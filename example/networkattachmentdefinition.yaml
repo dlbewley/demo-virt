@@ -1,0 +1,93 @@
+---
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  annotations:
+    description: Provisioning Bridge V1928
+    k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/br-1928
+  name: vlan-1928
+spec:
+  config: |-
+    {
+      "name": "vlan-1928",
+      "cniVersion": "0.3.1",
+      "plugins": [
+        {
+          "type": "cnv-bridge",
+          "bridge":"br-1928",
+          "vlan":1928,
+          "ipam":{}
+        },
+        {
+          "type": "cnv-tuning"
+        }
+      ]
+    }    
+---
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  annotations:
+    description: Metal Bridge V1927
+    k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/br-1927
+  name: vlan-1927
+spec:
+  config: |-
+    {
+      "name": "vlan-1927",
+      "cniVersion": "0.3.1",
+      "plugins": [
+        {
+          "type": "cnv-bridge",
+          "bridge":"br-1927",
+          "vlan":1927,
+          "ipam":{}
+        },
+        {
+          "type": "cnv-tuning"
+        }
+      ]
+    }    
+---
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  annotations:
+    description: Disco Bridge V1926
+    k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/br-1926
+  name: vlan-1926
+spec:
+  config: |-
+    {
+      "name": "vlan-1926",
+      "cniVersion": "0.3.1",
+      "plugins": [
+        {
+          "type": "cnv-bridge",
+          "bridge":"br-1926",
+          "vlan":1926,
+          "ipam":{}
+        },
+        {
+          "type": "cnv-tuning"
+        }
+      ]
+    }    
+----
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  annotations:
+    description: Main Lab Bridge V1924
+    k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/br-1924
+  name: vlan-1924
+spec:
+  config: |-
+    {
+      "name": "vlan-1924",
+      "cniVersion": "0.3.1",
+      "type": "cnv-bridge",
+      "bridge": "br-1924",
+      "macspoofchk": true, 
+      "vlan": 1924
+    }    

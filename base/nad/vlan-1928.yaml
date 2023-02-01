@@ -1,0 +1,9 @@
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  annotations:
+    description: Provisioning V1928
+    k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/br-1928
+  name: vlan-1928
+spec:
+  config: "{\n  \"name\": \"vlan-1928\",\n  \"bridge\": \"br-1928\",\n  \"vlan\": 1928,\n  \"cniVersion\": \"0.3.1\",\n  \"type\": \"cnv-bridge\",\n  \"macspoofchk\": true\n} "

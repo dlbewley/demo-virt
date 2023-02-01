@@ -1,0 +1,82 @@
+= OpenShift Virtualization and Networking Exploration
+:source-highlighter: rouge
+
+
+This is a collection of configs to explore OpenShift Virtualization in a Nested Virtualization environment. It will build upon learning described in https://guifreelife.com/blog/2022/05/13/OpenShift-Virtualization-on-vSphere/
+
+== References
+
+* https://docs.google.com/presentation/d/1p7NxcK_0xxxyKtndNC_zh9kCi_fZLieiXBLYjRxJDWk/edit#slide=id.g634ca58e56_0_218[OpenShift and OVN Deck]
+* https://guifreelife.com/blog/2022/05/13/OpenShift-Virtualization-on-vSphere/[GUI Free Life]
+
+== Configure Hypervisor Networking
+
+.Template to create a node network configuration policy
+[source,yaml]
+----
+include::templates/template-nncp.yaml[]
+----
+
+.NodeNetworkConfigurationPolicy to configure 2nd NIC
+.Create NodeNetworkConfigurationPolicies for each VLAN from Template
+[source,bash]
+----
+# zsh syntax
+unset vlans
+declare -A vlans
+NIC=ens224
+vlans[1924]="Lab"
+vlans[1925]="Disco"
+vlans[1926]="Trans Proxy"
+vlans[1927]="Metal"
+vlans[1928]="Provisioning"
+
+for V in ${(k)vlans}; do
+  oc process -p VLAN="$V" -p NIC="$NIC" \
+    -f templates/template-nncp.yaml -o yaml \
+    | yq e '.items[0]' > "base/nncp/$NIC-br-vlan-$V.yaml"
+done
+----
+
+== Configure Namespace Networking
+
+.Template to create a network attachment definition
+[source,yaml]
+----
+include::templates/template-nad-vlan.yaml[]
+----
+
+.Create Network-Attach-Defs for each VLAN from Template
+[source,bash]
+----
+# zsh syntax
+for V in ${(k)vlans}; do
+  oc process -p VLAN=$V -p DESCRIPTION="${vlans[$V]}" \
+    -f templates/template-nad-vlan.yaml -o yaml \
+    | yq e '.items[0]' > base/nad/vlan-$V.yaml
+done
+----
+
+.Create Kustomizations from generated resources
+[source,bash]
+----
+pushd base/nad
+rm kustomization.yaml
+kustomize create --autodetect
+popd
+
+pushd base/nncp
+rm kustomization.yaml
+kustomize create --autodetect
+popd
+
+pushd base
+rm kustomization.yaml
+kustomize create
+kustomize edit add base nncp,nad
+popd
+----
+
+== Test Plan
+
+Create a new machineset to apply these network configs to.

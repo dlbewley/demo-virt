@@ -1,0 +1,113 @@
+apiVersion: nmstate.io/v1
+kind: NodeNetworkConfigurationPolicy
+metadata:
+  name: ens224-policy
+spec:
+  nodeSelector:
+    cpu-feature.node.kubevirt.io/hypervisor: "true"
+    machine.openshift.io/cluster-api-machineset: hub-kmbtb-cnv
+  desiredState:
+    interfaces:
+    - name: ens224
+      type: ethernet
+      state: up
+      ipv4:
+        enabled: false
+      ipv6:
+        enabled: false
+    - name: ens224.1925
+      type: vlan
+      state: up
+      ipv4:
+        enabled: false
+      ipv6:
+        enabled: false
+      vlan:
+        base-iface: ens224
+        id: 1925
+    - name: br-1925
+      bridge:
+        options:
+          stp:
+            enabled: false
+        port:
+        - name: ens224.1925
+          vlan: {}
+      ipv4:
+        enabled: false
+      ipv6:
+        enabled: false
+      state: up
+      type: linux-bridge
+    - name: ens224.1926
+      type: vlan
+      state: up
+      ipv4:
+        enabled: false
+      ipv6:
+        enabled: false
+      vlan:
+        base-iface: ens224
+        id: 1926
+    - name: br-1926
+      bridge:
+        options:
+          stp:
+            enabled: false
+        port:
+        - name: ens224.1926
+          vlan: {}
+      ipv4:
+        enabled: false
+      ipv6:
+        enabled: false
+      state: up
+      type: linux-bridge
+    - name: ens224.1927
+      type: vlan
+      state: up
+      ipv4:
+        enabled: false
+      ipv6:
+        enabled: false
+      vlan:
+        base-iface: ens224
+        id: 1927
+    - name: br-1927
+      type: linux-bridge
+      state: up
+      bridge:
+        options:
+          stp:
+            enabled: false
+        port:
+        - name: ens224.1927
+          vlan: {}
+      ipv4:
+        enabled: false
+      ipv6:
+        enabled: false
+    - name: ens224.1928
+      type: vlan
+      state: up
+      ipv4:
+        enabled: false
+      ipv6:
+        enabled: false
+      vlan:
+        base-iface: ens224
+        id: 1928
+    - name: br-1928
+      type: linux-bridge
+      state: up
+      bridge:
+        options:
+          stp:
+            enabled: false
+        port:
+        - name: ens224.1928
+          vlan: {}
+      ipv4:
+        enabled: false
+      ipv6:
+        enabled: false

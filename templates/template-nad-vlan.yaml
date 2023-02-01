@@ -1,0 +1,31 @@
+---
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: nad-vlan
+
+objects:
+  - apiVersion: k8s.cni.cncf.io/v1
+    kind: NetworkAttachmentDefinition
+    metadata:
+      annotations:
+        description: ${DESCRIPTION} V${VLAN}
+        k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/br-${VLAN}
+      name: vlan-${VLAN}
+    spec:
+      config: |-
+        {
+          "name": "vlan-${VLAN}",
+          "bridge": "br-${VLAN}",
+          "vlan": ${VLAN},
+          "cniVersion": "0.3.1",
+          "type": "cnv-bridge",
+          "macspoofchk": true
+        } 
+
+parameters:
+  - description: Network description
+    name: DESCRIPTION
+    value: Bridge
+  - description: VLAN ID
+    name: VLAN

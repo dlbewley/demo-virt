@@ -1,0 +1,42 @@
+apiVersion: nmstate.io/v1
+kind: NodeNetworkConfigurationPolicy
+metadata:
+  annotations:
+    description: Network Config for adding vlan ${VLAN} and bridge on ${NIC}
+  name: ens224-v1927-policy
+spec:
+  desiredState:
+    interfaces:
+      - ipv4:
+          enabled: false
+        ipv6:
+          enabled: false
+        name: ens224
+        state: up
+        type: ethernet
+      - ipv4:
+          enabled: false
+        ipv6:
+          enabled: false
+        name: ens224.1927
+        state: up
+        type: vlan
+        vlan:
+          base-iface: ens224
+          id: "1927"
+      - bridge:
+          options:
+            stp:
+              enabled: false
+          port:
+            - name: ens224.1927
+              vlan: {}
+        ipv4:
+          enabled: false
+        ipv6:
+          enabled: false
+        name: br-1927
+        state: up
+        type: linux-bridge
+  nodeSelector:
+    machine.openshift.io/cluster-api-machineset: hub-test-cnv

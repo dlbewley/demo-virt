@@ -1,0 +1,65 @@
+---
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: nncp
+
+objects:
+  - apiVersion: nmstate.io/v1
+    kind: NodeNetworkConfigurationPolicy
+    metadata:
+      name: ${NIC}-v${VLAN}-policy
+      annotations:
+        description: ${DESCRIPTION}
+    spec:
+      nodeSelector:
+        ${NODE_SELECTOR_KEY}: ${NODE_SELECTOR_VALUE}
+      desiredState:
+        interfaces:
+          - name: ${NIC}
+            type: ethernet
+            state: up
+            ipv4:
+              enabled: false
+            ipv6:
+              enabled: false
+          - name: ${NIC}.${VLAN}
+            type: vlan
+            state: up
+            vlan:
+              base-iface: ${NIC}
+              id: ${VLAN}
+            ipv4:
+              enabled: false
+            ipv6:
+              enabled: false
+          - name: br-${VLAN}
+            type: linux-bridge
+            state: up
+            bridge:
+              options:
+                stp:
+                  enabled: false
+              port:
+                - name: ${NIC}.${VLAN}
+                  vlan: {}
+            ipv4:
+              enabled: false
+            ipv6:
+              enabled: false
+
+parameters:
+  - description: Physical NIC
+    name: NIC
+    value: ens224
+  - description: VLAN ID
+    name: VLAN
+  - description: Node Selector Key
+    name: NODE_SELECTOR_KEY
+    value: machine.openshift.io/cluster-api-machineset
+  - description: Node Selector Value
+    name: NODE_SELECTOR_VALUE
+    value: hub-test-cnv
+  - description: Policy description
+    name: DESCRIPTION
+    value: Network Config for adding vlan ${VLAN} and bridge on ${NIC} 

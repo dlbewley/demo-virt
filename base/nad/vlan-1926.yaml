@@ -1,0 +1,9 @@
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  annotations:
+    description: Trans Proxy V1926
+    k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/br-1926
+  name: vlan-1926
+spec:
+  config: "{\n  \"name\": \"vlan-1926\",\n  \"bridge\": \"br-1926\",\n  \"vlan\": 1926,\n  \"cniVersion\": \"0.3.1\",\n  \"type\": \"cnv-bridge\",\n  \"macspoofchk\": true\n} "

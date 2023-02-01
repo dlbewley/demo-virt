@@ -1,0 +1,54 @@
+apiVersion: machine.openshift.io/v1beta1
+kind: MachineSet
+metadata:
+  annotations:
+    machine.openshift.io/memoryMb: '16384'
+    machine.openshift.io/vCPU: '12'
+  name: hub-test-cnv
+  namespace: openshift-machine-api
+  labels:
+    machine.openshift.io/cluster-api-cluster: hub-kmbtb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      machine.openshift.io/cluster-api-cluster: hub-kmbtb
+      machine.openshift.io/cluster-api-machineset: hub-test-cnv
+  template:
+    metadata:
+      labels:
+        machine.openshift.io/cluster-api-cluster: hub-kmbtb
+        machine.openshift.io/cluster-api-machine-role: worker
+        machine.openshift.io/cluster-api-machine-type: worker
+        machine.openshift.io/cluster-api-machineset: hub-test-cnv
+    spec:
+      lifecycleHooks: {}
+      metadata:
+        labels:
+          machine.openshift.io/cluster-api-machineset: hub-test-cnv
+      providerSpec:
+        value:
+          apiVersion: machine.openshift.io/v1beta1
+          kind: VSphereMachineProviderSpec
+          metadata:
+            creationTimestamp: null
+          template: hub-kmbtb-rhcos-cnv
+          numCPUs: 12
+          numCoresPerSocket: 1
+          memoryMiB: 16384
+          diskGiB: 90
+          snapshot: ''
+          userDataSecret:
+            name: worker-user-data
+          credentialsSecret:
+            name: vsphere-cloud-credentials
+          network:
+            devices:
+              - networkName: lab-192-168-4-0-b24
+              - networkName: Trunk
+          workspace:
+            datacenter: Garden
+            datastore: VMData-HD
+            folder: /Garden/vm/hub-kmbtb
+            resourcePool: /Garden/host/Goat/Resources
+            server: vcenter.lab.bewley.net
