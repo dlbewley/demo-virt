@@ -1,8 +1,7 @@
 = OpenShift Virtualization and Networking Exploration
 :source-highlighter: rouge
 
-
-This is a collection of configs to explore OpenShift Virtualization in a Nested Virtualization environment. It will build upon learning described in https://guifreelife.com/blog/2022/05/13/OpenShift-Virtualization-on-vSphere/
+This repo is a collection of configs to explore OpenShift Virtualization in a Nested Virtualization environment. It's not actually a Demo at this time. It will build upon learning described in https://guifreelife.com/blog/2022/05/13/OpenShift-Virtualization-on-vSphere/
 
 == References
 
@@ -17,7 +16,6 @@ This is a collection of configs to explore OpenShift Virtualization in a Nested 
 include::templates/template-nncp.yaml[]
 ----
 
-.NodeNetworkConfigurationPolicy to configure 2nd NIC
 .Create NodeNetworkConfigurationPolicies for each VLAN from Template
 [source,bash]
 ----
@@ -79,4 +77,13 @@ popd
 
 == Test Plan
 
-Create a new machineset to apply these network configs to.
+.TBD
+* Create a new machineset[examples/machineset.yaml] with 1 VM capable of nested virt
+* Examine default network config on node ens224
+* Apply `link:base/nncp[nncp]` and examine network config result via
+** `ip`
+** `nnce`
+** `ovs-vsctl`
+* Create a demo namespace
+* Apply `link:base/nad[nad]` in demo namespace and examine network config result
+* Create VM in demo namespace
