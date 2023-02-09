@@ -12,6 +12,7 @@ objects:
         description: ${DESCRIPTION} V${VLAN}
         k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/br-${VLAN}
       name: vlan-${VLAN}
+      namespace: ${NAMESPACE}
     spec:
       config: |-
         {
@@ -29,3 +30,5 @@ parameters:
     value: Bridge
   - description: VLAN ID
     name: VLAN
+  - description: Namespace
+    name: NAMESPACE
