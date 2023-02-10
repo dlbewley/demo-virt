@@ -50,7 +50,7 @@ objects:
             type: vlan
             state: up
             vlan:
-              base-iface: ${NIC}
+              base-iface: ${BOND}
               id: ${VLAN}
             ipv4:
               enabled: false
@@ -64,7 +64,7 @@ objects:
                 stp:
                   enabled: false
               port:
-                - name: ${NIC}.${VLAN}
+                - name: ${BOND}.${VLAN}
                   vlan: {}
             ipv4:
               enabled: false
