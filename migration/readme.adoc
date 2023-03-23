@@ -32,13 +32,9 @@ You may optionally https://docs.openshift.com/container-platform/latest/registry
 oc patch configs.imageregistry.operator.openshift.io/cluster --patch '{"spec":{"defaultRoute":true}}' --type=merge
 
 REGISTRY=$(oc get route default-route -n openshift-image-registry --template='{{ .spec.host }}')
-
-oc extract secret/router-certs-default -n openshift-ingress --keys=tls.crt --to=-
-
-oc get secret -n openshift-ingress  router-certs-default -o go-template='{{index .data "tls.crt"}}' | base64 -d | sudo tee /etc/pki/ca-trust/source/anchors/${HOST}.crt  > /dev/null
 ----
 
-* Build and push vddk image to OpenShift registry
+* Build and push vddk image to OpenShift registry. In imagstream in openshift-mtv named vddk will be created.
 
 [source,bash]
 ----
@@ -47,14 +43,14 @@ make push
 
 === Create a Provider
 
-* Create a VMware provider
-
-https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/2.3/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#adding-source-provider_vmware
+* https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/2.3/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#adding-source-provider_vmware[Create a VMware provider]
 
 image:img/provider.png[]
 
 * Select a Migration Network for a host in the vSphere cluster.
 
-Right now this does not work
+.**Blocker**
+[WARNING]
+Right now this does not work in my lab.
 
 image:img/migration-network.png[]
