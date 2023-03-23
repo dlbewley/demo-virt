@@ -1,0 +1,16 @@
+---
+# WIP
+apiVersion: forklift.konveyor.io/v1beta1
+kind: Provider
+metadata:
+  name: lab
+  namespace: openshift-mtv
+spec:
+  secret:
+    name: lab-6x5hq
+    namespace: openshift-mtv
+  settings:
+    vddkInitImage: vddk:latest
+  type: vsphere
+  url: https://vcenter.lab.bewley.net/sdk
+status:
