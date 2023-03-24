@@ -102,4 +102,15 @@ image:img/provider.png[]
 [WARNING]
 Right now this does not work in my lab.
 
+image:img/select-migration-network.png[]
+
 image:img/migration-network.png[]
+
+.**Fix**
+[TIP]
+Ah! After adding a VMkernel NIC on the network things are "super green" :lettuce: as Ruby Rhod in The Fifth Element would say.
+image:img/add-vmkernel-nic.png[]
+
+=== More steps
+
+... tbd. see  link:instance/overlays/lab[instance/overlays/lab]

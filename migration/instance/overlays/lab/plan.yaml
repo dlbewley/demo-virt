@@ -1,0 +1,27 @@
+---
+apiVersion: forklift.konveyor.io/v1beta1
+kind: Plan
+metadata:
+  name: migtest
+spec:
+  archived: false
+  description: ''
+  map:
+    network:
+      name: migtest-58ljm
+      namespace: openshift-mtv
+    storage:
+      name: migtest-f65b6
+      namespace: openshift-mtv
+  provider:
+    destination:
+      name: host
+      namespace: openshift-mtv
+    source:
+      name: lab
+      namespace: openshift-mtv
+  targetNamespace: dale
+  vms:
+    - hooks: []
+      id: vm-2081
+  warm: false

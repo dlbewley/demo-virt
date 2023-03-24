@@ -34,7 +34,7 @@ vmware-vix-disklib-distrib:
 clean:
 	rm -rf vmware-vix-disklib-distrib
 
-realclean:
+realclean: clean
 	podman rmi \
 	$(IMAGE):$(VDDK_VER) \
 	$(REGISTRY)/$(NAMESPACE)/$(IMAGE):$(VDDK_VER) \
