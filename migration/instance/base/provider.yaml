@@ -10,7 +10,7 @@ spec:
     name: lab-6x5hq
     namespace: openshift-mtv
   settings:
-    vddkInitImage: vddk:latest
+    vddkInitImage: image-registry.openshift-image-registry.svc:5000/openshift-mtv/vddk:latest
   type: vsphere
   url: https://vcenter.lab.bewley.net/sdk
 status:
