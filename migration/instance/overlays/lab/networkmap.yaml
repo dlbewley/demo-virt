@@ -15,8 +15,8 @@ spec:
       namespace: openshift-mtv
   map:
     - destination:
-      name: vlan-1924
-      namespace: dale
-      type: multus
-    source:
-      id: network-196
+        name: vlan-1924
+        namespace: dale
+        type: multus
+      source:
+        id: network-196
