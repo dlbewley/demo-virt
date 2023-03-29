@@ -45,7 +45,7 @@ Download the https://developer.vmware.com/web/sdk/7.0/vddk[VMware VDDK] tar.gz f
 
 You may optionally https://docs.openshift.com/container-platform/latest/registry/securing-exposing-registry.html[expose the OpenShift cluster image registry] to store the VDDK image built in the following step.
 
-If you do not expose the registry the image must be pushed to some other registry by hand and the location will be updated in the `Provider` link:overlays/lab/resource.
+If you do not expose the registry the image must be pushed to some other registry can do so by hand or using and the Makefile variables. The location must be updated in the `Provider` link:overlays/lab/resource[].
 
 * Expose the cluster registry and capture the URL
 
@@ -115,13 +115,10 @@ $ cd ..
 
 == Create a VMware Provider in MTV Console
 
-
 Browse to the `$MTV_URL` for the Migration Toolkit for Virtualization console to continue.
 
 [source,bash]
 MTV_URL="https://$(oc get route virt -n openshift-mtv -o jsonpath='{.spec.host}')"
-
-
 
 * https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/2.3/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#adding-source-provider_vmware[Create a example VMware provider] and storage and network mappings
 
@@ -146,14 +143,13 @@ image:img/provider-edit.png[]
 
 image:img/provider-ready.png[]
 
-* Select a Migration Network for the 'host' provider
+* Select a Migration Network for the 'host' provider used by MTV
 
-
-.**Fix**
+.**ESXi Connectivity**
 [TIP]
-Ah! After adding a VMkernel NIC on the network things are "super green" :lettuce: as Ruby Rhod in The Fifth Element would say.
+Ensure the vSphere host can be reached on the chosen migration network.
 image:img/add-vmkernel-nic.png[]
 
-=== More steps
+== Create Migration Plan
 
-... tbd. see  link:instance/overlays/lab[instance/overlays/lab]
+todo link:instance/overlays/lab/plan.yaml[]
