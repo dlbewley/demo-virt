@@ -6,7 +6,13 @@ namespace: openshift-mtv
 
 resources:
   - forkliftcontroller.yaml
-  # default provider, 'host', seems to already be setup?
-  # - serviceaccount.yaml
-  # - clusterrolebinding.yaml
-  # - secret.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+secretGenerator:
+  - name: provider-creds
+    files:
+      - secrets/password
+      - secrets/user
+      - secrets/thumbprint

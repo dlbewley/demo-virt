@@ -1,5 +1,4 @@
 ---
-# WIP
 apiVersion: forklift.konveyor.io/v1beta1
 kind: Provider
 metadata:
@@ -7,7 +6,7 @@ metadata:
   namespace: openshift-mtv
 spec:
   secret:
-    name: lab-6x5hq
+    name: provider-creds
     namespace: openshift-mtv
   settings:
     vddkInitImage: image-registry.openshift-image-registry.svc:5000/openshift-mtv/vddk:latest
