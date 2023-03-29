@@ -7,5 +7,6 @@ bases:
 
 resources:
   - networkmap.yaml
+  - provider.yaml
   - rolebinding.yaml
   - storagemap.yaml
