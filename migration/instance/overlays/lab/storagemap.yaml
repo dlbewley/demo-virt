@@ -23,6 +23,10 @@ spec:
       storageClass: ocs-storagecluster-ceph-rbd
     source:
       id: datastore-49
+  - destination:
+      storageClass: ocs-storagecluster-ceph-rbd
+    source:
+      id: datastore-3061
   provider:
     destination:
       name: host
