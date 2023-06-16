@@ -8,38 +8,45 @@ https://red.ht/mtv-docs[Migration Toolkit for Virtualization]
 
 [source,bash]
 ----
-$ oc apply -k operator/overlays/release-v2.3
+$ oc apply -k operator/overlays/release-v2.4
 namespace/openshift-mtv created
 operatorgroup.operators.coreos.com/migration created
 subscription.operators.coreos.com/mtv-operator created
 ----
+
+* Ready the provider credentials in link:instance/base/secrets/[instance/base/secrets/].
 
 * Create a Forklift resource to start MTV services
 
 [source,bash]
 ----
 $ oc apply -k instance/base
+secret/provider-creds created
 forkliftcontroller.forklift.konveyor.io/forklift-controller created
 ----
 
-* Confirm that multiple pods are running and obtain the URL to the MTV console
+* Refresh the OpenShift web console and a new Migration item will appear.
+
+* Confirm that multiple pods are running
 
 [source,bash]
 ----
 $ oc get pods -n openshift-mtv
-NAME                                        READY   STATUS    RESTARTS   AGE
-forklift-controller-5b6f8f7fbb-hrhbx        2/2     Running   0          108s
-forklift-must-gather-api-6b8f67fd4d-bhvxs   1/1     Running   0          93s
-forklift-operator-54c675f466-f9672          1/1     Running   0          3m23s
-forklift-ui-7f4544c68-lgj8j                 1/1     Running   0          74s
-forklift-validation-7956ccff49-bshln        1/1     Running   0          97s
+NAME                                                    READY   STATUS    RESTARTS   AGE
+forklift-api-67d4b8c5b7-crbzs                           1/1     Running   0          2m13s
+forklift-controller-985596cc4-mswtc                     2/2     Running   0          2m24s
+forklift-must-gather-api-6d554d9d75-jwj7l               1/1     Running   0          118s
+forklift-operator-6d574b99d9-nwcf6                      1/1     Running   0          5m6s
+forklift-ui-plugin-58bc5df894-wpgqb                     1/1     Running   0          105s
+forklift-validation-79b57595bf-ngjkb                    1/1     Running   0          2m3s
+forklift-volume-populator-controller-5846bc88c7-n5nl8   1/1     Running   0          2m18s
 ----
 
 == Build a VDDK Container Image
 
 To migrate from vSphere, a VDDK image will be required.
 
-Download the https://developer.vmware.com/web/sdk/7.0/vddk[VMware VDDK] tar.gz file and build a container image. The steps below will automatically build and push to the cluster registry once it is exposed.
+Download the https://developer.vmware.com/web/sdk/7.0/vddk[VMware VDDK] tar.gz file and place it in migration directory. The steps below will automatically build and push to the cluster registry once it is exposed.
 
 === Expose OpenShift Cluster Registry
 
@@ -85,19 +92,21 @@ podman build . -t vddk:7.0.3-20134304 && \
         podman tag vddk:7.0.3-20134304 default-route-openshift-image-registry.apps.hub.lab.bewley.net/openshift-mtv/vddk:latest
 STEP 1/5: FROM registry.access.redhat.com/ubi8/ubi-minimal
 STEP 2/5: USER 1001
---> Pushing cache []:2572ce12921600e8830f348535a71cc29f6845033f71dc9d592058b5ffdddb83
---> 122039dcf62
+--> Using cache 122039dcf6243a95eb5b6b80247dbdf2d04de89701111c32f1ca32c03102ec1b
+--> 122039dcf624
 STEP 3/5: COPY vmware-vix-disklib-distrib /vmware-vix-disklib-distrib
---> Pushing cache []:3a5a94e88003e3eecdeaf90189bcacb9e891ff7a5a0eec00d272c66c2a174b0f
---> 77ecf26236a
+--> Using cache 77ecf26236ab061e4f839dbc2001ddfe48a6a6580f6c767effc58621996101f9
+--> 77ecf26236ab
 STEP 4/5: RUN mkdir -p /opt
---> Pushing cache []:5af6b7705716cc215d685d39cea3aee55046ed567f13b2c132c05247e3ab1f68
---> d5fe34a4b96
+--> Using cache d5fe34a4b964d19205709a6bf00d13ac3fc8655b752f724c0f71ea32b2d1f760
+--> d5fe34a4b964
 STEP 5/5: ENTRYPOINT ["cp", "-r", "/vmware-vix-disklib-distrib", "/opt"]
+--> Using cache 455fd246ee5833b19a0c8e919ea6ea7006f828e3873dfb590611f43a0b6142c8
 COMMIT vddk:7.0.3-20134304
---> Pushing cache []:73a518594ae91783d4a9f9151839338a7fe0c060ddc8c2d807aa7950f9e5978b
---> 455fd246ee5
+--> 455fd246ee58
 Successfully tagged localhost/vddk:7.0.3-20134304
+Successfully tagged default-route-openshift-image-registry.apps.hub.lab.bewley.net/openshift-mtv/vddk:7.0.3-20134304
+Successfully tagged default-route-openshift-image-registry.apps.hub.lab.bewley.net/openshift-mtv/vddk:latest
 455fd246ee5833b19a0c8e919ea6ea7006f828e3873dfb590611f43a0b6142c8
 
 $  make push
@@ -113,14 +122,32 @@ Storing signatures
 $ cd ..
 ----
 
-== Create a VMware Provider in MTV Console
+== Create a VMware Provider
 
-Browse to the `$MTV_URL` for the Migration Toolkit for Virtualization console to continue.
+Browse to Migration -> Providers for virtualization and create provider by hand or start with 
 
 [source,bash]
-MTV_URL="https://$(oc get route virt -n openshift-mtv -o jsonpath='{.spec.host}')"
+$ oc apply -k instance/overlays/lab/
+rolebinding.rbac.authorization.k8s.io/allow-image-pullers created
+secret/provider-creds configured
+forkliftcontroller.forklift.konveyor.io/forklift-controller unchanged
+provider.forklift.konveyor.io/lab created
 
-* https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/2.3/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#adding-source-provider_vmware[Create a example VMware provider] and storage and network mappings
+
+Creating a VMware provider will require the SHA1 fingerprint of the vCenter server.
+
+* Obtain the SHA-1 fingerprint for the vCenter certificate and write this value to link:base/secrets/thumbprint[base/secrets/thumbprint]
+[source,bash]
+$ echo | openssl s_client -connect vcenter.lab.bewley.net:443 2>/dev/null -showcerts \
+       | openssl x509 -fingerprint -sha1 -noout
+SHA1 Fingerprint=C2:6C:23:AA:0A:EE:30:25:B5:7D:EE:31:24:28:E7:4A:78:3E:A2:01
+
+
+* https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/2.4/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#adding-providers
+[Create a example VMware provider]
+
+*  Create storage and network mappings
+
 
 [source,bash]
 ----
@@ -135,7 +162,7 @@ storagemap.forklift.konveyor.io/storemap created
 
 image:img/provider.png[]
 
-* Edit the provider and correct the credentials and trust the certificate
+* Edit the provider and correct the credentials and certificate SHA-1 fingerprint.
 
 image:img/provider-edit.png[]
 
@@ -145,11 +172,19 @@ image:img/provider-ready.png[]
 
 * Select a Migration Network for the 'host' provider used by MTV
 
+Untested. Choose mgmt network instead?
+
+image:img/mig-network-1.png[]
+
+image:img/mig-network-2.png[]
+
 .**ESXi Connectivity**
 [TIP]
 Ensure the vSphere host can be reached on the chosen migration network.
 image:img/add-vmkernel-nic.png[]
 
 == Create Migration Plan
+
+It might be good to create a migration-in namespace with a NAD there.
 
 todo link:instance/overlays/lab/plan.yaml[]
