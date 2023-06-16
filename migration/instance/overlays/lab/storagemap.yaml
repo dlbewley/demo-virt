@@ -1,0 +1,32 @@
+---
+apiVersion: forklift.konveyor.io/v1beta1
+kind: StorageMap
+metadata:
+  annotations:
+    forklift.konveyor.io/shared: "true"
+  name: storemap
+spec:
+  map:
+  - destination:
+      storageClass: ocs-storagecluster-ceph-rbd
+    source:
+      id: datastore-801
+  - destination:
+      storageClass: ocs-storagecluster-ceph-rbd
+    source:
+      id: datastore-802
+  - destination:
+      storageClass: ocs-storagecluster-ceph-rbd
+    source:
+      id: datastore-803
+  - destination:
+      storageClass: ocs-storagecluster-ceph-rbd
+    source:
+      id: datastore-49
+  provider:
+    destination:
+      name: host
+      namespace: openshift-mtv
+    source:
+      name: lab
+      namespace: openshift-mtv

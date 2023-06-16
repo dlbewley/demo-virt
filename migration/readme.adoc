@@ -1,0 +1,155 @@
+= Migrating Virtual Machines from VMware to OpenShift using MTV
+
+https://red.ht/mtv-docs[Migration Toolkit for Virtualization]
+
+== Install the Migration Toolkit for Virtualization Operator
+
+* Install the MTV Operator
+
+[source,bash]
+----
+$ oc apply -k operator/overlays/release-v2.3
+namespace/openshift-mtv created
+operatorgroup.operators.coreos.com/migration created
+subscription.operators.coreos.com/mtv-operator created
+----
+
+* Create a Forklift resource to start MTV services
+
+[source,bash]
+----
+$ oc apply -k instance/base
+forkliftcontroller.forklift.konveyor.io/forklift-controller created
+----
+
+* Confirm that multiple pods are running and obtain the URL to the MTV console
+
+[source,bash]
+----
+$ oc get pods -n openshift-mtv
+NAME                                        READY   STATUS    RESTARTS   AGE
+forklift-controller-5b6f8f7fbb-hrhbx        2/2     Running   0          108s
+forklift-must-gather-api-6b8f67fd4d-bhvxs   1/1     Running   0          93s
+forklift-operator-54c675f466-f9672          1/1     Running   0          3m23s
+forklift-ui-7f4544c68-lgj8j                 1/1     Running   0          74s
+forklift-validation-7956ccff49-bshln        1/1     Running   0          97s
+----
+
+== Build a VDDK Container Image
+
+To migrate from vSphere, a VDDK image will be required.
+
+Download the https://developer.vmware.com/web/sdk/7.0/vddk[VMware VDDK] tar.gz file and build a container image. The steps below will automatically build and push to the cluster registry once it is exposed.
+
+=== Expose OpenShift Cluster Registry
+
+You may optionally https://docs.openshift.com/container-platform/latest/registry/securing-exposing-registry.html[expose the OpenShift cluster image registry] to store the VDDK image built in the following step.
+
+If you do not expose the registry the image must be pushed to some other registry can do so by hand or using and the Makefile variables. The location must be updated in the `Provider` link:overlays/lab/resource[].
+
+* Expose the cluster registry and capture the URL
+
+[source,bash]
+----
+oc patch configs.imageregistry.operator.openshift.io/cluster --patch '{"spec":{"defaultRoute":true}}' --type=merge
+
+export REGISTRY=$(oc get route default-route -n openshift-image-registry --template='{{ .spec.host }}')
+----
+
+* Obtain a token for logging into the OpenShift registry.
+
+[source,bash]
+----
+export REGISTRY_USER=$(oc whoami) # must not be 'system:admin'
+export TOKEN=$(oc whoami -t) # or use OpenShift web console to obtain
+----
+
+* Login to the registry
+
+[source,bash]
+----
+$ podman login -u $REGISTRY_USER -p $TOKEN $REGISTRY
+Login Succeeded!
+----
+
+* Build and push vddk image to OpenShift registry. See link:Makefile[Makefile]
+
+[source,bash]
+----
+$ cd vddk
+
+$ make image
+tar -xzf VMware-vix-disklib-7.0.3-20134304.x86_64.tar.gz
+podman build . -t vddk:7.0.3-20134304 && \
+        podman tag vddk:7.0.3-20134304 default-route-openshift-image-registry.apps.hub.lab.bewley.net/openshift-mtv/vddk:7.0.3-20134304 && \
+        podman tag vddk:7.0.3-20134304 default-route-openshift-image-registry.apps.hub.lab.bewley.net/openshift-mtv/vddk:latest
+STEP 1/5: FROM registry.access.redhat.com/ubi8/ubi-minimal
+STEP 2/5: USER 1001
+--> Pushing cache []:2572ce12921600e8830f348535a71cc29f6845033f71dc9d592058b5ffdddb83
+--> 122039dcf62
+STEP 3/5: COPY vmware-vix-disklib-distrib /vmware-vix-disklib-distrib
+--> Pushing cache []:3a5a94e88003e3eecdeaf90189bcacb9e891ff7a5a0eec00d272c66c2a174b0f
+--> 77ecf26236a
+STEP 4/5: RUN mkdir -p /opt
+--> Pushing cache []:5af6b7705716cc215d685d39cea3aee55046ed567f13b2c132c05247e3ab1f68
+--> d5fe34a4b96
+STEP 5/5: ENTRYPOINT ["cp", "-r", "/vmware-vix-disklib-distrib", "/opt"]
+COMMIT vddk:7.0.3-20134304
+--> Pushing cache []:73a518594ae91783d4a9f9151839338a7fe0c060ddc8c2d807aa7950f9e5978b
+--> 455fd246ee5
+Successfully tagged localhost/vddk:7.0.3-20134304
+455fd246ee5833b19a0c8e919ea6ea7006f828e3873dfb590611f43a0b6142c8
+
+$  make push
+podman push --tls-verify=false default-route-openshift-image-registry.apps.hub.lab.bewley.net/openshift-mtv/vddk:latest
+Getting image source signatures
+Copying blob sha256:3196904b95517fd70bece2220309675d2f98172e2e37fcfeb6e45e7badf6ebc8
+Copying blob sha256:969795712c492f0c43031ce89dfb3d6ca2c08221fc28fb4479c7e0a370af7342
+Copying blob sha256:0b474ab10c0960f9a901f530835176cd1c6ed2866c6bac8d56e9188308edf244
+Copying config sha256:455fd246ee5833b19a0c8e919ea6ea7006f828e3873dfb590611f43a0b6142c8
+Writing manifest to image destination
+Storing signatures
+
+$ cd ..
+----
+
+== Create a VMware Provider in MTV Console
+
+Browse to the `$MTV_URL` for the Migration Toolkit for Virtualization console to continue.
+
+[source,bash]
+MTV_URL="https://$(oc get route virt -n openshift-mtv -o jsonpath='{.spec.host}')"
+
+* https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/2.3/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#adding-source-provider_vmware[Create a example VMware provider] and storage and network mappings
+
+[source,bash]
+----
+$ oc apply -k instance/overlays/lab
+rolebinding.rbac.authorization.k8s.io/allow-image-pullers created
+secret/provider-creds created
+forkliftcontroller.forklift.konveyor.io/forklift-controller unchanged
+networkmap.forklift.konveyor.io/netmap created
+provider.forklift.konveyor.io/lab created
+storagemap.forklift.konveyor.io/storemap created
+----
+
+image:img/provider.png[]
+
+* Edit the provider and correct the credentials and trust the certificate
+
+image:img/provider-edit.png[]
+
+* Status should now be Ready.
+
+image:img/provider-ready.png[]
+
+* Select a Migration Network for the 'host' provider used by MTV
+
+.**ESXi Connectivity**
+[TIP]
+Ensure the vSphere host can be reached on the chosen migration network.
+image:img/add-vmkernel-nic.png[]
+
+== Create Migration Plan
+
+todo link:instance/overlays/lab/plan.yaml[]
