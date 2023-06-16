@@ -1,0 +1,15 @@
+---
+apiVersion: forklift.konveyor.io/v1beta1
+kind: Provider
+metadata:
+  name: lab
+  namespace: openshift-mtv
+spec:
+  secret:
+    name: provider-creds
+    namespace: openshift-mtv
+  settings:
+    vddkInitImage: image-registry.openshift-image-registry.svc:5000/openshift-mtv/vddk:latest
+  type: vsphere
+  url: https://vcenter.lab.bewley.net/sdk
+status:
