@@ -68,8 +68,8 @@ export REGISTRY=$(oc get route default-route -n openshift-image-registry --templ
 
 [source,bash]
 ----
-export REGISTRY_USER=$(oc whoami) # must not be 'system:admin'
-export TOKEN=$(oc whoami -t) # or use OpenShift web console to obtain a token
+export REGISTRY_USER=builder # must not be 'system:admin'
+export TOKEN=$(oc create token builder -n openshift-mtv)
 ----
 
 * Login to the registry
@@ -125,7 +125,23 @@ $ cd ..
 
 == Create a VMware Provider
 
-Browse to Migration -> Providers for virtualization and create provider by hand or start with 
+Browse to Migration -> Providers for virtualization and https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/2.4/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#adding-providers[Create a VMware provider] by hand or use Kustomize.
+
+.Capture vCenter SHA1 Fingerprint
+[IMPORTANT]
+====
+The provider will require the SHA1 fingerprint of the vCenter server certificate.
+
+* Obtain the SHA-1 fingerprint for the vCenter certificate and write this value to link:instance/base/secrets/thumbprint[instance/base/secrets/thumbprint]
+[source,bash]
+----
+$ echo | openssl s_client -connect vcenter.lab.bewley.net:443 2>/dev/null -showcerts \
+       | openssl x509 -fingerprint -sha1 -noout
+SHA1 Fingerprint=C2:6C:23:AA:0A:EE:30:25:B5:7D:EE:31:24:28:E7:4A:78:3E:A2:01
+----
+====
+
+* Create VMware provider
 
 [source,bash]
 $ oc apply -k instance/overlays/lab/
@@ -135,20 +151,7 @@ forkliftcontroller.forklift.konveyor.io/forklift-controller unchanged
 provider.forklift.konveyor.io/lab created
 
 
-Creating a VMware provider will require the SHA1 fingerprint of the vCenter server.
-
-* Obtain the SHA-1 fingerprint for the vCenter certificate and write this value to link:base/secrets/thumbprint[base/secrets/thumbprint]
-[source,bash]
-$ echo | openssl s_client -connect vcenter.lab.bewley.net:443 2>/dev/null -showcerts \
-       | openssl x509 -fingerprint -sha1 -noout
-SHA1 Fingerprint=C2:6C:23:AA:0A:EE:30:25:B5:7D:EE:31:24:28:E7:4A:78:3E:A2:01
-
-
-* https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/2.4/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#adding-providers
-[Create a example VMware provider]
-
 *  Create storage and network mappings
-
 
 [source,bash]
 ----
@@ -163,7 +166,7 @@ storagemap.forklift.konveyor.io/storemap created
 
 image:img/provider.png[]
 
-* Edit the provider and correct the credentials and certificate SHA-1 fingerprint.
+* Edit the provider and correct the credentials and certificate SHA-1 fingerprint if it is not already present.
 
 image:img/provider-edit.png[]
 
@@ -171,23 +174,23 @@ image:img/provider-edit.png[]
 
 image:img/provider-ready.png[]
 
-* Select a Migration Network for the 'host' provider used by MTV
+* Optionally select a Migration Network for the 'host' provider used by MTV. The default Management Network should function.
 
-.**TBD**
-[WARNING]
-When the vNIC had an IP OpenShift integration with vSphere failed. Need more testing.
+// Needs more testing. Setting a Migration network explicitly does not seem to be necessary.
+// .**TBD**
+// [WARNING]
+// When the vNIC had an IP OpenShift integration with vSphere failed. Need more testing.
 
-image:img/mig-network-1.png[]
+// image:img/mig-network-1.png[]
 
-image:img/mig-network-2.png[]
+// image:img/mig-network-2.png[]
 
-.**ESXi Connectivity**
-[TIP]
-Ensure the vSphere host can be reached on the chosen migration network.
-image:img/add-vmkernel-nic.png[]
+// .**ESXi Connectivity**
+// [TIP]
+// Ensure the vSphere host can be reached on the chosen migration network.
+// image:img/add-vmkernel-nic.png[]
 
 == Create Migration Plan
 
-It might be good to create a migration-in namespace with a NAD there.
-
-todo link:instance/overlays/lab/plan.yaml[]
+.TODO
+* Verify a migration in a user nameapce
