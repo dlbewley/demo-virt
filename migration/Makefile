@@ -1,6 +1,7 @@
 IMAGE ?= vddk
 NAMESPACE ?= openshift-mtv
-REGISTRY ?= default-route-openshift-image-registry.apps.hub.lab.bewley.net
+APPS_DOMAIN ?= apps.hub.lab.bewley.net
+REGISTRY ?= default-route-openshift-image-registry.$(APPS_DOMAIN)
 REGISTRY_USER ?= dlbewley
 # openshift token (oc whoami -t)
 TOKEN ?= sha256~EXAMPLE

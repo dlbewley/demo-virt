@@ -1,9 +1,10 @@
+---
 apiVersion: forklift.konveyor.io/v1beta1
 kind: NetworkMap
 metadata:
   annotations:
     forklift.konveyor.io/shared: "true"
-  name: netmap
+  name: lab4-dale
   namespace: openshift-mtv
 spec:
   provider:
@@ -20,3 +21,24 @@ spec:
         type: multus
       source:
         id: network-196
+---
+apiVersion: forklift.konveyor.io/v1beta1
+kind: NetworkMap
+metadata:
+  annotations:
+    forklift.konveyor.io/shared: "true"
+  name: lab4-podnet
+  namespace: openshift-mtv
+spec:
+  map:
+  - destination:
+      type: pod
+    source:
+      id: network-196
+  provider:
+    destination:
+      name: host
+      namespace: openshift-mtv
+    source:
+      name: lab
+      namespace: openshift-mtv

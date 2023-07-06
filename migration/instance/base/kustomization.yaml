@@ -13,6 +13,7 @@ generatorOptions:
 secretGenerator:
   - name: provider-creds
     files:
+      - secrets/insecureSkipVerify
       - secrets/password
-      - secrets/user
       - secrets/thumbprint
+      - secrets/user
