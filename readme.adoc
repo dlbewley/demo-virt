@@ -22,6 +22,8 @@ Generate the link:networking[networking/] resouces for application.
 
 An OpenShift Template can be used to make generation of NNCPs a bit more repeatable and fault tolerant. As with most things in life, being organized and consistent is very important in networking. Please don't write a one-off NNCP. Nothing (very little) is ever "one-off".
 
+Maybe take a peek at this link:networking/diagram.md[networking diagram] for a sense of how the pieces will fit together.
+
 .link:templates/template-nncp-nic-vlan-br.yaml[Template] to create a node network configuration policy
 [source,yaml]
 ----
@@ -144,6 +146,8 @@ for VLAN in ${(k)vlans}; do
 done
 ----
 
+The output can be seen in link:networking/nad/[networking/nad/].
+
 .Create Kustomizations from generated resources
 [source,bash]
 ----
@@ -160,6 +164,9 @@ oc apply -k networking/nad
 ----
 
 == Testing
+=== Migration from VMware
+
+link:migration/[Details] on migration from VMware to OpenShift Virtualization.
 
 === High Availability
 ==== Node Maintenance Operator
