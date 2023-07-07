@@ -7,16 +7,21 @@ This repo is a collection of configs to explore OpenShift Virtualization in a Ne
 
 * https://docs.google.com/presentation/d/1p7NxcK_0xxxyKtndNC_zh9kCi_fZLieiXBLYjRxJDWk/edit#slide=id.g634ca58e56_0_218[OpenShift and OVN Deck]
 * https://guifreelife.com/blog/2022/05/13/OpenShift-Virtualization-on-vSphere/[GUI Free Life]
+* https://github.com/openshift/network-tools/blob/master/docs/user.md
 
 == Configure Hypervisor Networking
+
+An OpenShift Template can be used to make generation of NNCPs a bit more repeatable and fault tolerant. As with most things in life, being organized and consistent is very important in networking. Please don't write a one-off NNCP. Nothing (very little) is ever "one-off".
 
 .Template to create a node network configuration policy
 [source,yaml]
 ----
-include::templates/template-nncp.yaml[]
+include::templates/template-nncp-nic-vlan-br.yaml[]
 ----
 
-.Create NodeNetworkConfigurationPolicies for each VLAN from Template
+This template uses NODE_SELECTOR_KEY and NODE_SELECTOR_VALUE parameters to target the nodes which are expected to provide networking for virtual machines. This example uses the machineset used to provision the hypervisor nodes.
+
+.Generate NodeNetworkConfigurationPolicies for each VLAN from Template
 [source,bash]
 ----
 # zsh syntax
@@ -29,14 +34,77 @@ vlans[1926]="Trans Proxy"
 vlans[1927]="Metal"
 vlans[1928]="Provisioning"
 
-for V in ${(k)vlans}; do
-  oc process -p VLAN="$V" -p NIC="$NIC" \
-    -f templates/template-nncp.yaml -o yaml \
-    | yq e '.items[0]' > "base/nncp/$NIC-br-vlan-$V.yaml"
+for VLAN in ${(k)vlans}; do
+  oc process \
+    -p VLAN="$V" \
+    -p NIC="$NIC" \
+    -p NODE_SELECTOR_KEY=machine.openshift.io/cluster-api-machineset \
+    -p NODE_SELECTOR_VALUE=hub-l7c56-cnv \
+    -p DESCRIPTION="Add ${vlans[$VLAN]} VLAN ${VLAN} and Bridge br-${VLAN} on ${NIC}" \
+    -f templates/template-nncp-nic-vlan-br.yaml \
+    -o yaml \
+    | yq e '.items[0]' > "base/nncp/nncp-$NIC-br-vlan-$VLAN.yaml"
+  echo $k
 done
 ----
 
+The output can be seen in link:base/nncp/[base/nncp/].
+
+.Ensure kustomization.yaml includes the generated NNCP resources
+[source,bash]
+----
+pushd base/nncp
+rm kustomization.yaml
+kustomize create --autodetect --labels template:nncp-nic-vlan-br
+popd
+----
+
+.Apply the generated NNCPs
+[source,bash]
+----
+oc apply -k base/nncp
+----
+
+Examine the NNCPs for their status. Also check the NNCEs for any failures.
+
+Once applied, the nodes should have enacted the changes and will offer these new bridges as allocatable resources of the nodes.
+
+.See which nodes will support scheduling based on availability of these bridge network resources.
+[source,bash]
+----
+oc get nodes \
+  -l machine.openshift.io/cluster-api-machineset=hub-l7c56-cnv \
+  -o json \
+  | jq '.items[] | {"node": .metadata.name, "allocatable": .status.allocatable | with_entries(select(.key|match("bridge")))}'
+----
+[source,json]
+----
+{
+  "node": "hub-l7c56-cnv-2vv8w",
+  "allocatable": {
+    "bridge.network.kubevirt.io/br-1924": "1k",
+    "bridge.network.kubevirt.io/br-1925": "1k",
+    "bridge.network.kubevirt.io/br-1926": "1k",
+    "bridge.network.kubevirt.io/br-1927": "1k",
+    "bridge.network.kubevirt.io/br-1928": "1k"
+  }
+}
+{
+  "node": "hub-l7c56-cnv-vk878",
+  "allocatable": {
+    "bridge.network.kubevirt.io/br-1924": "1k",
+    "bridge.network.kubevirt.io/br-1925": "1k",
+    "bridge.network.kubevirt.io/br-1926": "1k",
+    "bridge.network.kubevirt.io/br-1927": "1k",
+    "bridge.network.kubevirt.io/br-1928": "1k"
+  }
+}
+----
+
+
 == Configure Namespace Networking
+
+Attachment to a network is gated by namespace level resources like NetworkAttachmentDefinitions and Multus annotations on pods.
 
 .Template to create a network attachment definition
 [source,yaml]
@@ -48,10 +116,23 @@ include::templates/template-nad-vlan.yaml[]
 [source,bash]
 ----
 # zsh syntax
-for V in ${(k)vlans}; do
-  oc process -p VLAN=$V -p DESCRIPTION="${vlans[$V]}" \
-    -f templates/template-nad-vlan.yaml -o yaml \
-    | yq e '.items[0]' > base/nad/vlan-$V.yaml
+unset vlans
+declare -A vlans
+NAMESPACE=demo-virt
+vlans[1924]="Lab"
+vlans[1925]="Disco"
+vlans[1926]="Trans Proxy"
+vlans[1927]="Metal"
+vlans[1928]="Provisioning"
+
+for VLAN in ${(k)vlans}; do
+  oc process \
+    -p VLAN=$VLAN \
+    -p DESCRIPTION="${vlans[$VLAN]} VLAN ${VLAN} by Bridge br-${VLAN}" \
+    -p NAMESPACE=$NAMESPACE \
+    -f templates/template-nad-vlan.yaml \
+    -o yaml \
+    | yq e '.items[0]' > base/nad/nad-vlan-$VLAN.yaml
 done
 ----
 
@@ -60,22 +141,110 @@ done
 ----
 pushd base/nad
 rm kustomization.yaml
-kustomize create --autodetect
-popd
-
-pushd base/nncp
-rm kustomization.yaml
-kustomize create --autodetect
-popd
-
-pushd base
-rm kustomization.yaml
-kustomize create
-kustomize edit add base nncp,nad
+kustomize create --autodetect --labels template:nad-vlan --namespace $NAMESPACE
 popd
 ----
 
+.Apply the generated Net-attach-defs
+[source,bash]
+----
+oc apply -k base/nad
+----
+
 == Test Plan
+=== Node Maintenance Operator
+
+https://docs.openshift.com/container-platform/4.11/nodes/nodes/eco-node-maintenance-operator.html[Node Maintenance Operator]
+
+[source,yaml]
+----
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  creationTimestamp: "2023-02-07T16:41:54Z"
+  generation: 1
+  labels:
+    operators.coreos.com/node-maintenance-operator.openshift-operators: ""
+  name: node-maintenance-operator
+  namespace: openshift-operators
+spec:
+  channel: stable
+  installPlanApproval: Automatic
+  name: node-maintenance-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+---
+# necessary?
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: node-maintenance-operator
+  namespace: openshift-operators
+----
+
+Create a maintenance and VM live migrated great
+
+=== Node Health Check Operator
+
+https://docs.openshift.com/container-platform/4.11/nodes/nodes/eco-node-health-check-operator.html[Node Health Check Operator]
+
+https://cloud.redhat.com/blog/keeping-virtual-machines-available-by-allowing-nodes-to-self-repair
+
+And Self Node Remediation Operator
+
+
+* create a NHC
+
+[source,yaml]
+----
+apiVersion: remediation.medik8s.io/v1alpha1
+kind: NodeHealthCheck
+metadata:
+  name: cnv-nodehealthcheck
+spec:
+  minHealthy: 51%
+  remediationTemplate:
+    apiVersion: self-node-remediation.medik8s.io/v1alpha1
+    kind: SelfNodeRemediationTemplate
+    name: self-node-remediation-resource-deletion-template
+    namespace: openshift-operators
+  selector:
+    matchLabels:
+      machine.openshift.io/cluster-api-machineset: hub-q4jtr-cnv
+  unhealthyConditions:
+    #- duration: 60s
+    - duration: 300s
+      status: 'False'
+      type: Ready
+    - duration: 300s
+      status: Unknown
+      type: Ready
+----
+
+In VM Set runStrategy: Always
+
+[source,yaml]
+----
+apiVersion: self-node-remediation.medik8s.io/v1alpha1
+kind: SelfNodeRemediationConfig
+metadata:
+  name: self-node-remediation-config
+  namespace: openshift-operators
+spec:
+  safeTimeToAssumeNodeRebootedSeconds: 180 
+  watchdogFilePath: /dev/watchdog 
+  isSoftwareRebootEnabled: true 
+  apiServerTimeout: 15s 
+  apiCheckInterval: 5s 
+  maxApiErrorThreshold: 3 
+  peerApiServerTimeout: 5s 
+  peerDialTimeout: 5s 
+  peerRequestTimeout: 5s 
+  peerUpdateInterval: 15m 
+  selector: machine.openshift.io/cluster-api-machineset=hub-q4jtr-cnv
+----
+
+=== TBD
 
 .TBD
 * Create a new machineset[examples/machineset.yaml] with 1 VM capable of nested virt
@@ -86,4 +255,167 @@ popd
 ** `ovs-vsctl`
 * Create a demo namespace
 * Apply `link:base/nad[nad]` in demo namespace and examine network config result
-* Create VM in demo namespace
+
+== Multus General
+
+https://access.redhat.com/documentation/en-us/openshift_container_platform/4.12/html/networking/multiple-networks[Multiple networks] can use these CNI plugins
+
+* https://access.redhat.com/documentation/en-us/openshift_container_platform/4.12/html-single/networking/#nw-multus-bridge-object_configuring-additional-network[bridge]: Configure a bridge-based additional network to allow pods on the same host to communicate with each other and the host.
+** CNV uses `cnv-bridge`. What is the big difference?
+* host-device: Configure a host-device additional network to allow pods access to a physical Ethernet network device on the host system.
+* ipvlan: Configure an ipvlan-based additional network to allow pods on a host to communicate with other hosts and pods on those hosts, similar to a macvlan-based additional network. Unlike a macvlan-based additional network, each pod shares the same MAC address as the parent physical network interface.
+* macvlan: Configure a macvlan-based additional network to allow pods on a host to communicate with other hosts and pods on those hosts by using a physical network interface. Each pod that is attached to a macvlan-based additional network is provided a unique MAC address.
+* SR-IOV: Configure an SR-IOV based additional network to allow pods to attach to a virtual function (VF) interface on SR-IOV capable hardware on the host system.
+
+https://docs.openshift.com/container-platform/4.12/networking/multiple_networks/attaching-pod.html
+
+
+== Here is a test case that worked ipvaln
+
+.NNCP configuring br-1924
+[source,yaml]
+----
+---
+# oc process -p VLAN=1924 -p NODE_SELECTOR_KEY=kubernetes.io/hostname -p NODE_SELECTOR_VALUE=hub-q4jtr-cnv-dn79n \
+#    -f templates/template-nncp.yaml -o yaml | yq e '.items[0]' - > nncp-hub-q4jtr-cnv-dn79n.yaml
+apiVersion: nmstate.io/v1
+kind: NodeNetworkConfigurationPolicy
+metadata:
+  annotations:
+    description: Network Config for adding vlan 1924 and bridge on ens224
+  name: ens224-v1924-dn79n
+spec:
+  nodeSelector:
+    kubernetes.io/hostname: hub-q4jtr-cnv-dn79n
+  desiredState:
+    interfaces:
+      - ipv4:
+          enabled: false
+        ipv6:
+          enabled: false
+        name: ens224
+        state: up
+        type: ethernet
+      - ipv4:
+          enabled: false
+        ipv6:
+          enabled: false
+        name: ens224.1924
+        state: up
+        type: vlan
+        vlan:
+          base-iface: ens224
+          id: 1924
+      - bridge:
+          options:
+            stp:
+              enabled: false
+          port:
+            - name: ens224.1924
+              vlan: {}
+        ipv4:
+          enabled: false
+        ipv6:
+          enabled: false
+        name: br-1924
+        state: up
+        type: linux-bridge
+----
+
+.Net-Attach-Def making ipvlan available on br-1924
+[source,yaml]
+----
+---
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  annotations:
+    description: IPVLAN will assign the MAC of the 'master' interface
+    k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/br-1924
+  name: ipvlan-1924
+spec:
+  config: |-
+    {
+      "cniVersion": "0.3.1",
+      "name": "ipvlan-1924", 
+      "plugins": [{ 
+        "type": "ipvlan",
+        "master": "br-1924", 
+        "mode": "l2",
+        "ipam": {
+          "type": "static",
+          "addresses": [
+            { "address": "192.168.4.213/24" }
+            ]
+            }
+          },
+          # without this next plugin get an address in use error
+          {
+        "type": "tuning",
+        "capabilities": { "mac": true }
+      }]
+    }
+----
+
+.Deployment using ipvlan-1924 net-attach-def
+[source,yaml]
+----
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"static:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"static\")].image"}]'
+  labels:
+    app: static
+    app.kubernetes.io/component: static
+    app.kubernetes.io/instance: static
+  name: static-ipvlan
+  namespace: dale
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      deployment: static-ipvlan
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        k8s.v1.cni.cncf.io/networks: '[{"interface":"net1","name":"ipvlan-1924","namespace":"dale"}]'
+        openshift.io/generated-by: OpenShiftNewApp
+      creationTimestamp: null
+      labels:
+        deployment: static-ipvlan
+    spec:
+      containers:
+      - command:
+        - /bin/bash
+        - -c
+        - sleep 2000000000000
+        image: registry.redhat.io/openshift4/ose-cli
+        imagePullPolicy: Always
+        name: ose-cli
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        - containerPort: 8443
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      nodeSelector:
+        kubernetes.io/hostname: hub-q4jtr-cnv-dn79n
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30       
+----
+
+
+== Can we do the same  with macvlan and DHCP?
