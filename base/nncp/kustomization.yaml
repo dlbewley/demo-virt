@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- nncp-ens224-br-vlan-1924.yaml
+- nncp-ens224-br-vlan-1925.yaml
+- nncp-ens224-br-vlan-1926.yaml
+- nncp-ens224-br-vlan-1927.yaml
+- nncp-ens224-br-vlan-1928.yaml
+commonLabels:
+  template: nncp-nic-vlan-br
