@@ -6,5 +6,7 @@ resources:
 - nad-vlan-1926.yaml
 - nad-vlan-1927.yaml
 - nad-vlan-1928.yaml
-commonAnnotations:
-  generator: template-nad-vlan
+- namespace.yaml
+namespace: demo-virt
+commonLabels:
+  template: nad-vlan
