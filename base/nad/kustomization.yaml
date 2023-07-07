@@ -9,4 +9,4 @@ resources:
 - namespace.yaml
 namespace: demo-virt
 commonLabels:
-  template: nad-vlan
+  template: nad-vlan-cnv-bridge
