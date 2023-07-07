@@ -1,24 +1,24 @@
 = OpenShift Virtualization and Networking Exploration
 :source-highlighter: rouge
+:toc:
 
 This repo is a collection of configs to explore OpenShift Virtualization in a Nested Virtualization environment. It's not actually a Demo at this time. It will build upon learning described in https://guifreelife.com/blog/2022/05/13/OpenShift-Virtualization-on-vSphere/
 
-== References
 
-* https://docs.google.com/presentation/d/1p7NxcK_0xxxyKtndNC_zh9kCi_fZLieiXBLYjRxJDWk/edit#slide=id.g634ca58e56_0_218[OpenShift and OVN Deck]
-* https://guifreelife.com/blog/2022/05/13/OpenShift-Virtualization-on-vSphere/[GUI Free Life]
-* https://github.com/openshift/network-tools/blob/master/docs/user.md
+== Installation
+=== Install OpenShift Virtualization
 
-== Install OpenShift Virtualization
-
-.Install and instantiate the operator
+.Install and instantiate the operator from link:virtualization/[virtualization/]
 [source,bash]
 ----
 oc apply -k virtualization/operator/base
 oc apply -k virtualization/instance/base
 ----
 
-== Configure Hypervisor Node Networking
+== Configuration
+=== Configure Hypervisor Node Networking
+
+Generate the link:networking[networking/] resouces for application.
 
 An OpenShift Template can be used to make generation of NNCPs a bit more repeatable and fault tolerant. As with most things in life, being organized and consistent is very important in networking. Please don't write a one-off NNCP. Nothing (very little) is ever "one-off".
 
@@ -110,8 +110,7 @@ oc get nodes \
 }
 ----
 
-
-== Configure Namespace Networking
+=== Configure Namespace Networking
 
 Attachment to a network is gated by namespace level resources like NetworkAttachmentDefinitions and Multus annotations on pods.
 
@@ -139,7 +138,7 @@ for VLAN in ${(k)vlans}; do
     -p VLAN=$VLAN \
     -p DESCRIPTION="${vlans[$VLAN]} VLAN ${VLAN} by Bridge br-${VLAN}" \
     -p NAMESPACE=$NAMESPACE \
-    -f templates/template-nad-vlan.yaml \
+    -f templates/template-nad-vlan-cnv-bridge.yaml \
     -o yaml \
     | yq e '.items[0]' > networking/nad/nad-vlan-$VLAN.yaml
 done
@@ -160,8 +159,10 @@ popd
 oc apply -k networking/nad
 ----
 
-== Test Plan
-=== Node Maintenance Operator
+== Testing
+
+=== High Availability
+==== Node Maintenance Operator
 
 https://docs.openshift.com/container-platform/4.11/nodes/nodes/eco-node-maintenance-operator.html[Node Maintenance Operator]
 
@@ -193,7 +194,7 @@ metadata:
 
 Create a maintenance and VM live migrated great
 
-=== Node Health Check Operator
+==== Node Health Check Operator
 
 https://docs.openshift.com/container-platform/4.11/nodes/nodes/eco-node-health-check-operator.html[Node Health Check Operator]
 
@@ -265,7 +266,7 @@ spec:
 * Create a demo namespace
 * Apply `link:networking/nad[nad]` in demo namespace and examine network config result
 
-== Multus General
+=== Multus General
 
 https://access.redhat.com/documentation/en-us/openshift_container_platform/4.12/html/networking/multiple-networks[Multiple networks] can use these CNI plugins
 
@@ -279,7 +280,9 @@ https://access.redhat.com/documentation/en-us/openshift_container_platform/4.12/
 https://docs.openshift.com/container-platform/4.12/networking/multiple_networks/attaching-pod.html
 
 
-== Here is a test case that worked ipvaln
+=== IPVLAN
+
+Here is a test case that worked ipvlan
 
 .NNCP configuring br-1924
 [source,yaml]
@@ -426,5 +429,11 @@ spec:
       terminationGracePeriodSeconds: 30       
 ----
 
+=== MACVLAN
+=== DHCP
 
-== Can we do the same  with macvlan and DHCP?
+== References
+
+* https://docs.google.com/presentation/d/1p7NxcK_0xxxyKtndNC_zh9kCi_fZLieiXBLYjRxJDWk/edit#slide=id.g634ca58e56_0_218[OpenShift and OVN Deck]
+* https://guifreelife.com/blog/2022/05/13/OpenShift-Virtualization-on-vSphere/[GUI Free Life]
+* https://github.com/openshift/network-tools/blob/master/docs/user.md
