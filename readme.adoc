@@ -116,10 +116,10 @@ oc get nodes \
 
 Attachment to a network is gated by namespace level resources like NetworkAttachmentDefinitions and Multus annotations on pods.
 
-.link:templates/template-nad-vlan.yaml[Template] to create a network attachment definition
+.link:templates/template-nad-vlan-cnv-bridge.yaml[Template] to create a network attachment definition
 [source,yaml]
 ----
-include::templates/template-nad-vlan.yaml[]
+include::templates/template-nad-vlan-cnv-bridge.yaml[]
 ----
 
 .Create Network-Attach-Defs for each VLAN from Template
