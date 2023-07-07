@@ -5,6 +5,7 @@ metadata:
   annotations:
     forklift.konveyor.io/shared: "true"
   name: storemap
+  namespace: openshift-mtv
 spec:
   map:
   - destination:
@@ -23,6 +24,10 @@ spec:
       storageClass: ocs-storagecluster-ceph-rbd
     source:
       id: datastore-49
+  - destination:
+      storageClass: ocs-storagecluster-ceph-rbd
+    source:
+      id: datastore-3061
   provider:
     destination:
       name: host
