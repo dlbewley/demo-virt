@@ -2,13 +2,27 @@
 apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
-  name: nncp
+  name: nncp-nic-vlan-br
+  annotations:
+    description: >-
+      Template to generate NodeNetworkConfigurationPolicy resources which program a VLAN interface on a base interface and attach a bridge to the VLAN which could be used to facilitate a namespaced NetworkAttachmentDefinition.
+
+      Resulting interfaces look like:
+       NIC -> NIC.VLAN -> BR-VLAN
+
+      Note: This template is for use on the CLI.
+
+    iconClass: icon-load-balancer
+    openshift.io/provider-display-name: GUIFreeLife
+    openshift.io/documentation-url: https://github.com/dlbewley/demo-virt
+    openshift.io/support-url: https://github.com/dlbewley/demo-virt/issues
+    tags: "networking,nmstate"
 
 objects:
   - apiVersion: nmstate.io/v1
     kind: NodeNetworkConfigurationPolicy
     metadata:
-      name: ${NIC}-v${VLAN}-policy
+      name: ${NIC}-v${VLAN}
       annotations:
         description: ${DESCRIPTION}
     spec:
@@ -23,6 +37,7 @@ objects:
               enabled: false
             ipv6:
               enabled: false
+
           - name: ${NIC}.${VLAN}
             type: vlan
             state: up
@@ -33,6 +48,7 @@ objects:
               enabled: false
             ipv6:
               enabled: false
+
           - name: br-${VLAN}
             type: linux-bridge
             state: up
@@ -49,17 +65,20 @@ objects:
               enabled: false
 
 parameters:
-  - description: Physical NIC
+  - description: Physical NIC or Bond to add VLAN interface and bridge to
     name: NIC
     value: ens224
+    required: true
   - description: VLAN ID
     name: VLAN
+    required: true
   - description: Node Selector Key
     name: NODE_SELECTOR_KEY
     value: machine.openshift.io/cluster-api-machineset
   - description: Node Selector Value
     name: NODE_SELECTOR_VALUE
     value: hub-test-cnv
+    required: true
   - description: Policy description
     name: DESCRIPTION
-    value: Network Config for adding vlan ${VLAN} and bridge on ${NIC} 
+    value: Add VLAN ${VLAN} and Bridge br-${VLAN} on ${NIC}

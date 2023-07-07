@@ -1,0 +1,50 @@
+---
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: nad-vlan-cnv-bridge
+  annotations:
+    description: >-
+      Template to generate NetworkAttachmentDefinition resources which enable access to VLANs via Bridge interfaces.
+
+      Results can be used to multi-home pods using Multus.
+
+    iconClass: icon-load-balancer
+    openshift.io/provider-display-name: GUIFreeLife
+    openshift.io/documentation-url: https://github.com/dlbewley/demo-virt
+    openshift.io/support-url: https://github.com/dlbewley/demo-virt/issues
+    tags: "networking,nmstate"
+
+objects:
+  - apiVersion: k8s.cni.cncf.io/v1
+    kind: NetworkAttachmentDefinition
+    metadata:
+      annotations:
+        description: ${DESCRIPTION}
+        k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/br-${VLAN}
+      name: vlan-${VLAN}
+      namespace: ${NAMESPACE}
+    spec:
+      config: |-
+        {
+          "name": "vlan-${VLAN}",
+          "bridge": "br-${VLAN}",
+          "vlan": ${VLAN},
+          "cniVersion": "0.3.1",
+          "type": "cnv-bridge",
+          "macspoofchk": true
+        } 
+
+parameters:
+  # - description: Network description
+  #   name: DESCRIPTION
+  #   value: Bridge
+  #   required: true
+  - description: VLAN ID
+    name: VLAN
+    required: true
+  - description: Namespace
+    name: NAMESPACE
+  - description: Net-attach-def description
+    name: DESCRIPTION
+    value: Attachment to br-<vlan id>.

@@ -2,8 +2,11 @@ apiVersion: k8s.cni.cncf.io/v1
 kind: NetworkAttachmentDefinition
 metadata:
   annotations:
-    description: Metal V1927
+    description: Metal VLAN 1927 by Bridge br-1927
     k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/br-1927
+  label:
+    vlan: "1927"
   name: vlan-1927
+  namespace: demo-virt
 spec:
   config: "{\n  \"name\": \"vlan-1927\",\n  \"bridge\": \"br-1927\",\n  \"vlan\": 1927,\n  \"cniVersion\": \"0.3.1\",\n  \"type\": \"cnv-bridge\",\n  \"macspoofchk\": true\n} "
