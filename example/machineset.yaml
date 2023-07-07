@@ -1,0 +1,55 @@
+---
+apiVersion: machine.openshift.io/v1beta1
+kind: MachineSet
+metadata:
+  annotations:
+    machine.openshift.io/memoryMb: "16384"
+    machine.openshift.io/vCPU: "12"
+  labels:
+    machine.openshift.io/cluster-api-cluster: hub-l7c56
+  name: hub-l7c56-cnv
+  namespace: openshift-machine-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      machine.openshift.io/cluster-api-cluster: hub-l7c56
+      machine.openshift.io/cluster-api-machineset: hub-l7c56-cnv
+  template:
+    metadata:
+      labels:
+        machine.openshift.io/cluster-api-cluster: hub-l7c56
+        machine.openshift.io/cluster-api-machine-role: worker
+        machine.openshift.io/cluster-api-machine-type: worker
+        machine.openshift.io/cluster-api-machineset: hub-l7c56-cnv
+    spec:
+      metadata:
+        labels:
+          machine.openshift.io/cluster-api-machineset: hub-l7c56-cnv
+      providerSpec:
+        value:
+          apiVersion: machine.openshift.io/v1beta1
+          kind: VSphereMachineProviderSpec
+          metadata:
+            creationTimestamp: null
+          credentialsSecret:
+            name: vsphere-cloud-credentials
+          diskGiB: 120
+          memoryMiB: 16384
+          network:
+            devices:
+            - networkName: lab-192-168-4-0-b24
+            # secondary NIC
+            - networkName: Trunk
+          numCPUs: 12
+          numCoresPerSocket: 1
+          snapshot: ""
+          template: hub-l7c56-rhcos-oak-east-cnv
+          userDataSecret:
+            name: worker-user-data
+          workspace:
+            datacenter: Garden
+            datastore: VMData
+            folder: /Garden/vm/hub-l7c56
+            resourcePool: /Garden/host/Goat/Resources
+            server: vcenter.lab.bewley.net
