@@ -1,8 +1,11 @@
 = Migrating Virtual Machines from VMware to OpenShift using MTV
+:source-highlighter: rouge
+:toc:
 
-https://red.ht/mtv-docs[Migration Toolkit for Virtualization]
 
 == Install the Migration Toolkit for Virtualization Operator
+
+See https://red.ht/mtv-docs[Migration Toolkit for Virtualization] documentation.
 
 * Install the MTV Operator
 
@@ -50,7 +53,7 @@ Download the https://developer.vmware.com/web/sdk/7.0/vddk[VMware VDDK] tar.gz f
 
 === Expose OpenShift Cluster Registry
 
-You may optionally https://docs.openshift.com/container-platform/latest/registry/securing-exposing-registry.html[expose the OpenShift cluster image registry] to store the VDDK image built in the following step.
+You may optionally https://docs.openshift.com/container-platform/latest/registry/securing-exposing-registry.html[expose the OpenShift cluster image registry] to store the VDDK image built in the following steps.
 
 [TIP]
 If you do not expose the cluster registry, the VDDK image must be pushed to some other registry. You can do so by hand or using and the Makefile variables. The location must be updated in the `Provider` link:instance/overlays/lab/provider.yaml[provider.yaml].
@@ -59,9 +62,11 @@ If you do not expose the cluster registry, the VDDK image must be pushed to some
 
 [source,bash]
 ----
-oc patch configs.imageregistry.operator.openshift.io/cluster --patch '{"spec":{"defaultRoute":true}}' --type=merge
+oc patch configs.imageregistry.operator.openshift.io/cluster \
+  --patch '{"spec":{"defaultRoute":true}}' --type=merge
 
-export REGISTRY=$(oc get route default-route -n openshift-image-registry --template='{{ .spec.host }}')
+export REGISTRY=$(oc get route default-route -n openshift-image-registry \
+  --template='{{ .spec.host }}')
 ----
 
 * Obtain a token for logging into the OpenShift registry.
@@ -124,15 +129,16 @@ $ cd ..
 ----
 
 == Create a VMware Provider
+=== Using the Web UI
 
-Browse to Migration -> Providers for virtualization and https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/2.4/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#adding-providers[Create a VMware provider] by hand or use Kustomize.
+Browse to Migration -> Providers for virtualization and https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/2.4/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#adding-providers[Create a VMware provider] by hand.
 
 .Capture vCenter SHA1 Fingerprint
 [IMPORTANT]
 ====
 The provider will require the SHA1 fingerprint of the vCenter server certificate.
 
-* Obtain the SHA-1 fingerprint for the vCenter certificate and write this value to link:instance/base/secrets/thumbprint[instance/base/secrets/thumbprint]
+* Obtain the SHA-1 fingerprint for the vCenter certificate and optionally write this value to link:instance/base/secrets/thumbprint[instance/base/secrets/thumbprint]
 [source,bash]
 ----
 $ echo | openssl s_client -connect vcenter.lab.bewley.net:443 2>/dev/null -showcerts \
@@ -141,32 +147,9 @@ SHA1 Fingerprint=C2:6C:23:AA:0A:EE:30:25:B5:7D:EE:31:24:28:E7:4A:78:3E:A2:01
 ----
 ====
 
-* Create VMware provider
-
-[source,bash]
-$ oc apply -k instance/overlays/lab/
-rolebinding.rbac.authorization.k8s.io/allow-image-pullers created
-secret/provider-creds configured
-forkliftcontroller.forklift.konveyor.io/forklift-controller unchanged
-provider.forklift.konveyor.io/lab created
-
-
-*  Create storage and network mappings
-
-[source,bash]
-----
-$ oc apply -k instance/overlays/lab
-rolebinding.rbac.authorization.k8s.io/allow-image-pullers created
-secret/provider-creds created
-forkliftcontroller.forklift.konveyor.io/forklift-controller unchanged
-networkmap.forklift.konveyor.io/netmap created
-provider.forklift.konveyor.io/lab created
-storagemap.forklift.konveyor.io/storemap created
-----
-
 image:img/provider.png[]
 
-* Edit the provider and correct the credentials and certificate SHA-1 fingerprint if it is not already present.
+* Edit the provider and correct the credentials and the certificate SHA-1 fingerprint if it is not already present.
 
 image:img/provider-edit.png[]
 
@@ -190,7 +173,53 @@ image:img/provider-ready.png[]
 // Ensure the vSphere host can be reached on the chosen migration network.
 // image:img/add-vmkernel-nic.png[]
 
-== Create Migration Plan
+=== Using Kustomize or GitOps
+
+Instead of of the web UI, you may use Kustomize and an overlay to create the VMware provider. See this link:instance/overlays/lab/provider.yaml[example provider.yaml]. Notice this overlay will also link:instance/overlays/lab/rolebinding.yaml[enable all other namespaces to pull the VDDK image] which was built in the openshift-mtv namespace.
+
+* Create VMware provider
+
+[source,bash]
+$ oc apply -k instance/overlays/lab/
+rolebinding.rbac.authorization.k8s.io/allow-image-pullers created
+secret/provider-creds configured
+forkliftcontroller.forklift.konveyor.io/forklift-controller unchanged
+provider.forklift.konveyor.io/lab created
+
+== Create Mappings from VMware to OpenShift Virt
+
+=== Using the Web UI
+
+Create storage and network mappings in the UI or using Kustomize
+
+* Browse to Migration -> NetworkMaps for virtualization and https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/2.4/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#creating-network-mapping_mtv[Create a network mapping] by hand.
+* Browse to Migration -> StorageMaps for virtualization and https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/2.4/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#creating-storage-mapping_mtv[Create a storage mapping] by hand.
+
+=== Using Kustomize or GitOps
+
+*  Create storage and network mappings using Kustomize
+
+[source,bash]
+----
+$ oc apply -k instance/overlays/lab
+rolebinding.rbac.authorization.k8s.io/allow-image-pullers created
+secret/provider-creds created
+forkliftcontroller.forklift.konveyor.io/forklift-controller unchanged
+networkmap.forklift.konveyor.io/netmap created
+provider.forklift.konveyor.io/lab created
+storagemap.forklift.konveyor.io/storemap created
+----
+
+== Migrate a Virtual Machine
 
 .TODO
-* Verify a migration in a user nameapce
+* Illustrate a migration.
+
+=== Create A Migration Plan
+
+* Browse to Migration -> Plans for virtualization and 
+https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/2.4/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#creating-migration-plan_mtv[Create a migration plan] for a single VM to test.
+
+=== Execute the Migration Plan
+
+https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/2.4/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#running-migration-plan_mtv
