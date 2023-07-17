@@ -172,7 +172,7 @@ image:img/provider-ready.png[]
 // Ensure the vSphere host can be reached on the chosen migration network.
 // image:img/add-vmkernel-nic.png[]
 
-==== GitOps Method
+=== Using Kustomize or GitOps
 
 Instead of of the web UI, you may use Kustomize and an overlay to create the provider. See this link:instance/overlays/lab/provider.yaml[example provider.yaml]. Notice this overlay will also link:instance/overlays/lab/rolebinding.yaml[enable all other namespaces to pull the VDDK image] which was built in the openshift-mtv namespace.
 
@@ -185,7 +185,7 @@ secret/provider-creds configured
 forkliftcontroller.forklift.konveyor.io/forklift-controller unchanged
 provider.forklift.konveyor.io/lab created
 
-=== Create Mappings from VMware to OpenShift Virt
+== Create Mappings from VMware to OpenShift Virt
 
 *  Create storage and network mappings
 
