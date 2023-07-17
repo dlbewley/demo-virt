@@ -46,7 +46,7 @@ forklift-volume-populator-controller-5846bc88c7-n5nl8   1/1     Running   0     
 
 To migrate from vSphere, a VDDK image will be required.
 
-Download the https://developer.vmware.com/web/sdk/7.0/vddk[VMware VDDK] tar.gz file and place it in migration directory. The steps below will automatically build and push to the cluster registry once it is exposed.
+Download the https://developer.vmware.com/web/sdk/7.0/vddk[VMware VDDK] tar.gz file and place it in the link:vddk/[vddk] directory. The steps below will automatically build and push to the cluster registry once it is exposed.
 
 === Expose OpenShift Cluster Registry
 
