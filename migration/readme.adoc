@@ -1,4 +1,6 @@
 = Migrating Virtual Machines from VMware to OpenShift using MTV
+:source-highlighter: rouge
+:toc:
 
 https://red.ht/mtv-docs[Migration Toolkit for Virtualization]
 
