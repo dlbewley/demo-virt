@@ -9,8 +9,3 @@ generatorOptions:
 
 patchesStrategicMerge:
   - patch-virtualmachine.yaml
-
-secretGenerator:
-  - name: cloudinitdisk
-    files:
-      - scripts/userData

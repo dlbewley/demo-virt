@@ -11,17 +11,3 @@ resources:
 # this results in deletion of the rootdisk volume[0]
 patchesStrategicMerge:
   - patch-virtualmachine.yaml
-
-
-# patches:
-#   - target:
-#       group: kubevirt.io
-#       kind: VirtualMachine
-#       name: fedora-wl0g2prnv4k3w6f8
-#       version: v1
-#     patch: |-
-#       - op: replace
-#         path: /spec/template/spec/volumes/1/cloudInitNoCloud
-#         value: {"secretRef:"{"name":"cloudinitdisk"}}
-
-
