@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+bases:
+  - ../../base
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+patchesStrategicMerge:
+  - patch-virtualmachine.yaml
+
+secretGenerator:
+  - name: cloudinitdisk
+    files:
+      - scripts/userData

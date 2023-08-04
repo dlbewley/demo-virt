@@ -1,0 +1,22 @@
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: fedora
+spec:
+ running: true
+ template:
+    spec:
+      volumes:
+        # the rootdisk volume is not changed, but must be repeated to
+        # avoid deletion if we want to use a yaml patch like
+        # a normal human
+        - name: rootdisk
+          dataVolume:
+            name: fedora
+        - name: cloudinitdisk
+          cloudInitNoCloud:
+            userData: |-
+              #cloud-config
+              user: patch
+              password: adamspoint
