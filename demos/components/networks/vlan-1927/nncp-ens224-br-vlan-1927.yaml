@@ -1,0 +1,49 @@
+#  oc process -f templates/template-nncp-nic-vlan-br.yaml \
+#   -p VLAN=1927 \
+#   -p NIC=ens224 \
+#   -p NODE_SELECTOR_KEY=machine.openshift.io/cluster-api-machineset \
+#   -p NODE_SELECTOR_VALUE=hub-l7c56-cnv \
+#   -o yaml | yq e '.items[0]' - > nncp-ens224-br-vlan-1927.yaml
+---
+apiVersion: nmstate.io/v1
+kind: NodeNetworkConfigurationPolicy
+metadata:
+  annotations:
+    description: Add VLAN 1927 and Bridge br-1927 on ens224
+  name: ens224-v1927
+spec:
+  desiredState:
+    interfaces:
+      - ipv4:
+          enabled: false
+        ipv6:
+          enabled: false
+        name: ens224
+        state: up
+        type: ethernet
+      - ipv4:
+          enabled: false
+        ipv6:
+          enabled: false
+        name: ens224.1927
+        state: up
+        type: vlan
+        vlan:
+          base-iface: ens224
+          id: "1927"
+      - bridge:
+          options:
+            stp:
+              enabled: false
+          port:
+            - name: ens224.1927
+              vlan: {}
+        ipv4:
+          enabled: false
+        ipv6:
+          enabled: false
+        name: br-1927
+        state: up
+        type: linux-bridge
+  nodeSelector:
+    machine.openshift.io/cluster-api-machineset: hub-l7c56-cnv

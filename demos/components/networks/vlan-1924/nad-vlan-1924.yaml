@@ -1,0 +1,11 @@
+# oc process -p VLAN=1924 -p DESCRIPTION="Lab Network 192.168.4.0/24 V1924" -p  -f templates/template-nad-vlan-cnv-bridge.yaml -o yaml | yq e '.items[0]'
+---
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  annotations:
+    description: Lab Network 192.168.4.0/24
+    k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/br-1924
+  name: vlan-1924
+spec:
+  config: "{\n  \"name\": \"vlan-1924\",\n  \"bridge\": \"br-1924\",\n  \"vlan\": 1924,\n  \"cniVersion\": \"0.3.1\",\n  \"type\": \"cnv-bridge\",\n  \"macspoofchk\": true\n} "

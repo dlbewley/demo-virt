@@ -1,0 +1,12 @@
+# oc process -p VLAN=1927 -p DESCRIPTION="Metal Lab Network 192.168.7.0/24 V1927" -f templates/template-nad-vlan-cnv-bridge.yaml -o yaml | yq e '.items[0]'
+---
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  annotations:
+    description: Metal Lab Network 192.168.7.0/24 V1927
+    k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/br-1927
+  name: vlan-1927
+  namespace: ""
+spec:
+  config: "{\n  \"name\": \"vlan-1927\",\n  \"bridge\": \"br-1927\",\n  \"vlan\": 1927,\n  \"cniVersion\": \"0.3.1\",\n  \"type\": \"cnv-bridge\",\n  \"macspoofchk\": true\n} "
