@@ -1,5 +1,11 @@
-# oc process -p VLAN=1924 -p DESCRIPTION="Lab Network 192.168.4.0/24" -p NAMESPACE=dale \            
-#    -f templates/template-nad-vlan.yaml -o yaml | yq e '.items[0]' - > nad-1924.yaml 
+---
+apiVersion: v1
+kind: namespace
+metadata:
+  name: dale-dn79n
+---
+# oc process -p VLAN=1924 -p DESCRIPTION="Lab Network 192.168.4.0/24" -p NAMESPACE=dale-dn79n \
+#    -f templates/template-nad-vlan.yaml -o yaml | yq e '.items[0]' - > nad-1924.yaml
 apiVersion: k8s.cni.cncf.io/v1
 kind: NetworkAttachmentDefinition
 metadata:
@@ -7,6 +13,14 @@ metadata:
     description: Lab Network 192.168.4.0/24 V1924
     k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/br-1924
   name: vlan-1924
-  namespace: dale
+  namespace: dale-dn79n
 spec:
-  config: "{\n  \"name\": \"vlan-1924\",\n  \"bridge\": \"br-1924\",\n  \"vlan\": 1924,\n  \"cniVersion\": \"0.3.1\",\n  \"type\": \"cnv-bridge\",\n  \"macspoofchk\": true\n} "
+  config: |-
+    {
+    "name": "vlan-1924",
+    "bridge": "br-1924",
+    "vlan": 1924,
+    "cniVersion": "0.3.1",
+    "type": "cnv-bridge",
+    "macspoofchk": true
+    }
