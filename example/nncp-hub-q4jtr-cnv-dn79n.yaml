@@ -5,29 +5,33 @@ apiVersion: nmstate.io/v1
 kind: NodeNetworkConfigurationPolicy
 metadata:
   annotations:
-    description: Network Config for adding vlan 1924 and bridge on ens224
-  name: ens224-v1924-policy
+    description: Network Config for adding vlan 1924 1927 and bridge on ens224
+  name: ens224-v1924-dn79n
 spec:
+  nodeSelector:
+    kubernetes.io/hostname: hub-q4jtr-cnv-dn79n
   desiredState:
     interfaces:
-      - ipv4:
-          enabled: false
-        ipv6:
-          enabled: false
-        name: ens224
-        state: up
+      - name: ens224
         type: ethernet
-      - ipv4:
+        ipv4:
           enabled: false
         ipv6:
           enabled: false
-        name: ens224.1924
         state: up
+      - name: ens224.1924
         type: vlan
+        ipv4:
+          enabled: false
+        ipv6:
+          enabled: false
+        state: up
         vlan:
           base-iface: ens224
           id: 1924
-      - bridge:
+      - name: br-1924
+        type: linux-bridge
+        bridge:
           options:
             stp:
               enabled: false
@@ -38,8 +42,29 @@ spec:
           enabled: false
         ipv6:
           enabled: false
-        name: br-1924
         state: up
+
+      - name: ens224.1927
+        type: vlan
+        ipv4:
+          enabled: false
+        ipv6:
+          enabled: false
+        state: up
+        vlan:
+          base-iface: ens224
+          id: 1927
+      - name: br-1927
         type: linux-bridge
-  nodeSelector:
-    kubernetes.io/hostname: hub-q4jtr-cnv-dn79n
+        bridge:
+          options:
+            stp:
+              enabled: false
+          port:
+            - name: ens224.1927
+              vlan: {}
+        ipv4:
+          enabled: false
+        ipv6:
+          enabled: false
+        state: up

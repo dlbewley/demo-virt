@@ -1,0 +1,25 @@
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  annotations:
+    description: Lab Network 192.168.4.0/24 V1924 MACVLAN
+    k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/br-1924
+  name: nad-macvlan
+spec:
+  config: |-
+    {
+    "cniVersion": "0.3.1",
+    "name": "macvlan", 
+    "plugins": [{ 
+        "type": "macvlan",
+        "capabilities": { "ips": true }, 
+        "master": "br-1924", 
+        "mode": "bridge",
+        "ipam": {
+          "type": "static"
+        }
+      }, {
+        "capabilities": { "mac": true }, 
+        "type": "tuning"
+      }]
+    }
