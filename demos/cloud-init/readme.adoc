@@ -6,6 +6,8 @@ The OpenShift Virtualization console enables visual editing of user data (AKA cl
 
 Here are some example ways of overriding cloud-init user data scripts when using Kustomize.
 
+These examples use a VM named `rhel-node-1` defined in link:../components/vms/rhel9/[here].
+
 include::overlays/ignition/readme.adoc[leveloffset=+1]
 
 include::overlays/inline/readme.adoc[leveloffset=+1]

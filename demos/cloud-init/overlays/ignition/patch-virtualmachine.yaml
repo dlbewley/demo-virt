@@ -2,18 +2,33 @@
 apiVersion: kubevirt.io/v1
 kind: VirtualMachine
 metadata:
-  name: fedora
+  name: rhel-node-1
 spec:
  template:
     spec:
       volumes:
-        # the rootdisk volume is not changed, but must be repeated to
-        # avoid deletion if we want to use a yaml patch like
-        # a normal human
+        # the rootdisk volume is not changed, but must be repeated here to
+        # avoid deletion by strategic merge patch
+        # because of this, using a secret and/or jsonpatch is likely more wise than this yaml example
         - name: rootdisk
           dataVolume:
-            name: fedora
+            name: rhel-node-1
         - name: cloudinitdisk
+          # ignition must use config drive not no cloud drive
           cloudInitConfigDrive:
+            # https://coreos.github.io/ignition/configuration-v3_2/
             userData: |-
-              {"ignition":{"config":{"replace":{"source":"https://webserver/bootstrap.ign"}},"version":"3.1.0"}}
+              {
+                "ignition": {
+                  "version": "3.2.0",
+                  "passwd": {
+                    "users": [
+                      {
+                        "name": "dale",
+                        "passwordHash": "$y$j9T$7aro.bnljehsGoARa6kPJ/$l/HKr.X8JFwrhoza1qeOPKYTx5xATOOI1J6KmzN35Y5",
+                        "sshAuthoizedKeys": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDcYGv4QhrNhDB9ahXEp2x6kn9YZ2RV5GEXcRRYvk4yLpFidvSFJxkE3AonLuOgi7WBVwMofCCWbHDEgBIWNv6RzR41gKQYI+ZgcT5bSZ9ZFhkkgBvTE66q0XyFXYeON+QV1Woxb7FDDmkvpMi9Sp32EMLOaSQwgnWCsI00zmUgM4UYy66UatWqSRaPtLe8ES2IqA/WUcRfxexcFjtS6jsn2R3Xyz+w9IpexWMhTjWmKpH97Ps8Sj61pCgGgMkkvuBDWBhnVy58Hf0tNg2YZnILCUdh0vVZ1LWPpsno2HB+gBzNhJZznSC5x+emUKtpQwOzrdFn51h1ZCEQDAmyZ+Vb acm@bunny"
+                      }
+                    ]
+                  }
+                }
+              }
