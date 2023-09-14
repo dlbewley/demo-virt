@@ -1,16 +1,17 @@
 apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
+  name: rhel9-server-tiny-bewley
   annotations:
     defaults.template.kubevirt.io/disk: rootdisk
-    description: Template for Red Hat Enterprise Linux 9 VM or newer. A PVC with the
+    description: Template for BIS Red Hat Enterprise Linux 9 VM or newer. A PVC with the
       RHEL disk image must be available.
     iconClass: icon-rhel
     name.os.template.kubevirt.io/rhel9.0: Red Hat Enterprise Linux 9.0 or higher
-    openshift.io/display-name: Red Hat Enterprise Linux 9 VM Dale
-    openshift.io/documentation-url: https://github.com/kubevirt/common-templates
-    openshift.io/provider-display-name: Red Hat
-    openshift.io/support-url: https://github.com/kubevirt/common-templates/issues
+    openshift.io/display-name: Bewley Internet Solutions RHEL 9 VM
+    openshift.io/documentation-url: https://github.com/dlbewley
+    openshift.io/provider-display-name: Bewley Internet Solutions
+    openshift.io/support-url: https://github.com/dlbewley/guifreelife-src/issues
     operator-sdk/primary-resource: openshift-cnv/ssp-kubevirt-hyperconverged
     operator-sdk/primary-resource-type: SSP.ssp.kubevirt.io
     tags: kubevirt,virtualmachine,linux,rhel
@@ -31,7 +32,6 @@ metadata:
     template.kubevirt.io/provider-url: https://www.redhat.com
     template.kubevirt.io/version: v1alpha1
     template.openshift.io/bindable: "false"
-  creationTimestamp: "2022-11-07T20:36:00Z"
   labels:
     app.kubernetes.io/component: templating
     app.kubernetes.io/managed-by: ssp-operator
@@ -43,8 +43,6 @@ metadata:
     template.kubevirt.io/type: base
     template.kubevirt.io/version: v0.23.5
     workload.template.kubevirt.io/server: "true"
-  name: rhel9-server-tiny-mod
-  namespace: openshift
 objects:
 - apiVersion: kubevirt.io/v1
   kind: VirtualMachine
