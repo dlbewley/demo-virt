@@ -1,1 +1,3 @@
-Use Ignition data.
+# Ignition as cloud-init user data
+
+Use Ignition data to supply cloud-init.
