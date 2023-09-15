@@ -9,9 +9,5 @@ resources:
 components:
   - ../../../components/vms/rhel9
 
-generatorOptions:
-  disableNameSuffixHash: true
-
-# this results in deletion of the rootdisk volume[0]
 patchesStrategicMerge:
   - patch-virtualmachine.yaml
