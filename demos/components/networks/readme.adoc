@@ -20,7 +20,7 @@ oc process -f templates/template-nncp-nic-vlan-br.yaml \
 # create the coresponding net-attach-def
 # be sure to set a namespace in your overlay
 oc process -f templates/template-nad-vlan-cnv-bridge.yaml \
-  -p VLAN=1927 \
+  -p VLAN=1924 \
   -p DESCRIPTION="Lab Network 192.168.4.0/24 V1924" \
   -o yaml \
   | yq e '.items[0]' - > nad-vlan-1924.yaml
