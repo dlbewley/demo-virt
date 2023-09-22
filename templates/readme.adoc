@@ -1,5 +1,9 @@
 Templates for creation of network or virtualization resources.
 
 .Uses
-* Generate resources for storage in git and application via GitOps. See link:../demos/components/networks[components/networks] for example
-* Install these templates for user consumption in the OpenShift console `oc apply -k .`
+* Generate static resources to store in git for application via GitOps. See link:../demos/components/networks[components/networks]
+* Install these templates in openshift namespace, and use them in the Developer Console. See blow.
+
+image:../img/nad-template-catalog.png[]
+
+image:../img/nad-template-instantiate.png[]
