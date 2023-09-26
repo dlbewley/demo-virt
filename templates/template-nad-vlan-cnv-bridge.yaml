@@ -5,7 +5,7 @@ metadata:
   name: nad-vlan-cnv-bridge
   annotations:
     description: >-
-      Template to generate NetworkAttachmentDefinition resources which enable access to VLANs via Bridge interfaces.
+      A NetworkAttachmentDefinition resource to enable access to a VLAN via Bridge interface.
 
       Results can be used to multi-home pods using Multus.
 

@@ -2,7 +2,16 @@
 apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
-  name: nncp
+  name: nncp-bond
+  annotations:
+    description: >-
+      A NodeNetworkConfigurationPolicy to bond two NICs.
+
+    iconClass: icon-load-balancer
+    openshift.io/provider-display-name: GUIFreeLife
+    openshift.io/documentation-url: https://github.com/dlbewley/demo-virt
+    openshift.io/support-url: https://github.com/dlbewley/demo-virt/issues
+    tags: "networking,nmstate"
 
 objects:
   - apiVersion: nmstate.io/v1

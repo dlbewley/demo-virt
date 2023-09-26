@@ -5,12 +5,10 @@ metadata:
   name: nncp-nic-vlan-br
   annotations:
     description: >-
-      Template to generate NodeNetworkConfigurationPolicy resources which program a VLAN interface on a base interface and attach a bridge to the VLAN which could be used to facilitate a namespaced NetworkAttachmentDefinition.
+      A NodeNetworkConfigurationPolicy to add a VLAN interface to a NIC and attach a bridge for the VLAN. The bridge can be targeted by namespaced NetworkAttachmentDefinitions.
 
       Resulting interfaces look like:
        NIC -> NIC.VLAN -> BR-VLAN
-
-      Note: This template is for use on the CLI.
 
     iconClass: icon-load-balancer
     openshift.io/provider-display-name: GUIFreeLife
