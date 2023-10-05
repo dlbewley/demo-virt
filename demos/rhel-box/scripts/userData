@@ -1,0 +1,54 @@
+#cloud-config
+users:
+  - name: cloud-user
+    lock_passwd: false
+    plain_text_passwd: tree-can-surely
+    groups: wheel
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDcYGv4QhrNhDB9ahXEp2x6kn9YZ2RV5GEXcRRYvk4yLpFidvSFJxkE3AonLuOgi7WBVwMofCCWbHDEgBIWNv6RzR41gKQYI+ZgcT5bSZ9ZFhkkgBvTE66q0XyFXYeON+QV1Woxb7FDDmkvpMi9Sp32EMLOaSQwgnWCsI00zmUgM4UYy66UatWqSRaPtLe8ES2IqA/WUcRfxexcFjtS6jsn2R3Xyz+w9IpexWMhTjWmKpH97Ps8Sj61pCgGgMkkvuBDWBhnVy58Hf0tNg2YZnILCUdh0vVZ1LWPpsno2HB+gBzNhJZznSC5x+emUKtpQwOzrdFn51h1ZCEQDAmyZ+Vb acm@bunny
+  - name: ansible
+    gecos: Ansible User
+    shell: /bin/bash
+    plain_text_passwd: tree-can-surely
+    groups: wheel
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDcYGv4QhrNhDB9ahXEp2x6kn9YZ2RV5GEXcRRYvk4yLpFidvSFJxkE3AonLuOgi7WBVwMofCCWbHDEgBIWNv6RzR41gKQYI+ZgcT5bSZ9ZFhkkgBvTE66q0XyFXYeON+QV1Woxb7FDDmkvpMi9Sp32EMLOaSQwgnWCsI00zmUgM4UYy66UatWqSRaPtLe8ES2IqA/WUcRfxexcFjtS6jsn2R3Xyz+w9IpexWMhTjWmKpH97Ps8Sj61pCgGgMkkvuBDWBhnVy58Hf0tNg2YZnILCUdh0vVZ1LWPpsno2HB+gBzNhJZznSC5x+emUKtpQwOzrdFn51h1ZCEQDAmyZ+Vb acm@bunny
+
+
+rh_subscription:
+  org: 123456789
+  activation-key: example
+  enable-repo:
+    - 'rhel-9-for-x86_64-baseos-rpms'
+    - 'rhel-9-for-x86_64-appstream-rpms'
+    - 'rhocp-4.13-for-rhel-9-x86_64-rpms'
+    - 'fast-datapath-for-rhel-9-x86_64-rpms'
+
+packages:
+  - ansible-core
+  - openshift-clients
+  - httpd
+  - jq
+
+write_files:
+  - path: /home/ansible/inventory/hosts
+    content: |
+      # https://docs.openshift.com/container-platform/latest/machine_management/adding-rhel-compute.html
+      [all:vars]
+      ansible_become=True
+      openshift_kubeconfig_path="/home/ansible/cluster/kubeconfig"
+      [new_workers]
+      rhel-node-1.lab.bewley.net
+
+mounts:
+  - [ /dev/disk/by-id/virtio-admin-kubeconfig, /home/ansible/cluster, iso9660, 'defaults,noexec' ]
+
+runcmd:
+  - [systemctl, daemon-reload]
+  - [systemctl, enable, httpd.service]
+  - [systemctl,  start, --no-block, httpd.service]
+#  - [chown, -R, 'ansible:ansible', /home/ansible]
+#  - [cd, /usr/share/ansible/openshift-ansible]
+#  - [ansible-playbook, -c, local, -i, /home/ansible/inventory/hosts playbooks/scaleup.yml]
