@@ -67,6 +67,10 @@ parameters:
     name: NIC
     value: ens224
     required: true
+  - description: NIC Interface type. eg ethernet, bond
+    name: NIC_TYPE
+    value: ethernet
+    required: true
   - description: VLAN ID
     name: VLAN
     required: true
@@ -75,8 +79,9 @@ parameters:
     value: machine.openshift.io/cluster-api-machineset
   - description: Node Selector Value
     name: NODE_SELECTOR_VALUE
-    value: hub-test-cnv
-    required: true
+    value: ''
+    required: false
   - description: Policy description
     name: DESCRIPTION
+    # modify these by hand in the NNCP resource
     value: Add VLAN ${VLAN} and Bridge br-${VLAN} on ${NIC}
