@@ -29,7 +29,6 @@ objects:
         {
           "name": "vlan-${VLAN}",
           "bridge": "br-${VLAN}",
-          "vlan": ${VLAN},
           "cniVersion": "0.3.1",
           "type": "cnv-bridge",
           "macspoofchk": true

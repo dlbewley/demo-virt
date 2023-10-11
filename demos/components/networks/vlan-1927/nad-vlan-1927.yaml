@@ -18,6 +18,5 @@ spec:
       "cniVersion": "0.3.1",
       "macspoofchk": true,
       "name": "vlan-1927",
-      "type": "cnv-bridge",
-      "vlan": 1927
+      "type": "cnv-bridge"
     }
