@@ -24,6 +24,9 @@ secretGenerator:
     files:
       - secrets/kubeconfig
 
+# patchesStrategicMerge:
+#   - nested-virt/patch-vm.yaml
+
 patches:
 - target:
     group: kubevirt.io
