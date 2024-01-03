@@ -1,1 +1,3 @@
 Installing and enabling the OpenShift Virtualization operator. Do this first.
+
+https://github.com/kubevirt/hyperconverged-cluster-operator/blob/main/docs/cluster-configuration.md
