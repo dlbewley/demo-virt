@@ -6,6 +6,7 @@ namespace: openshift-mtv
 
 resources:
   - forkliftcontroller.yaml
+  - rolebinding.yaml
 
 generatorOptions:
   disableNameSuffixHash: true

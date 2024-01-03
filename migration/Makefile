@@ -2,7 +2,7 @@ IMAGE ?= vddk
 NAMESPACE ?= openshift-mtv
 APPS_DOMAIN ?= apps.hub.lab.bewley.net
 REGISTRY ?= default-route-openshift-image-registry.$(APPS_DOMAIN)
-REGISTRY_USER ?= dlbewley
+REGISTRY_USER ?= builder
 # openshift token (oc whoami -t)
 TOKEN ?= sha256~EXAMPLE
 TLS_VERIFY ?= false
@@ -17,7 +17,7 @@ p-%:
 	@echo '$*=$(subst ','\'',$(subst $(newline),\n,$($*)))'
 
 image: unarchive
-	podman build . -t $(IMAGE):$(VDDK_VER) && \
+	podman build . --label VDDK_VER=$(VDDK_VER) -t $(IMAGE):$(VDDK_VER) && \
 	podman tag $(IMAGE):$(VDDK_VER) $(REGISTRY)/$(NAMESPACE)/$(IMAGE):$(VDDK_VER) && \
 	podman tag $(IMAGE):$(VDDK_VER) $(REGISTRY)/$(NAMESPACE)/$(IMAGE):latest
 
@@ -25,6 +25,7 @@ login:
 	podman login -u $(REGISTRY_USER) -p $(TOKEN) $(REGISTRY)
 
 push:
+	podman push --tls-verify=$(TLS_VERIFY) $(REGISTRY)/$(NAMESPACE)/$(IMAGE):$(VDDK_VER) && \
 	podman push --tls-verify=$(TLS_VERIFY) $(REGISTRY)/$(NAMESPACE)/$(IMAGE):latest
 
 unarchive: vmware-vix-disklib-distrib
