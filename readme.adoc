@@ -4,6 +4,8 @@
 
 This repo is a collection of configs to explore OpenShift Virtualization in a Nested Virtualization environment. It's not actually a Demo at this time. It will build upon learning described in https://guifreelife.com/blog/2022/05/13/OpenShift-Virtualization-on-vSphere/
 
+Note https://access.redhat.com/solutions/6972064
+How to create VLAN interface for VMs in OpenShift Virtualization
 
 == Installation
 === Install OpenShift Virtualization
@@ -19,16 +21,17 @@ oc apply -k virtualization/instance/base
 
 == Configuration
 
-Virtual machines can use the default pod network and expose ports using Services, Routes etc, but it is likely you may have a need to deploy a virtual machine directly to existing networks outside the cluster.
+Virtual machines can use the default pod network and expose ports using Kubernetes resources like Services, Ingresses, Routes etc. However, it is likely you may have a need to deploy a virtual machine directly to existing enterprise networks outside the cluster.
 
 This can be done by plumbing those networks to the Nodes and using the NMstate operator which can be programmed using NodeNetworkConfigurationPolicy (NNCP) resources.
 
 === Configure Hypervisor Node Networking
 
-An OpenShift Template can be used to make generation of NNCPs a bit more repeatable and fault tolerant. As with most things in life, being organized and consistent is very important in networking. Please don't write a one-off NNCP. Nothing (very little) is ever "one-off".
+An OpenShift Template can be used to make the writing of NNCPs a bit more repeatable and fault tolerant. As with most things in life, being organized and consistent is very important in networking. Please don't write a one-off NNCP. Nothing (very little) is ever "one-off".
 
-Some generated NNCPs can be found here link:networking[demos/components/networks/].
-
+Some generated NNCPs can be found
+here link:networking[networking/]
+and here link:demos/components/networks/[demos/components/networks/].
 
 .link:templates/template-nncp-nic-vlan-br.yaml[Template] to create a node network configuration policy
 [source,yaml]
@@ -36,7 +39,7 @@ Some generated NNCPs can be found here link:networking[demos/components/networks
 include::templates/template-nncp-nic-vlan-br.yaml[]
 ----
 
-This template uses NODE_SELECTOR_KEY and NODE_SELECTOR_VALUE parameters to target the nodes which are expected to provide networking for virtual machines. This example uses the machineset used to provision the hypervisor nodes.
+Because it is common to have different cluster Nodes allocated for different workloads, this template uses `NODE_SELECTOR_KEY` and `NODE_SELECTOR_VALUE` parameters to target the nodes which are expected to provide networking for virtual machines. This example uses the machineset used to provision the hypervisor nodes.
 
 .Generate NodeNetworkConfigurationPolicies for multiple VLANs using a link:templates/template-nncp-nic-vlan-br.yaml[Template]
 [TIP]
