@@ -26,15 +26,6 @@ graph LR;
       ens224["fa:fa-ethernet ens224"]
       ens224 --> br-data["fa:fa-bridge br-data"]
 
-      subgraph vlan1924["fa:fa-tag VLAN 1924<br> 192.168.4.0/24"]
-        ens224.1924("fa:fa-tag ens224.1924")
-        ens224.1924 --- br-1924[["br-1924 fa:fa-grip-vertical"]]
-      end
-
-      subgraph vlan1927["fa:fa-tag VLAN 1927<br> 192.168.7.0/24"]
-        ens224.1927("fa:fa-tag ens224.1927")
-        ens224.1927 --- br-1927[["br-1927 fa:fa-grip-vertical"]]
-      end
     end
   end
 
