@@ -39,7 +39,7 @@ graph LR;
     subgraph ns1-vm2[fab:fa-windows WS VM]
         ns1-vm2-nic1["fa:fa-ethernet net1"]
     end
-    br-1924 -.- ns1-nad-1924[/"fa:fa-code NAD 'dev-net'"/] --> ns1-vm2-nic1
+    br-data -.- ns1-nad-1924[/"fa:fa-code NAD 'dev-net'"/] --> ns1-vm2-nic1
   end
 
   subgraph ns2["Namespace 2"]
