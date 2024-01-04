@@ -3,7 +3,7 @@
 See <https://access.redhat.com/solutions/6972064> and <https://developers.redhat.com/blog/2017/09/14/vlan-filter-support-on-bridge#without_vlan_filtering> and 
 
 ## Bridge Filter Example
-This method treats the linux bridge as if it were a physical switch with all the packets tagged as they traverse the switch and selectively untagged upon egress to an interface.
+This method treats the linux bridge as if it were a physical switch with all the packets tagged as they traverse the switch and optionally untagged upon egress to an interface.
 
 
 ```mermaid
@@ -24,8 +24,7 @@ graph LR;
 
     subgraph nncp["fa:fa-code NNCP"]
       ens224["fa:fa-ethernet ens224"]
-      ens224 --> br-data["fa:fa-bridge br-data"]
-
+      ens224 ==> br-data[["fa:fa-grip-vertical fa:fa-bridge br-data"]]
     end
   end
 
