@@ -87,7 +87,7 @@ graph LR;
   style ns2 fill:#ccc
 ```
 
-## Older Example
+## VLAN Interface Example
 
 This example peels VLANs off the NIC and defines a single bridge per VLAN. This may have a positive impact on efficiency of traffic between hosts on this same VLAN as they will avoid tagging and untagging. It is a more complex configuration.
 
