@@ -69,11 +69,9 @@ graph LR;
 
   classDef vlan-1924 fill:#bbf
   class ens224.1924,br-1924,ns1-nad-1924,ns2-nad-1924,ns1-vm2-nic1,ns1-ws2-1924,ns2-vm1-nic1,ns2-vm2-nic2 vlan-1924
-  style vlan1924 fill:#99f
 
   classDef vlan-1927 fill:#fbb
   class ens224.1927,br-1927,ns1-nad-1927,ns2-nad-1927,ns2-vm2-nic1,ns2-vm3-nic1 vlan-1927
-  style vlan1927 fill:#f99
 
   style nncp stroke:#f66,stroke-width:2px,color:#999,stroke-dasharray: 5 5
   style T fill:white,stroke:darkgrey,stroke-width:1px,color:#333,stroke-dasharray: 2 2
