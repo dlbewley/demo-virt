@@ -7,5 +7,7 @@ namespace: demo-virt
 resources:
   - namespace.yaml
   - template-nad-vlan-cnv-bridge.yaml
+  - template-nad-br-cnv-bridge-vlan.yaml
   - template-nncp-nic-vlan-br.yaml
+  - template-nncp-nic-br.yaml
   - template-nncp-bond.yaml
