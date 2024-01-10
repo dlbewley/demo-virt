@@ -1,3 +1,5 @@
-Create bridge 'br-vmdata' attached to NIC ens224.
+Create Linux bridge br-vmdata attached to NIC ens224.
 
-Bridge carries tagged VLANs and 'bridge filtering' allows for attaching ports to specific VLANs to carry traffic to a pod.
+Bridge carries tagged VLANs and bridge filtering feature allows for attaching ports to specific VLANs to carry traffic to a pod.
+
+See https://access.redhat.com/solutions/6972064
