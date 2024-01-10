@@ -7,8 +7,12 @@ metadata:
     description: >-
       A NodeNetworkConfigurationPolicy to add a VLAN interface to a NIC and attach a bridge for the VLAN. The bridge can be targeted by namespaced NetworkAttachmentDefinitions.
 
-      Resulting interfaces look like:
-       NIC -> NIC.VLAN -> BR-VLAN
+      |<802.1q>|
+      |<-- NNCP ----------------->|<-- NAD -->|
+      [host-NIC]--+-[vlan1]-[BR1]--[guest-nic]
+                   \[vlan2]-[BR2]--[guest-nic]
+
+      See https://access.redhat.com/solutions/6972064
 
     iconClass: icon-load-balancer
     openshift.io/provider-display-name: GUIFreeLife
@@ -29,7 +33,7 @@ objects:
       desiredState:
         interfaces:
           - name: ${NIC}
-            type: ethernet
+            type: ${NIC_TYPE}
             state: up
             ipv4:
               enabled: false
@@ -70,7 +74,7 @@ parameters:
   - description: NIC Interface type. eg ethernet, bond
     name: NIC_TYPE
     value: ethernet
-    required: true
+    required: false
   - description: VLAN ID
     name: VLAN
     required: true
