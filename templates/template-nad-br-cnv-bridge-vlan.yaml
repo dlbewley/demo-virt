@@ -3,10 +3,10 @@
 apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
-  name: nad-bridge-vlan
+  name: nad-br-cnv-bridge-vlan
   annotations:
     description: >-
-      NetworkAttachmentDefinition resource to enable access to a bridge via VLAN interface.
+      NetworkAttachmentDefinition resource to enable access to a Linux bridge via cnv-bridge and VLAN ID.
 
       When defined in 'default' namespace the NAD is usable from all other namespaces.
 
