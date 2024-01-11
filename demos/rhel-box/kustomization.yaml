@@ -7,9 +7,13 @@ namespace: demo-virt
 #  - namespace.yaml
 
 components:
-  - ../components/vms/rhel9
-  # be sure to update VM patches down below to match vlan and namespace
+  # this should have already been applied elsewhere
+  #- ../components/networks/br-vmdata
+
+  # be sure to update VM patches below to match vlan and namespace
   - ../components/networks/vlan-1924
+
+  - ../components/vms/rhel9
 
 # the inline json patch can not learn of the random suffix
 generatorOptions:
@@ -34,31 +38,61 @@ patches:
     name: rhel-node-1
     version: v1
   patch: |-
-    - op: replace
-      path: /spec/template/spec/domain/cpu/sockets
-      value: 1
-
+    # pull cloud init script from secret
     - op: replace
       path: /spec/template/spec/volumes/1/cloudInitNoCloud
-      value: {"secretRef":{"name":"cloudinitdisk-rhel-node"}}
+      value: {
+        "secretRef": {
+          "name": "cloudinitdisk-rhel-node"
+        }
+      }
 
+    # add secret holding kubeconfig as volume
     - op: add
       path: /spec/template/spec/volumes/-
-      value: {"name":"admin-kubeconfig","secret":{"secretName":"admin-kubeconfig"}}
-
+      value: {
+        "name": "admin-kubeconfig",
+        "secret": {
+          "secretName": "admin-kubeconfig"
+        }
+      }
+    # add secret volume as a disk
     - op: add
       path: /spec/template/spec/domain/devices/disks/-
-      value: {"name":"admin-kubeconfig","serial": "admin-kubeconfig","disk":{"bus":"virtio"}}
+      value: {
+        "name": "admin-kubeconfig",
+        "serial": "admin-kubeconfig",
+        "disk": {
+          "bus": "virtio"
+        }
+      }
 
-    # note namespace in net-attach-def multus reference
-    - op: replace
-      path: /spec/template/spec/networks/0
-      value: {"name":"nic-vlan-1924","multus":{"networkName":"demo-virt/vlan-1924"}}
-
+    # convert default interface from masquerade to bridge 
     - op: replace
       path: /spec/template/spec/domain/devices/interfaces/0
-      value: {"name": "nic-vlan-1924","bridge":{},"model":"virtio"}
+      value: {
+        "name": "nic-vlan-1924",
+        "bridge": {},
+        "model": "virtio"
+      }
 
+    # rehome default interface to network attachment definition
+    # note namespace in net-attach-def multus reference if necessary
+    - op: replace
+      path: /spec/template/spec/networks/0
+      value: {
+        "name": "nic-vlan-1924",
+        "multus": {
+          "networkName": "vlan-1924"
+        }
+      }
+
+    # start VM at creation
     - op: replace
       path: /spec/running
       value: true
+
+    # live migrate VM if kicked off the node
+    - op: add
+      path: /spec/template/spec/evictionStrategy
+      value: "LiveMigrate"
