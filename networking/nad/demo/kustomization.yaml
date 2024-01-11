@@ -4,8 +4,6 @@ kind: Kustomization
 
 namespace: demo-virt
 
-components:
-  - ../../demos/components/networks/vlan-1924
-
 resources:
+  - ../base
   - namespace.yaml
