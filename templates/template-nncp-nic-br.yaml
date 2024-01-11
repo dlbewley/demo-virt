@@ -31,6 +31,8 @@ objects:
       name: ${NIC}-${BR_NAME}
       annotations:
         description: ${DESCRIPTION}
+      labels:
+        template: nncp-nic-br
     spec:
       nodeSelector:
         ${NODE_SELECTOR_KEY}: ${NODE_SELECTOR_VALUE}

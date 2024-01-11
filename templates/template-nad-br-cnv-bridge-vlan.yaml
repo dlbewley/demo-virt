@@ -23,12 +23,14 @@ objects:
       annotations:
         description: ${DESCRIPTION}
         k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/${BRIDGE}
+      labels:
+        template: nad-br-cnv-bridge-vlan
       name: vlan-${VLAN}
       namespace: ${NAMESPACE}
     spec:
-      config: |-
+      config: |
         {
-          "name": "${BRIDGE}.${VLAN}",
+          "name": "vlan-${VLAN}",
           "cniVersion": "0.3.1",
           "type": "cnv-bridge", 
           "bridge": "${BRIDGE}",
@@ -39,7 +41,7 @@ objects:
         }
 
 parameters:
-  - description: Existing bridge carrying tagged traffic to peel the VLAN from
+  - description: Existing Linux bridge carrying tagged traffic to peel the VLAN from
     name: BRIDGE
     value: br-vmdata
     required: false

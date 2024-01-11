@@ -27,6 +27,8 @@ objects:
       name: ${NIC}-v${VLAN}
       annotations:
         description: ${DESCRIPTION}
+      labels:
+        template: nncp-nic-vlan-br
     spec:
       nodeSelector:
         ${NODE_SELECTOR_KEY}: ${NODE_SELECTOR_VALUE}

@@ -9,6 +9,8 @@ kind: NodeNetworkConfigurationPolicy
 metadata:
   annotations:
     description: Create bridge br-vmdata with ens224 as a port
+  labels:
+    template: nncp-nic-vlan-br
   name: ens224-br-vmdata
 spec:
   desiredState:

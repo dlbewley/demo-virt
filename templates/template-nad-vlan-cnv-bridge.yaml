@@ -22,10 +22,12 @@ objects:
       annotations:
         description: ${DESCRIPTION}
         k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/br-${VLAN}
+      labels:
+        template: nad-vlan-vnc-bridge
       name: vlan-${VLAN}
       namespace: ${NAMESPACE}
     spec:
-      config: |-
+      config: |
         {
           "name": "vlan-${VLAN}",
           "bridge": "br-${VLAN}",
@@ -43,4 +45,4 @@ parameters:
     value: default
   - description: Net-attach-def description
     name: DESCRIPTION
-    value: Attachment to br-<vlan id>.
+    value: Attachment to br-${VLAN}

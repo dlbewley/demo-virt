@@ -1,0 +1,8 @@
+= VLAN-1924 Net-Attach-Def
+
+Assumes hypervisors have a bridge called br-vmdata.
+
+Creates a namespaced NetworkAttachmentDefinition of type cnv-bridge to enabled accessing VLAN ID 1924 from br-vmdata. Use 'default' namespace to make NAD visible to all projects.
+
+* link:../../../../templates/template-nad-br-cnv-bridge-vlan.yaml[templates/template-nad-br-cnv-bridge-vlan.yaml]
+* https://access.redhat.com/solutions/6972064

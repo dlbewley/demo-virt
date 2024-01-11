@@ -1,4 +1,4 @@
-= Templates for creation of network or virtualization resources
+= Templates for creation of network resources for OpenShift Virtualization
 
 == CLI Usage
 
