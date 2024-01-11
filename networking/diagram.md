@@ -1,10 +1,10 @@
-# Networking Diagram
+# OpenShift Virtualization Networking Diagrams
 
-See <https://access.redhat.com/solutions/6972064> and <https://developers.redhat.com/blog/2017/09/14/vlan-filter-support-on-bridge#without_vlan_filtering> and 
+## Bridge VLAN Filtering Example
 
-## Bridge Filter Example
-This method treats the linux bridge as if it were a physical switch with all the packets tagged as they traverse the switch and optionally untagged upon egress to an interface.
+This method treats the linux bridge as if it were a physical switch. Packets entering the bridge from ens224 retain their 802.1q tags as they traverse the switch. 
 
+Veth ports added to the bridge for pods can optionally retain or strip the VLAN tags upon egress from the bridge.
 
 ```mermaid
 graph LR;
@@ -87,7 +87,9 @@ graph LR;
 
 ## VLAN Interface Example
 
-This example peels VLANs off the NIC and defines a single bridge per VLAN. This may have a positive impact on efficiency of traffic between hosts on this same VLAN as they will avoid tagging and untagging. It is a more complex configuration.
+This example peels VLANs off the NIC to define an interface per VLAN. Then a bridge is creatd for each VLAN. Traffic entering this bridge is already untagged.
+
+This may have a positive impact on efficiency of traffic between pods on this same VLAN as they will avoid tagging and untagging. It is a more complex configuration.
 
 ```mermaid
 graph LR;
@@ -180,3 +182,12 @@ graph LR;
   class ns2-vm1,ns2-vm2,ns2-vm3 ns2-vm
   style ns2 fill:#ccc
 ```
+
+## Examples
+
+[Network components](../demos/components/networks)
+
+## References
+
+* <https://access.redhat.com/solutions/6972064> 
+* <https://developers.redhat.com/blog/2017/09/14/vlan-filter-support-on-bridge#without_vlan_filtering>
