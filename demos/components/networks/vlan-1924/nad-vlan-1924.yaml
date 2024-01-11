@@ -10,6 +10,8 @@ metadata:
     description: Lab Network 192.168.4.0/24 V1924
     # bridge prequisite created by NNCP
     k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/br-vmdata
+  labels:
+    template: nad-br-cnv-bridge-vlan
   name: vlan-1924
   namespace: default
 spec:
