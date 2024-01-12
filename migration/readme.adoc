@@ -11,7 +11,7 @@ See https://red.ht/mtv-docs[Migration Toolkit for Virtualization] documentation.
 
 [source,bash]
 ----
-$ oc apply -k operator/overlays/release-v2.4
+$ oc apply -k operator/overlays/release-v2.5
 namespace/openshift-mtv created
 operatorgroup.operators.coreos.com/migration created
 subscription.operators.coreos.com/mtv-operator created
@@ -35,15 +35,17 @@ forkliftcontroller.forklift.konveyor.io/forklift-controller created
 [source,bash]
 ----
 $ oc get pods -n openshift-mtv
-NAME                                                    READY   STATUS    RESTARTS   AGE
-forklift-api-67d4b8c5b7-crbzs                           1/1     Running   0          2m13s
-forklift-controller-985596cc4-mswtc                     2/2     Running   0          2m24s
-forklift-must-gather-api-6d554d9d75-jwj7l               1/1     Running   0          118s
-forklift-operator-6d574b99d9-nwcf6                      1/1     Running   0          5m6s
-forklift-ui-plugin-58bc5df894-wpgqb                     1/1     Running   0          105s
-forklift-validation-79b57595bf-ngjkb                    1/1     Running   0          2m3s
-forklift-volume-populator-controller-5846bc88c7-n5nl8   1/1     Running   0          2m18s
+NAME                                                    READY   STATUS    RESTARTS      AGE
+forklift-api-56c46fddc8-n4tp8                           1/1     Running   0             2d6h
+forklift-controller-7d9ccd7b7b-5mzq5                    2/2     Running   0             2d20h
+forklift-must-gather-api-56d8d7b557-bkcpd               1/1     Running   0             2d6h
+forklift-operator-686474b648-82ltz                      1/1     Running   7 (23h ago)   2d6h
+forklift-ui-plugin-bf4f758dc-hxtfj                      1/1     Running   0             2d6h
+forklift-validation-f74cd4446-wd9nz                     1/1     Running   0             2d6h
+forklift-volume-populator-controller-5d8676b659-268zc   1/1     Running   0             2d20h
 ----
+
+image::img/2023-09-30_16-37-07-mtv-25-splash.png[]
 
 == Build a VDDK Container Image
 
@@ -92,38 +94,30 @@ Login Succeeded!
 $ cd vddk
 
 $ make image
-tar -xzf VMware-vix-disklib-7.0.3-20134304.x86_64.tar.gz
 podman build . -t vddk:7.0.3-20134304 && \
         podman tag vddk:7.0.3-20134304 default-route-openshift-image-registry.apps.hub.lab.bewley.net/openshift-mtv/vddk:7.0.3-20134304 && \
         podman tag vddk:7.0.3-20134304 default-route-openshift-image-registry.apps.hub.lab.bewley.net/openshift-mtv/vddk:latest
-STEP 1/5: FROM registry.access.redhat.com/ubi8/ubi-minimal
+STEP 1/5: FROM registry.access.redhat.com/ubi9/ubi-minimal
 STEP 2/5: USER 1001
---> Using cache 122039dcf6243a95eb5b6b80247dbdf2d04de89701111c32f1ca32c03102ec1b
---> 122039dcf624
+--> f3f8d5c29999
 STEP 3/5: COPY vmware-vix-disklib-distrib /vmware-vix-disklib-distrib
---> Using cache 77ecf26236ab061e4f839dbc2001ddfe48a6a6580f6c767effc58621996101f9
---> 77ecf26236ab
+--> 88b2cfb0749d
 STEP 4/5: RUN mkdir -p /opt
---> Using cache d5fe34a4b964d19205709a6bf00d13ac3fc8655b752f724c0f71ea32b2d1f760
---> d5fe34a4b964
+--> ed3ea3d5a946
 STEP 5/5: ENTRYPOINT ["cp", "-r", "/vmware-vix-disklib-distrib", "/opt"]
---> Using cache 455fd246ee5833b19a0c8e919ea6ea7006f828e3873dfb590611f43a0b6142c8
 COMMIT vddk:7.0.3-20134304
---> 455fd246ee58
+--> 9694359d833a
 Successfully tagged localhost/vddk:7.0.3-20134304
-Successfully tagged default-route-openshift-image-registry.apps.hub.lab.bewley.net/openshift-mtv/vddk:7.0.3-20134304
-Successfully tagged default-route-openshift-image-registry.apps.hub.lab.bewley.net/openshift-mtv/vddk:latest
-455fd246ee5833b19a0c8e919ea6ea7006f828e3873dfb590611f43a0b6142c8
+9694359d833ac783ed9b667f6473d87599ae62f260e8e99fd6c0c66eadf2bfe5
 
-$  make push
+$ make push
 podman push --tls-verify=false default-route-openshift-image-registry.apps.hub.lab.bewley.net/openshift-mtv/vddk:latest
 Getting image source signatures
-Copying blob sha256:3196904b95517fd70bece2220309675d2f98172e2e37fcfeb6e45e7badf6ebc8
-Copying blob sha256:969795712c492f0c43031ce89dfb3d6ca2c08221fc28fb4479c7e0a370af7342
-Copying blob sha256:0b474ab10c0960f9a901f530835176cd1c6ed2866c6bac8d56e9188308edf244
-Copying config sha256:455fd246ee5833b19a0c8e919ea6ea7006f828e3873dfb590611f43a0b6142c8
+Copying blob sha256:bf0ce923d07e7b91baffbe7030057e726fd22416a8a5b96e108252d9b2c1637c
+Copying blob sha256:384af134a8247dff9ae87b7f10fcd8e7d07a02d3db9b55e0aaabcfe2f03aae7e
+Copying blob sha256:a68b4dab593adf465d2dabe4c5e982585218d146114374c8bdcd2897f0063d88
+Copying config sha256:9694359d833ac783ed9b667f6473d87599ae62f260e8e99fd6c0c66eadf2bfe5
 Writing manifest to image destination
-Storing signatures
 
 $ cd ..
 ----
@@ -223,3 +217,10 @@ https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualizati
 === Execute the Migration Plan
 
 https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/2.4/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#running-migration-plan_mtv
+
+= Appendix
+
+[source,make]
+----
+include::Makefile[]
+----

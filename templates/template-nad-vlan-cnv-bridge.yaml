@@ -5,7 +5,7 @@ metadata:
   name: nad-vlan-cnv-bridge
   annotations:
     description: >-
-      Template to generate NetworkAttachmentDefinition resources which enable access to VLANs via Bridge interfaces.
+      A NetworkAttachmentDefinition resource to enable access to a VLAN via Bridge interface.
 
       Results can be used to multi-home pods using Multus.
 
@@ -22,29 +22,27 @@ objects:
       annotations:
         description: ${DESCRIPTION}
         k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/br-${VLAN}
+      labels:
+        template: nad-vlan-vnc-bridge
       name: vlan-${VLAN}
       namespace: ${NAMESPACE}
     spec:
-      config: |-
+      config: |
         {
           "name": "vlan-${VLAN}",
           "bridge": "br-${VLAN}",
-          "vlan": ${VLAN},
           "cniVersion": "0.3.1",
           "type": "cnv-bridge",
           "macspoofchk": true
-        } 
+        }
 
 parameters:
-  # - description: Network description
-  #   name: DESCRIPTION
-  #   value: Bridge
-  #   required: true
   - description: VLAN ID
     name: VLAN
     required: true
   - description: Namespace
     name: NAMESPACE
+    value: default
   - description: Net-attach-def description
     name: DESCRIPTION
-    value: Attachment to br-<vlan id>.
+    value: Attachment to br-${VLAN}

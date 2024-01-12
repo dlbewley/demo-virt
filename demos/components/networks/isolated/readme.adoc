@@ -1,0 +1,5 @@
+= Isolated
+
+Create a layer 2 overlay network.
+
+https://docs.openshift.com/container-platform/4.14/virt/vm_networking/virt-connecting-vm-to-ovn-secondary-network.html

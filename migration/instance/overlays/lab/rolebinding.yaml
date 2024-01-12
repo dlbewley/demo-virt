@@ -6,7 +6,7 @@ metadata:
     openshift.io/description: Allows all pods in all namespaces to pull images from
       this namespace.
   name: allow-image-pullers
-  namespace: openshift-mtv
+  namespace: openshift-mtv 
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole

@@ -1,0 +1,8 @@
+# pass through CPU for nested virt
+spec:
+  domain:
+    cpu:
+      model: host-passthrough
+      features:
+        - name: vmx
+          policy: require

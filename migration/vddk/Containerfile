@@ -1,5 +1,10 @@
 # download VDDK from https://developer.vmware.com/web/sdk/7.0/vddk
+# download VDDK from https://developer.vmware.com/web/sdk/8.0/vddk
+#FROM registry.access.redhat.com/ubi9/ubi-minimal
+ARG \
+    vddk_ver[=8]
 FROM registry.access.redhat.com/ubi8/ubi-minimal
+LABEL vddk_ver=${vddk_ver}
 USER 1001
 COPY vmware-vix-disklib-distrib /vmware-vix-disklib-distrib
 RUN mkdir -p /opt

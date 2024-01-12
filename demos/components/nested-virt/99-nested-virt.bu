@@ -1,0 +1,21 @@
+# Look for Y in output of
+#  cat /sys/module/kvm_intel/parameters/nested 
+# This MC was not actually needed in my lab which is running CNV on VMware
+---
+variant: openshift
+version: 4.13.0
+metadata:
+  name: 99-nested-virt
+  labels:
+    machineconfiguration.openshift.io/role: worker
+storage:
+  files:
+  - path: /etc/modprobe.d/kvm.conf
+    mode: 0644
+    user: root
+    overwrite: true
+    contents:
+      inline: |
+        options kvm_intel nested=1
+        options kvm_amd nested=1
+

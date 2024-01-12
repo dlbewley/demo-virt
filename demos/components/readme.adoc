@@ -1,0 +1,5 @@
+= Kustomize Components 
+
+Do not apply these directly, but reference them as https://github.com/kubernetes/enhancements/blob/master/keps/sig-cli/1802-kustomize-components/README.md[components] in your overlay kustomization.yaml.
+
+See link:../../../templates[templates]

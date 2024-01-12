@@ -1,0 +1,56 @@
+# create template in openshift namespace to make it visible cluster-wide
+---
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: nad-br-cnv-bridge-vlan
+  annotations:
+    description: >-
+      NetworkAttachmentDefinition resource to enable access to a Linux bridge via cnv-bridge and VLAN ID.
+
+      When defined in 'default' namespace the NAD is usable from all other namespaces.
+
+    iconClass: icon-load-balancer
+    openshift.io/provider-display-name: GUIFreeLife
+    openshift.io/documentation-url: https://github.com/dlbewley/demo-virt
+    openshift.io/support-url: https://github.com/dlbewley/demo-virt/issues
+    tags: "networking,nmstate"
+
+objects:
+  - apiVersion: k8s.cni.cncf.io/v1
+    kind: NetworkAttachmentDefinition
+    metadata:
+      annotations:
+        description: ${DESCRIPTION}
+        k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/${BRIDGE}
+      labels:
+        template: nad-br-cnv-bridge-vlan
+      name: vlan-${VLAN}
+      namespace: ${NAMESPACE}
+    spec:
+      config: |
+        {
+          "name": "vlan-${VLAN}",
+          "cniVersion": "0.3.1",
+          "type": "cnv-bridge", 
+          "bridge": "${BRIDGE}",
+          "macspoofchk": true, 
+          "vlan": ${VLAN}, 
+          "ipam": {},
+          "preserveDefaultVlan": false 
+        }
+
+parameters:
+  - description: Existing Linux bridge carrying tagged traffic to peel the VLAN from
+    name: BRIDGE
+    value: br-vmdata
+    required: false
+  - description: ID of the VLAN
+    name: VLAN
+    required: true
+  - description: Namespace to hold the attachment. The 'default' namespace enables cluster-wide use of the attachment
+    name: NAMESPACE
+    value: default
+  - description: Net-attach-def description
+    name: DESCRIPTION
+    value: Attachment to VLAN ${VLAN} through bridge ${BRIDGE}

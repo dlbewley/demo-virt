@@ -1,0 +1,28 @@
+#  oc process -f templates/template-nad-br-cnv-bridge-vlan.yaml \
+#    -p VLAN=1924 \
+#    -p DESCRIPTION="Lab Network 192.168.4.0/24 V1924" \
+#    -o yaml | yq e '.items[0]' > nad-vlan-1924.yaml
+---
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  annotations:
+    description: Lab Network 192.168.4.0/24 V1924
+    # bridge prequisite created by NNCP
+    k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/br-vmdata
+  labels:
+    template: nad-br-cnv-bridge-vlan
+  name: vlan-1924
+  namespace: default
+spec:
+  config: |
+    {
+      "name": "vlan-1924",
+      "cniVersion": "0.3.1",
+      "type": "cnv-bridge",
+      "bridge": "br-vmdata",
+      "macspoofchk": true,
+      "vlan": 1924,
+      "ipam": {},
+      "preserveDefaultVlan": false
+    }

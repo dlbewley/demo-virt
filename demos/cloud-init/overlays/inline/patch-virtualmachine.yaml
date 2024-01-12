@@ -1,0 +1,22 @@
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: rhel-node-1
+spec:
+ running: true
+ template:
+    spec:
+      volumes:
+        # the rootdisk volume is not changed, but must be repeated here to
+        # avoid deletion by strategic merge patch
+        # because of this, using a secret and/or jsonpatch is likely more wise than this yaml example
+        - name: rootdisk
+          dataVolume:
+            name: rhel-node-1
+        - name: cloudinitdisk
+          cloudInitNoCloud:
+            userData: |-
+              #cloud-config
+              user: patch
+              password: adamspoint

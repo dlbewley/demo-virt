@@ -1,3 +1,5 @@
+# https://github.com/kubevirt/hyperconverged-cluster-operator/blob/main/docs/cluster-configuration.md
+---
 apiVersion: hco.kubevirt.io/v1beta1
 kind: HyperConverged
 metadata:

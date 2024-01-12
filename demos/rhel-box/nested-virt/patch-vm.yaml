@@ -1,0 +1,14 @@
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: rhel-node-1
+spec:
+  template:
+    spec:
+      domain:
+        cpu:
+          model: host-passthrough
+          features:
+            - name: vmx
+              policy: require

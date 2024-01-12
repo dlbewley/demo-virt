@@ -1,0 +1,17 @@
+# Cloud-init Demos
+
+https://cloudinit.readthedocs.io/en/latest/[Cloud-init] is used to apply configuration to virtual machines launched from an image. Among other things, this can be useful, to register your RHEL host and apply all pending errata at first boot.
+
+The OpenShift Virtualization console enables visual editing of user data (AKA cloud-init scripts) within the _scripts_ tab of the virtual machine dialog. See https://kubevirt.io/user-guide/virtual_machines/startup_scripts/
+
+Here are some example ways of overriding cloud-init user data scripts when using Kustomize and GitOps.
+
+These examples use a VM named `rhel-node-1` defined link:../components/vms/rhel9/[here].
+
+link:overlays/secret/kustomization.yaml[Using a secret] to hold the cloud-init script is the most portable option in my opinion.
+
+include::overlays/ignition/readme.adoc[leveloffset=+1]
+
+include::overlays/inline/readme.adoc[leveloffset=+1]
+
+include::overlays/secret/readme.adoc[leveloffset=+1]

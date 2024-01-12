@@ -1,0 +1,4 @@
+Virtual Machines as Kustomize Components 
+
+Do not apply these directly, but reference them as components in your overlay kustomization.yaml.
+

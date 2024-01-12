@@ -5,12 +5,14 @@ metadata:
   name: nncp-nic-vlan-br
   annotations:
     description: >-
-      Template to generate NodeNetworkConfigurationPolicy resources which program a VLAN interface on a base interface and attach a bridge to the VLAN which could be used to facilitate a namespaced NetworkAttachmentDefinition.
+      A NodeNetworkConfigurationPolicy to add a VLAN interface to a NIC and attach a bridge for the VLAN. The bridge can be targeted by namespaced NetworkAttachmentDefinitions.
 
-      Resulting interfaces look like:
-       NIC -> NIC.VLAN -> BR-VLAN
+      |<802.1q>|
+      |<-- NNCP ----------------->|<-- NAD -->|
+      [host-NIC]--+-[vlan1]-[BR1]--[guest-nic]
+                   \[vlan2]-[BR2]--[guest-nic]
 
-      Note: This template is for use on the CLI.
+      See https://access.redhat.com/solutions/6972064
 
     iconClass: icon-load-balancer
     openshift.io/provider-display-name: GUIFreeLife
@@ -25,13 +27,15 @@ objects:
       name: ${NIC}-v${VLAN}
       annotations:
         description: ${DESCRIPTION}
+      labels:
+        template: nncp-nic-vlan-br
     spec:
       nodeSelector:
         ${NODE_SELECTOR_KEY}: ${NODE_SELECTOR_VALUE}
       desiredState:
         interfaces:
           - name: ${NIC}
-            type: ethernet
+            type: ${NIC_TYPE}
             state: up
             ipv4:
               enabled: false
@@ -69,6 +73,10 @@ parameters:
     name: NIC
     value: ens224
     required: true
+  - description: NIC Interface type. eg ethernet, bond
+    name: NIC_TYPE
+    value: ethernet
+    required: false
   - description: VLAN ID
     name: VLAN
     required: true
@@ -77,8 +85,9 @@ parameters:
     value: machine.openshift.io/cluster-api-machineset
   - description: Node Selector Value
     name: NODE_SELECTOR_VALUE
-    value: hub-test-cnv
-    required: true
+    value: ''
+    required: false
   - description: Policy description
     name: DESCRIPTION
+    # modify these by hand in the NNCP resource
     value: Add VLAN ${VLAN} and Bridge br-${VLAN} on ${NIC}

@@ -1,0 +1,3 @@
+# Patch as cloud-init user data
+
+Patch user data directly in the VM yaml

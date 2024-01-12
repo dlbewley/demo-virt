@@ -1,0 +1,86 @@
+# create template in openshift namespace to make it visible cluster-wide
+---
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: nncp-nic-br
+  annotations:
+    description: >-
+      A NodeNetworkConfigurationPolicy to add a bridge to a NIC potentially carrying multiple VLANs. The bridge can be targeted by namespaced NetworkAttachmentDefinitions.
+
+      Bridge Filtering enables VLANs to be accessed from bridge via
+      namespaced NetworkAttachmentDefinitions.
+
+      |<-- 802.1q -------->|
+      |<-- NNCP ---------->|<-- NAD ------------->|
+      [host-NIC]-[BR-vmdata]--+-[vlan1]-[guest-nic]
+                               \[vlan2]-[guest-nic]
+
+      See https://access.redhat.com/solutions/6972064
+
+    iconClass: icon-load-balancer
+    openshift.io/provider-display-name: GUIFreeLife
+    openshift.io/documentation-url: https://github.com/dlbewley/demo-virt
+    openshift.io/support-url: https://github.com/dlbewley/demo-virt/issues
+    tags: "networking,nmstate"
+
+objects:
+  - apiVersion: nmstate.io/v1
+    kind: NodeNetworkConfigurationPolicy
+    metadata:
+      name: ${NIC}-${BR_NAME}
+      annotations:
+        description: ${DESCRIPTION}
+      labels:
+        template: nncp-nic-br
+    spec:
+      nodeSelector:
+        ${NODE_SELECTOR_KEY}: ${NODE_SELECTOR_VALUE}
+      desiredState:
+        interfaces:
+          - name: ${NIC}
+            type: ${NIC_TYPE}
+            state: up
+            ipv4:
+              enabled: false
+            ipv6:
+              enabled: false
+
+          - name: ${BR_NAME}
+            type: linux-bridge
+            state: up
+            bridge:
+              options:
+                stp:
+                  enabled: false
+              port:
+                - name: ${NIC}
+            ipv4:
+              enabled: false
+            ipv6:
+              enabled: false
+
+parameters:
+  - description: Physical NIC or Bond to add bridge to
+    name: NIC
+    value: ens224
+    required: true
+  - description: NIC Interface type. eg ethernet, bond
+    name: NIC_TYPE
+    value: ethernet
+    required: false
+  - description: Bridge name
+    name: BR_NAME
+    value: br-vmdata
+    required: false
+  - description: Node Selector Key
+    name: NODE_SELECTOR_KEY
+    value: machine.openshift.io/cluster-api-machineset
+  - description: Node Selector Value
+    name: NODE_SELECTOR_VALUE
+    value: ''
+    required: false
+  - description: Policy description
+    name: DESCRIPTION
+    # modify these by hand in the NNCP resource
+    value: Create bridge ${BR_NAME} with ${NIC} as a port

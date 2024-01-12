@@ -1,0 +1,27 @@
+---
+apiVersion: v1
+kind: namespace
+metadata:
+  name: dale-dn79n
+---
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  annotations:
+    description: Metal Lab Network 192.168.7.0/24 V1927
+    k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/br-1927
+  name: vlan-1927
+  namespace: dale-dn79n
+spec:
+  config: |-
+    {
+      "name": "vlan-1927",
+      "bridge": "br-1927",
+      "vlan": 1927,
+      "cniVersion": "0.3.1",
+      "type": "cnv-bridge",
+      "macspoofchk": true,
+      "ipam": {
+        "type": "static"
+      }
+    }

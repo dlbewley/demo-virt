@@ -1,0 +1,14 @@
+# Ignition as cloud-init user data
+
+Use Ignition data to replace cloud-init.
+
+Note that Ignition must use cloudInitConfigDrive as opposed to cloudInitNoCloud drive.
+
+Generate passwordHash like this
+
+[source,bash]
+podman run -ti --rm quay.io/coreos/mkpasswd --method=yescrypt
+
+.Full disclosure
+[WARNING]
+This test has not worked for me yet.

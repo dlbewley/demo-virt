@@ -1,0 +1,14 @@
+{
+  "ignition": {
+    "version": "3.2.0",
+    "passwd": {
+      "users": [
+        {
+          "name": "dale",
+          "passwordHash": "$y$j9T$7aro.bnljehsGoARa6kPJ/$l/HKr.X8JFwrhoza1qeOPKYTx5xATOOI1J6KmzN35Y5",
+          "sshAuthoizedKeys": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDcYGv4QhrNhDB9ahXEp2x6kn9YZ2RV5GEXcRRYvk4yLpFidvSFJxkE3AonLuOgi7WBVwMofCCWbHDEgBIWNv6RzR41gKQYI+ZgcT5bSZ9ZFhkkgBvTE66q0XyFXYeON+QV1Woxb7FDDmkvpMi9Sp32EMLOaSQwgnWCsI00zmUgM4UYy66UatWqSRaPtLe8ES2IqA/WUcRfxexcFjtS6jsn2R3Xyz+w9IpexWMhTjWmKpH97Ps8Sj61pCgGgMkkvuBDWBhnVy58Hf0tNg2YZnILCUdh0vVZ1LWPpsno2HB+gBzNhJZznSC5x+emUKtpQwOzrdFn51h1ZCEQDAmyZ+Vb acm@bunny"
+        }
+      ]
+    }
+  }
+}

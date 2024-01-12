@@ -6,9 +6,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "1"
 spec:
-  olm_managed: true
   feature_must_gather_api: "true"
-  feature_ui: "false"
   feature_ui_plugin: "true"
   feature_validation: "true"
   feature_volume_populator: "true"
