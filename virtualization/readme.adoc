@@ -1,3 +1,11 @@
-Installing and enabling the OpenShift Virtualization operator. Do this first.
+= Installing and enabling the OpenShift Virtualization operator
 
-https://github.com/kubevirt/hyperconverged-cluster-operator/blob/main/docs/cluster-configuration.md
+Install and enable the operator first.
+Be advised that you should have a CSI provider and a default storageclass enabled already.
+
+[source,bash]
+oc apply -k operator/base
+oc apply -k instance/base
+
+.Ref
+* https://github.com/kubevirt/hyperconverged-cluster-operator/blob/main/docs/cluster-configuration.md
