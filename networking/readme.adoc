@@ -1,0 +1,15 @@
+= Networking
+
+Configure networking to support OpenShift Virtualization.
+
+It may help to view this link:diagram.md[diagram] first.
+
+* Setup the node level networking first
+
+[source,bash]
+oc apply -k nncp/base
+
+* Optionally setup networking attachment in demo-virt namespace
+
+[source,bash]
+oc apply -k nad/demo
