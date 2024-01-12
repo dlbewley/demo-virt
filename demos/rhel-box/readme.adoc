@@ -1,0 +1,11 @@
+= RHEL Box Demo
+
+Spin up a RHEL9 VM based on the link:../components/vms/rhel9/virtualmachine.yaml[stock template]
+with
+
+* Attach the default network interface to an link:../components/networks/vlan-1924/nad-vlan-1924.yaml[external network]
+* Set the https://docs.openshift.com/container-platform/4.14/virt/nodes/virt-node-maintenance.html#eviction-strategies[EvictionStrategy] to LiveMigrate
+* Set the VM to auto run
+* Consume cloud-init script from link:scripts/userData[a secret]
+** The cloud-init sets up users, registers the VM with subscription-manager and installs ansible
+* Mount a kubernetes secret into the filesystem in the ansible user home directory
