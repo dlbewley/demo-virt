@@ -1,6 +1,6 @@
 = RHEL Box Demo
 
-Spin up a RHEL9 VM based on the link:../components/vms/rhel9/virtualmachine.yaml[stock template]
+Spin up a RHEL9 VM based on the link:../components/vms/rhel9/virtualmachine.yaml[stock rhel9-server-small template]
 with
 
 * Attach the default network interface to an link:../components/networks/vlan-1924/nad-vlan-1924.yaml[external network]
