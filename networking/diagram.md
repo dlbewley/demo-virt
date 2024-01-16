@@ -24,7 +24,7 @@ graph LR;
 
     subgraph nncp["fa:fa-code NNCP"]
       ens224["fa:fa-ethernet ens224"]
-      ens224 ==> br-data[["fa:fa-grip-vertical fa:fa-bridge br-data"]]
+      ens224 ==> br-vmdata[["fa:fa-grip-vertical fa:fa-bridge br-vmdata"]]
     end
   end
 
@@ -38,7 +38,7 @@ graph LR;
     subgraph ns1-vm2[fab:fa-windows WS VM]
         ns1-vm2-nic1["fa:fa-ethernet net1"]
     end
-    br-data -.- ns1-nad-1924[/"fa:fa-code NAD 'dev-net'"/] --> ns1-vm2-nic1
+    br-vmdata -.- ns1-nad-1924[/"fa:fa-code NAD 'dev-net'"/] --> ns1-vm2-nic1
   end
 
   subgraph ns2["Namespace 2"]
@@ -58,10 +58,10 @@ graph LR;
         ns2-vm3-nic1["fa:fa-ethernet net1"]
     end
 
-    br-data -.- ns2-nad-1924[/"fa:fa-code NAD 'vlan-1924'"/] --- ns2-vm1-nic1
-                ns2-nad-1924                                 --- ns2-vm2-nic2
-    br-data -.- ns2-nad-1927[/"fa:fa-code NAD 'vlan-1927'"/] --- ns2-vm2-nic1
-                ns2-nad-1927                                 --- ns2-vm3-nic1
+    br-vmdata -.- ns2-nad-1924[/"fa:fa-code NAD 'vlan-1924'"/] --- ns2-vm1-nic1
+                ns2-nad-1924                                   --- ns2-vm2-nic2
+    br-vmdata -.- ns2-nad-1927[/"fa:fa-code NAD 'vlan-1927'"/] --- ns2-vm2-nic1
+                ns2-nad-1927                                   --- ns2-vm3-nic1
   end
 
   classDef clusterNet fill:#bfb
