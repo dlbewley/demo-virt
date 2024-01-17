@@ -147,6 +147,8 @@ image:img/provider.png[]
 
 image:img/provider-edit.png[]
 
+VDDK Init Image: `image-registry.openshift-image-registry.svc:5000/openshift-mtv/vddk:latest`
+
 * Status should now be Ready.
 
 image:img/provider-ready.png[]
