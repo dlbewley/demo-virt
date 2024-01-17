@@ -60,6 +60,7 @@ You may optionally https://docs.openshift.com/container-platform/latest/registry
 [TIP]
 If you do not expose the cluster registry, the VDDK image must be pushed to some other registry. You can do so by hand or using and the Makefile variables. The location must be updated in the `Provider` link:instance/overlays/lab/provider.yaml[provider.yaml].
 
+* Deploy the registry if you have not yet. Eg `oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"managementState":"Managed"}}'`
 * Expose the cluster registry and capture the URL
 
 [source,bash]
