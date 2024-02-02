@@ -6,6 +6,6 @@ Creates a Linux bridge named br-vmdata attached to NIC ens224.
 
 The bridge carries tagged VLANs fed to ens224. Bridge VLAN Filtering feature allows for NetworkAttachmentDefinitions to attach bridge ports to a pod (VM) which relay untagged VLAN traffic.
 
-* link:../../../../templates/template-nncp-nic-br-vmdata.yaml[templates/template-nncp-nic-br-vmdata.yaml]
+* link:../../../../templates/template-nncp-nic-br.yaml[templates/template-nncp-nic-br.yaml]
 * https://access.redhat.com/solutions/6972064
 * https://www.libertysys.com.au/2023/01/tech-nibble-linux-bridge-vlan-filtering/
