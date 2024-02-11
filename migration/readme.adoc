@@ -148,7 +148,9 @@ image:img/provider.png[]
 
 image:img/provider-edit.png[]
 
-Set the VDDK Init Image location to pull from the local image registry at `image-registry.openshift-image-registry.svc:5000/openshift-mtv/vddk:latest`
+* Set the VDDK Init Image location to pull from the local image registry at `image-registry.openshift-image-registry.svc:5000/openshift-mtv/vddk:latest`
+
+image:img/provider-details.png[]
 
 * Status should now be Ready.
 
