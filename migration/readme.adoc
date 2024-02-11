@@ -216,7 +216,7 @@ storagemap.forklift.konveyor.io/storemap created
 ----
 
 
-== Migrate a Virtual Machine
+== Migrate a Virtual Machine from VMware
 
 === Create A Migration Plan
 
