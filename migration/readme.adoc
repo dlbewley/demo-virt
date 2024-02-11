@@ -191,6 +191,10 @@ Create storage and network mappings in the UI or using Kustomize
 * Browse to Migration -> NetworkMaps for virtualization and https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/2.4/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#creating-network-mapping_mtv[Create a network mapping] by hand.
 * Browse to Migration -> StorageMaps for virtualization and https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/2.4/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#creating-storage-mapping_mtv[Create a storage mapping] by hand.
 
+image::img/mtv-25-networkmap.gif[]
+
+image::img/mtv-25-storagemap.gif[]
+
 === Using Kustomize or GitOps
 
 *  Create storage and network mappings using Kustomize
@@ -206,9 +210,6 @@ provider.forklift.konveyor.io/lab created
 storagemap.forklift.konveyor.io/storemap created
 ----
 
-image::img/mtv-25-networkmap.gif[]
-
-image::img/mtv-25-storagemap.gif[]
 
 == Migrate a Virtual Machine
 
