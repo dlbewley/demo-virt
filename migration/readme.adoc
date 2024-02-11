@@ -50,6 +50,7 @@ image::img/2023-09-30_16-37-07-mtv-25-splash.png[]
 == Build a VDDK Container Image
 
 To migrate from vSphere, a VDDK image will be required.
+Since Red Hat may not distributed this software you will have to download it and build a container image as follows.
 
 Download the https://developer.vmware.com/web/sdk/7.0/vddk[VMware VDDK] tar.gz file and place it in the link:vddk/[vddk] directory. The steps below will automatically build and push to the cluster registry once it is exposed.
 
@@ -147,7 +148,7 @@ image:img/provider.png[]
 
 image:img/provider-edit.png[]
 
-VDDK Init Image: `image-registry.openshift-image-registry.svc:5000/openshift-mtv/vddk:latest`
+Set the VDDK Init Image location to pull from the local image registry at `image-registry.openshift-image-registry.svc:5000/openshift-mtv/vddk:latest`
 
 * Status should now be Ready.
 
