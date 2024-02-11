@@ -172,7 +172,7 @@ image:img/provider-ready.png[]
 // Ensure the vSphere host can be reached on the chosen migration network.
 // image:img/add-vmkernel-nic.png[]
 
-=== Using Kustomize or GitOps
+=== Using Kustomize or GitOps to Create Providers
 
 Instead of of the web UI, you may use Kustomize and an overlay to create the VMware provider. See this link:instance/overlays/lab/provider.yaml[example provider.yaml]. Notice this overlay will also link:instance/overlays/lab/rolebinding.yaml[enable all other namespaces to pull the VDDK image] which was built in the openshift-mtv namespace.
 
@@ -192,13 +192,14 @@ provider.forklift.konveyor.io/lab created
 Create storage and network mappings in the UI or using Kustomize
 
 * Browse to Migration -> NetworkMaps for virtualization and https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/2.4/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#creating-network-mapping_mtv[Create a network mapping] by hand.
-* Browse to Migration -> StorageMaps for virtualization and https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/2.4/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#creating-storage-mapping_mtv[Create a storage mapping] by hand.
 
 image::img/mtv-25-networkmap.gif[]
 
+* Browse to Migration -> StorageMaps for virtualization and https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/2.4/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#creating-storage-mapping_mtv[Create a storage mapping] by hand.
+
 image::img/mtv-25-storagemap.gif[]
 
-=== Using Kustomize or GitOps
+=== Using Kustomize or GitOps to Create Mappings
 
 *  Create storage and network mappings using Kustomize
 
