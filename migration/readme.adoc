@@ -84,8 +84,7 @@ export TOKEN=$(oc create token builder -n openshift-mtv)
 
 [source,bash]
 ----
-$ podman login -u $REGISTRY_USER -p $TOKEN $REGISTRY
-Login Succeeded!
+podman login -u $REGISTRY_USER -p $TOKEN $REGISTRY
 ----
 
 * Build and push vddk image to OpenShift registry. See link:Makefile[Makefile]
@@ -207,15 +206,18 @@ provider.forklift.konveyor.io/lab created
 storagemap.forklift.konveyor.io/storemap created
 ----
 
-== Migrate a Virtual Machine
+image::img/mtv-25-networkmap.gif[]
 
-.TODO
-* Illustrate a migration.
+image::img/mtv-25-storagemap.gif[]
+
+== Migrate a Virtual Machine
 
 === Create A Migration Plan
 
 * Browse to Migration -> Plans for virtualization and 
 https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/2.4/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#creating-migration-plan_mtv[Create a migration plan] for a single VM to test.
+
+image::img/mtv-25-plan.gif[]
 
 === Execute the Migration Plan
 
