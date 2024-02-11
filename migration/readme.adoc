@@ -1,5 +1,6 @@
 = Migrating Virtual Machines from VMware to OpenShift using MTV
 :source-highlighter: rouge
+:mtv-ver: 2.5
 :toc:
 
 
@@ -50,6 +51,7 @@ image::img/2023-09-30_16-37-07-mtv-25-splash.png[]
 == Build a VDDK Container Image
 
 To migrate from vSphere, a VDDK image will be required.
+Since Red Hat may not distributed this software you will have to download it and build a container image as follows.
 
 Download the https://developer.vmware.com/web/sdk/7.0/vddk[VMware VDDK] tar.gz file and place it in the link:vddk/[vddk] directory. The steps below will automatically build and push to the cluster registry once it is exposed.
 
@@ -84,8 +86,7 @@ export TOKEN=$(oc create token builder -n openshift-mtv)
 
 [source,bash]
 ----
-$ podman login -u $REGISTRY_USER -p $TOKEN $REGISTRY
-Login Succeeded!
+podman login -u $REGISTRY_USER -p $TOKEN $REGISTRY
 ----
 
 * Build and push vddk image to OpenShift registry. See link:Makefile[Makefile]
@@ -126,7 +127,7 @@ $ cd ..
 == Create a VMware Provider
 === Using the Web UI
 
-Browse to Migration -> Providers for virtualization and https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/2.4/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#adding-providers[Create a VMware provider] by hand.
+* Browse to Migration -> Providers for virtualization and https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/{mtv-ver}/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#adding-providers[Create a VMware provider] by hand.
 
 .Capture vCenter SHA1 Fingerprint
 [IMPORTANT]
@@ -148,7 +149,9 @@ image:img/provider.png[]
 
 image:img/provider-edit.png[]
 
-VDDK Init Image: `image-registry.openshift-image-registry.svc:5000/openshift-mtv/vddk:latest`
+* Set the VDDK Init Image location to pull from the local image registry at `image-registry.openshift-image-registry.svc:5000/openshift-mtv/vddk:latest`
+
+image:img/provider-details.png[]
 
 * Status should now be Ready.
 
@@ -170,7 +173,7 @@ image:img/provider-ready.png[]
 // Ensure the vSphere host can be reached on the chosen migration network.
 // image:img/add-vmkernel-nic.png[]
 
-=== Using Kustomize or GitOps
+=== Using Kustomize or GitOps to Create Providers
 
 Instead of of the web UI, you may use Kustomize and an overlay to create the VMware provider. See this link:instance/overlays/lab/provider.yaml[example provider.yaml]. Notice this overlay will also link:instance/overlays/lab/rolebinding.yaml[enable all other namespaces to pull the VDDK image] which was built in the openshift-mtv namespace.
 
@@ -189,10 +192,15 @@ provider.forklift.konveyor.io/lab created
 
 Create storage and network mappings in the UI or using Kustomize
 
-* Browse to Migration -> NetworkMaps for virtualization and https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/2.4/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#creating-network-mapping_mtv[Create a network mapping] by hand.
-* Browse to Migration -> StorageMaps for virtualization and https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/2.4/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#creating-storage-mapping_mtv[Create a storage mapping] by hand.
+* Browse to Migration -> NetworkMaps for virtualization and https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/{mtv-ver}/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#creating-network-mapping_mtv[Create a network mapping] by hand.
 
-=== Using Kustomize or GitOps
+image::img/mtv-25-networkmap.gif[]
+
+* Browse to Migration -> StorageMaps for virtualization and https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/{mtv-ver}/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#creating-storage-mapping_mtv[Create a storage mapping] by hand.
+
+image::img/mtv-25-storagemap.gif[]
+
+=== Using Kustomize or GitOps to Create Mappings
 
 *  Create storage and network mappings using Kustomize
 
@@ -207,19 +215,19 @@ provider.forklift.konveyor.io/lab created
 storagemap.forklift.konveyor.io/storemap created
 ----
 
-== Migrate a Virtual Machine
 
-.TODO
-* Illustrate a migration.
+== Migrate a Virtual Machine from VMware
 
 === Create A Migration Plan
 
 * Browse to Migration -> Plans for virtualization and 
-https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/2.4/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#creating-migration-plan_mtv[Create a migration plan] for a single VM to test.
+https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/{mtv-ver}/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#creating-migration-plan_mtv[Create a migration plan] for a single VM to test.
+
+image::img/mtv-25-plan.gif[]
 
 === Execute the Migration Plan
 
-https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/2.4/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#running-migration-plan_mtv
+https://access.redhat.com/documentation/en-us/migration_toolkit_for_virtualization/{mtv-ver}/html/installing_and_using_the_migration_toolkit_for_virtualization/migrating-vms-web-console#running-migration-plan_mtv
 
 = Appendix
 
