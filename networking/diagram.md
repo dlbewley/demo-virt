@@ -33,7 +33,7 @@ graph LR;
         nginx-nic["fa:fa-ethernet eth0"]
     end
     clusternet ----> nginx-nic
-    {%% nginx-nic --> nat((NAT)) --> inet("fa:fa-cloud Inet") %%}
+    nginx-nic --> nat((NAT)) --> inet("fa:fa-cloud Inet")
 
     subgraph ns1-vm2[fab:fa-windows WS VM]
         ns1-vm2-nic1["fa:fa-ethernet net1"]
@@ -129,7 +129,7 @@ graph LR;
         nginx-nic["fa:fa-ethernet eth0"]
     end
     clusternet ----> nginx-nic
-    {%% nginx-nic --> nat((NAT)) --> inet("fa:fa-cloud Inet") %%}
+    nginx-nic --> nat((NAT)) --> inet("fa:fa-cloud Inet")
 
     subgraph ns1-vm2[fab:fa-windows WS VM]
         ns1-vm2-nic1["fa:fa-ethernet net1"]
