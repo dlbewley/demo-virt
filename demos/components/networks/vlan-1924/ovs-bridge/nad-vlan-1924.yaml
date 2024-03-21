@@ -4,8 +4,6 @@ kind: NetworkAttachmentDefinition
 metadata:
   annotations:
     description: Lab Network 192.168.4.0/24 V1924 OVN Bridge
-    # bridge prequisite created by NNCP
-#    k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/br-vmdata
   name: localnet-1924
   namespace: default
 spec:
