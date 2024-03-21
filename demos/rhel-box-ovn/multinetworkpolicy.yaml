@@ -7,7 +7,7 @@ kind: MultiNetworkPolicy
 metadata:
   annotations:
     k8s.v1.cni.cncf.io/policy-for: default/localnet-1924
-  name: allows-all-ssh
+  name: allow-ssh-dhcp
 spec:
   podSelector: {}
   policyTypes:
