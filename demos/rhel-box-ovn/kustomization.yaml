@@ -3,9 +3,6 @@ kind: Kustomization
 
 namespace: demo-virt
 
-#resources:
-#  - namespace.yaml
-
 components:
   # this should have already been applied elsewhere
   #- ../components/networks/br-vmdata/ovs-bridge
