@@ -1,0 +1,69 @@
+# observe result from ovs-vsctl list-br and nmcli con on node
+# [root@hub-tq2sk-cnv-62hvf ~]# ovs-vsctl list-br
+# br-ex
+# br-int
+# [root@hub-tq2sk-cnv-62hvf ~]# nmcli con
+# NAME                UUID                                  TYPE           DEVICE
+# ovs-if-br-ex        af3b9a2a-fbf1-4b2d-b0ee-2769409df9c9  ovs-interface  br-ex
+# lo                  7a61e7af-7962-43ca-aa64-24f8161c86e0  loopback       lo
+# Wired connection 2  a4d90df0-ebed-331b-bd92-4cc61930b1bc  ethernet       ens224
+# br-ex               e9f73bbd-1954-43e0-bd96-e34c83f28fa2  ovs-bridge     br-ex
+# br-vmdata           6bcd985d-02ef-4a1f-af0a-2947db80b5f4  bridge         br-vmdata
+# ovs-if-phys0        8da0eb24-b1fa-42f4-a023-50132fa6173e  ethernet       ens192
+# ovs-port-br-ex      0cc69bef-3ac7-4427-8677-ec37465c414f  ovs-port       br-ex
+# ovs-port-phys0      1d7ff560-0c5f-4586-8801-a73102ba21c5  ovs-port       ens192
+# Wired connection 1  bffe80d3-c483-3ccb-a7ca-3db3ebfae1e4  ethernet       --
+# [root@hub-tq2sk-cnv-62hvf ~]# ip -br -c -4 a
+# lo               UNKNOWN        127.0.0.1/8
+# ovn-k8s-mp0      UNKNOWN        10.128.4.2/23
+# br-ex            UNKNOWN        192.168.4.155/24 169.254.169.2/29
+#
+# AFTER
+#
+# [root@hub-tq2sk-cnv-62hvf ~]# nmcli con
+# NAME                UUID                                  TYPE           DEVICE
+# ovs-if-br-ex        af3b9a2a-fbf1-4b2d-b0ee-2769409df9c9  ovs-interface  br-ex
+# lo                  7a61e7af-7962-43ca-aa64-24f8161c86e0  loopback       lo
+# Wired connection 2  a4d90df0-ebed-331b-bd92-4cc61930b1bc  ethernet       ens224
+# br-ex               e9f73bbd-1954-43e0-bd96-e34c83f28fa2  ovs-bridge     br-ex
+# br-vmdata           6bcd985d-02ef-4a1f-af0a-2947db80b5f4  bridge         br-vmdata
+# ens224-port         dac899c8-0e66-4ca5-a823-c39b4cb48ebb  ovs-port       ens224
+# ovs-ens224-br       e087b11f-a67b-4b76-9f9b-00d5dda1541e  ovs-bridge     ovs-ens224
+# ovs-if-phys0        8da0eb24-b1fa-42f4-a023-50132fa6173e  ethernet       ens192
+# ovs-port-br-ex      0cc69bef-3ac7-4427-8677-ec37465c414f  ovs-port       br-ex
+# ovs-port-phys0      1d7ff560-0c5f-4586-8801-a73102ba21c5  ovs-port       ens192
+# Wired connection 1  bffe80d3-c483-3ccb-a7ca-3db3ebfae1e4  ethernet       --
+# [root@hub-tq2sk-cnv-62hvf ~]#  ovs-vsctl list-br
+# br-ex
+# br-int
+# ovs-ens224
+---
+apiVersion: nmstate.io/v1
+kind: NodeNetworkConfigurationPolicy
+metadata:
+  name: localnet
+spec:
+  nodeSelector:
+    machine.openshift.io/cluster-api-machineset: hub-tq2sk-cnv
+  desiredState:
+    ovn:
+      bridge-mappings:
+        - localnet: localnet
+          bridge: ovs-ens224
+          state: present 
+        # this value must match the NAD name
+        - localnet: localnet-1924
+          bridge: ovs-ens224
+          state: present 
+    interfaces:
+      - name: ovs-ens224
+        description: |-
+          A dedicated OVS bridge with ens224 as a port
+          allowing all VLANs and untagged traffic
+        type: ovs-bridge
+        state: up
+        bridge:
+          options:
+            stp: true
+          port:
+            - name: ens224

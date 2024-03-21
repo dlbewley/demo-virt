@@ -1,11 +1,23 @@
 = BR-VMData
 
+Define a bridge for attaching Virtual Machines to "pyhysical" VLANs in the datacenter.
+
+Creates a Bridge named br-vmdata attached to NIC ens224. Bridge is of type link:linux-bridge[linux-bridge] or link:ovs-bridge[ovs-bridge].
+
 Assumes hypervisors have a 2nd NIC called ens224 to carry virtual machine traffic.
 
-Creates a Linux bridge named br-vmdata attached to NIC ens224.
+The bridge carries tagged VLANs fed via 802.1q trunk to ens224 interface.
 
-The bridge carries tagged VLANs fed to ens224. Bridge VLAN Filtering feature allows for NetworkAttachmentDefinitions to attach bridge ports to a pod (VM) which relay untagged VLAN traffic.
+Bridge VLAN Filtering feature allows for NetworkAttachmentDefinitions to attach bridge ports to a pod (VM) which relay untagged VLAN traffic.
 
 * link:../../../../templates/template-nncp-nic-br.yaml[templates/template-nncp-nic-br.yaml]
 * https://access.redhat.com/solutions/6972064
 * https://www.libertysys.com.au/2023/01/tech-nibble-linux-bridge-vlan-filtering/
+
+== OVS Bridge
+
+Uses OVS-Bridge which provides features like NetworkPolicy and (pending) IPAM.
+
+== Linux Bridge
+
+Uses legacy linux-bridge interface which can not take advantage of current or future OVN enhancements.
