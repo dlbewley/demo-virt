@@ -1,12 +1,11 @@
 # OpenShift Virtualization Networking Diagrams
 
-## OVS Bridge VLAN Filtering Example
+## OVS Bridge Localnet Topology Example
 
-This method treats the OVS bridge as if it were a physical switch. Packets entering the bridge from ens224 retain their 802.1q tags as they traverse the switch.
+This method maps Network Attachment Definitions to an OVS Bridge via a Bridge Mapping. The bridge mapping is constructed by NNCP. The bridge may be the existing default br-ex or a custom bridge, eg. br-vmdata, constructed by NNCP. Packets entering the bridge from ens224 retain their 802.1q tags as they traverse the switch.
 
-Veth ports added to the bridge for pods can optionally retain or strip the VLAN tags upon egress from the bridge.
+An OVS logical switch will be created (`ovn-nbctl ls-list`) with a port for the bridge ports for the pod network interfaces (`ovn-nbctl lsp-list vmdata_ovn_localnet_switch`).
 
-Attachments of ovn-k8s-cni-overlay type and localnet topology will use an OVN bridge-mapping rather than targetting linux bridges by annotation.
 
 ```mermaid
 graph LR;
@@ -39,7 +38,6 @@ graph LR;
         nginx-nic["fa:fa-ethernet eth0"]
     end
     clusternet ----> nginx-nic
-    nginx-nic --> nat((NAT)) --> inet("fa:fa-cloud Inet")
 
     subgraph ns1-vm2[fab:fa-windows WS VM]
         ns1-vm2-nic1["fa:fa-ethernet net1"]
@@ -125,7 +123,6 @@ graph LR;
         nginx-nic["fa:fa-ethernet eth0"]
     end
     clusternet ----> nginx-nic
-    nginx-nic --> nat((NAT)) --> inet("fa:fa-cloud Inet")
 
     subgraph ns1-vm2[fab:fa-windows WS VM]
         ns1-vm2-nic1["fa:fa-ethernet net1"]
@@ -221,7 +218,6 @@ graph LR;
         nginx-nic["fa:fa-ethernet eth0"]
     end
     clusternet ----> nginx-nic
-    nginx-nic --> nat((NAT)) --> inet("fa:fa-cloud Inet")
 
     subgraph ns1-vm2[fab:fa-windows WS VM]
         ns1-vm2-nic1["fa:fa-ethernet net1"]
