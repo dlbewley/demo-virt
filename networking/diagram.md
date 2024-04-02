@@ -2,9 +2,11 @@
 
 ## OVS Bridge VLAN Filtering Example
 
-This method treats the ovs bridge as if it were a physical switch. Packets entering the bridge from ens224 retain their 802.1q tags as they traverse the switch. 
+This method treats the OVS bridge as if it were a physical switch. Packets entering the bridge from ens224 retain their 802.1q tags as they traverse the switch.
 
 Veth ports added to the bridge for pods can optionally retain or strip the VLAN tags upon egress from the bridge.
+
+Attachments of ovn-k8s-cni-overlay type and localnet topology will use an OVN bridge-mapping rather than targetting linux bridges by annotation.
 
 ```mermaid
 graph LR;
@@ -25,7 +27,11 @@ graph LR;
     subgraph nncp["fa:fa-code NNCP"]
       ens224["fa:fa-ethernet ens224"]
       ens224 ==> br-vmdata[["fa:fa-grip-vertical fa:fa-bridge br-vmdata"]]
+    br-vmdata --> BM(["fa:fa-tags bridge mapping"])
     end
+
+    BM --> vmdata_ovn_localnet_switch
+
   end
 
   subgraph ns1["Namespace 1"]
@@ -38,11 +44,11 @@ graph LR;
     subgraph ns1-vm2[fab:fa-windows WS VM]
         ns1-vm2-nic1["fa:fa-ethernet net1"]
     end
-    br-vmdata -.- ns1-nad-1924[/"fa:fa-code NAD 'dev-net'"/] --> ns1-vm2-nic1
+    vmdata_ovn_localnet_switch  -.- ns1-nad-1924[/"fa:fa-code NAD 'dev-net'"/] --> ns1-vm2-nic1
   end
 
   subgraph ns2["Namespace 2"]
-    subgraph ns2-vm1[fab:fa-github DevB VM]
+    subgraph ns2-vm1[fab:fa-github Dev VM]
         ns2-vm1-nic1["fa:fa-ethernet net1"]
         ns2-vm1-nic2["fa:fa-ethernet eth0"]
     end
@@ -58,9 +64,9 @@ graph LR;
         ns2-vm3-nic1["fa:fa-ethernet net1"]
     end
 
-    br-vmdata -.- ns2-nad-1924[/"fa:fa-code NAD 'vlan-1924'"/] --- ns2-vm1-nic1
+    vmdata_ovn_localnet_switch -.- ns2-nad-1924[/"fa:fa-code NAD 'vlan-1924'"/] --- ns2-vm1-nic1
                 ns2-nad-1924                                   --- ns2-vm2-nic2
-    br-vmdata -.- ns2-nad-1927[/"fa:fa-code NAD 'vlan-1927'"/] --- ns2-vm2-nic1
+    vmdata_ovn_localnet_switch -.- ns2-nad-1927[/"fa:fa-code NAD 'vlan-1927'"/] --- ns2-vm2-nic1
                 ns2-nad-1927                                   --- ns2-vm3-nic1
   end
 
@@ -88,7 +94,7 @@ graph LR;
 
 ## Linux Bridge VLAN Filtering Example
 
-This method treats the linux bridge as if it were a physical switch. Packets entering the bridge from ens224 retain their 802.1q tags as they traverse the switch. 
+This method treats the linux bridge as if it were a physical switch. Packets entering the bridge from ens224 retain their 802.1q tags as they traverse the switch.
 
 Veth ports added to the bridge for pods can optionally retain or strip the VLAN tags upon egress from the bridge.
 
@@ -128,7 +134,7 @@ graph LR;
   end
 
   subgraph ns2["Namespace 2"]
-    subgraph ns2-vm1[fab:fa-github DevB VM]
+    subgraph ns2-vm1[fab:fa-github Dev VM]
         ns2-vm1-nic1["fa:fa-ethernet net1"]
         ns2-vm1-nic2["fa:fa-ethernet eth0"]
     end
@@ -224,7 +230,7 @@ graph LR;
   end
 
   subgraph ns2["Namespace 2"]
-    subgraph ns2-vm1[fab:fa-github DevB VM]
+    subgraph ns2-vm1[fab:fa-github Dev VM]
         ns2-vm1-nic1["fa:fa-ethernet net1"]
         ns2-vm1-nic2["fa:fa-ethernet eth0"]
     end
@@ -275,5 +281,6 @@ graph LR;
 
 ## References
 
-* <https://access.redhat.com/solutions/6972064> 
+* <https://kubevirt.io/2023/OVN-kubernetes-secondary-networks-localnet.html>
+* <https://access.redhat.com/solutions/6972064>
 * <https://developers.redhat.com/blog/2017/09/14/vlan-filter-support-on-bridge#without_vlan_filtering>
