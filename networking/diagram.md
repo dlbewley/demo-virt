@@ -4,8 +4,12 @@
 
 This method maps Network Attachment Definitions to an OVS Bridge via a Bridge Mapping. The bridge mapping is constructed by NNCP. The bridge may be the existing default br-ex or a custom bridge, eg. br-vmdata, constructed by NNCP. Packets entering the bridge from ens224 retain their 802.1q tags as they traverse the switch.
 
-An OVS logical switch will be created (`ovn-nbctl ls-list`) with a port for the bridge ports for the pod network interfaces (`ovn-nbctl lsp-list vmdata_ovn_localnet_switch`).
+An OVS logical switch will be created (`ovn-nbctl ls-list`) with a logical switch port for the bridge and for each of the pod network interfaces (`ovn-nbctl lsp-list vmdata_ovn_localnet_switch`).
 
+
+The network name as found in the NAD.spec.config.name is used as the selector to identify the appropriate bridge for a given network via the bridge mapping.
+
+The `name` in the config of a Network Attachment Definition defines "a network". Any NADs which grant access to this "network" must be the same.
 
 ```mermaid
 graph LR;
@@ -26,10 +30,14 @@ graph LR;
     subgraph nncp["fa:fa-code NNCP"]
       ens224["fa:fa-ethernet ens224"]
       ens224 ==> br-vmdata[["fa:fa-grip-vertical fa:fa-bridge br-vmdata"]]
-    br-vmdata --> BM(["fa:fa-tags bridge mapping"])
+      br-vmdata --> BM1924(["fa:fa-tags bridge mapping"])
+      br-vmdata --> BM1926(["fa:fa-tags bridge mapping"])
+
+      note["NOTE: Bridge-mappings are entries of a single list."]
     end
 
-    BM --> vmdata_ovn_localnet_switch
+    BM1924 --> vmdata_ovn_localnet_switch
+    BM1926 --> vmdata_ovn_localnet_switch
 
   end
 
