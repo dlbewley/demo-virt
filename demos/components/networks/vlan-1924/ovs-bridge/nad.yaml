@@ -13,7 +13,7 @@ spec:
   config: |-
     {
       "cniVersion": "0.3.1", 
-      "name": "vmdata",
+      "name": "vlan-1924",
       "type": "ovn-k8s-cni-overlay", 
       "topology": "localnet", 
       "netAttachDefName": "default/vlan-1924",
