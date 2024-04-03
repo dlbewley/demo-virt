@@ -85,7 +85,6 @@ patches:
         }
       }
 
-    # convert default interface from masquerade to bridge 
     - op: add
       path: /spec/template/spec/domain/devices/interfaces/-
       value: {
