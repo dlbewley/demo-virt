@@ -9,6 +9,7 @@ components:
 
   # be sure to update VM patches below to match vlan and namespace
   - ../components/networks/vlan-1924/ovs-bridge
+  - ../components/networks/vlan-1926/ovs-bridge
 
   - ../components/vms/rhel9
 
@@ -80,7 +81,25 @@ patches:
       value: {
         "name": "nic-vlan-1924",
         "multus": {
-          "networkName": "default/localnet-1924"
+          "networkName": "default/vlan-1924"
+        }
+      }
+
+    # convert default interface from masquerade to bridge 
+    - op: add
+      path: /spec/template/spec/domain/devices/interfaces/-
+      value: {
+        "name": "nic-vlan-1926",
+        "bridge": {},
+        "model": "virtio"
+      }
+
+    - op: add
+      path: /spec/template/spec/networks/-
+      value: {
+        "name": "nic-vlan-1926",
+        "multus": {
+          "networkName": "default/vlan-1926"
         }
       }
 
