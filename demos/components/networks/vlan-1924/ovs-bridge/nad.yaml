@@ -7,7 +7,9 @@ metadata:
   name: vlan-1924
   namespace: default
 spec:
-  # name below is the name of the localnet found in an OVN bridge-mapping
+  # the name below is the name of a cluster-scoped "network"
+  # this network will be mapped to an appropriate bridge
+  # via NNCP in an OVN bridge-mapping
   config: |-
     {
       "cniVersion": "0.3.1", 
