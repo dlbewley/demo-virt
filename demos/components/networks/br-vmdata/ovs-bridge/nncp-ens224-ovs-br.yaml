@@ -1,72 +1,3 @@
-# observe result from ovs-vsctl list-br and nmcli con on node
-# 2024-03-28
-# Before
-# sh-5.1# ovs-vsctl list-br
-# br-ex
-# br-int
-
-# sh-5.1# ovn-nbctl ls-list
-# b9240f07-5230-47dd-b556-d5d64bf137ca (ext_hub-tq2sk-cnv-62hvf)
-# 8be51fcb-ee1b-49bd-8dd4-b718bbba311e (hub-tq2sk-cnv-62hvf)
-# 52210db9-2495-4de7-8d0c-2df0f76f899a (isolated_ovn_layer2_switch)
-# 68a2c0a7-6045-4c2d-b3c4-2dfaa0b1683a (join)
-# edc9dd4f-8b86-46e4-b205-20d23ff003e0 (transit_switch)
-
-# sh-5.1# ip -br -c -4 a
-# lo               UNKNOWN        127.0.0.1/8
-# ovn-k8s-mp0      UNKNOWN        10.128.4.2/23
-# br-ex            UNKNOWN        192.168.4.155/24 169.254.169.2/29
-
-# sh-5.1# ip -br -c link
-# lo               UNKNOWN        00:00:00:00:00:00 <LOOPBACK,UP,LOWER_UP>
-# ens192           UP             00:50:56:b4:0e:b4 <BROADCAST,MULTICAST,ALLMULTI,UP,LOWER_UP>
-# ens224           UP             00:50:56:b4:66:b5 <BROADCAST,MULTICAST,UP,LOWER_UP>
-# ovs-system       DOWN           0e:2a:93:c7:be:e7 <BROADCAST,MULTICAST>
-# genev_sys_6081   UNKNOWN        d2:ac:fc:f2:9c:60 <BROADCAST,MULTICAST,UP,LOWER_UP>
-# ovn-k8s-mp0      UNKNOWN        a2:18:e5:85:1e:09 <BROADCAST,MULTICAST,UP,LOWER_UP>
-# br-int           DOWN           4e:b6:e1:d8:1a:2a <BROADCAST,MULTICAST>
-# br-ex            UNKNOWN        00:50:56:b4:0e:b4 <BROADCAST,MULTICAST,UP,LOWER_UP>
-
-# AFTER
-
-# sh-5.1# ovs-vsctl list-br
-# br-ex
-# br-int
-# br-vmdata
-
-# sh-5.1# ovn-nbctl ls-list
-# b9240f07-5230-47dd-b556-d5d64bf137ca (ext_hub-tq2sk-cnv-62hvf)
-# 8be51fcb-ee1b-49bd-8dd4-b718bbba311e (hub-tq2sk-cnv-62hvf)
-# 52210db9-2495-4de7-8d0c-2df0f76f899a (isolated_ovn_layer2_switch)
-# 68a2c0a7-6045-4c2d-b3c4-2dfaa0b1683a (join)
-# edc9dd4f-8b86-46e4-b205-20d23ff003e0 (transit_switch)
-
-# sh-5.1# nmcli con
-# NAME                UUID                                  TYPE           DEVICE
-# ovs-if-br-ex        af3b9a2a-fbf1-4b2d-b0ee-2769409df9c9  ovs-interface  br-ex
-# lo                  7a61e7af-7962-43ca-aa64-24f8161c86e0  loopback       lo
-# Wired connection 2  a4d90df0-ebed-331b-bd92-4cc61930b1bc  ethernet       ens224
-# br-ex               e9f73bbd-1954-43e0-bd96-e34c83f28fa2  ovs-bridge     br-ex
-# br-vmdata-br        f63dfd93-c43e-43da-bf10-d128c4e95b0d  ovs-bridge     br-vmdata
-# ens224-port         5ef57d0b-61de-4a87-8b9e-68a34ea44de9  ovs-port       ens224
-# ovs-if-phys0        8da0eb24-b1fa-42f4-a023-50132fa6173e  ethernet       ens192
-# ovs-port-br-ex      0cc69bef-3ac7-4427-8677-ec37465c414f  ovs-port       br-ex
-# ovs-port-phys0      1d7ff560-0c5f-4586-8801-a73102ba21c5  ovs-port       ens192
-# Wired connection 1  bffe80d3-c483-3ccb-a7ca-3db3ebfae1e4  ethernet       --
-
-# when there is a VM attached to this NAD running on THIS host:
-# sh-5.1# ovn-nbctl ls-list
-# b9240f07-5230-47dd-b556-d5d64bf137ca (ext_hub-tq2sk-cnv-62hvf)
-# 8be51fcb-ee1b-49bd-8dd4-b718bbba311e (hub-tq2sk-cnv-62hvf)
-# 52210db9-2495-4de7-8d0c-2df0f76f899a (isolated_ovn_layer2_switch)
-# 68a2c0a7-6045-4c2d-b3c4-2dfaa0b1683a (join)
-# edc9dd4f-8b86-46e4-b205-20d23ff003e0 (transit_switch)
-# 67fe6187-3bfe-49a7-b6db-10490c95149a (vmdata_ovn_localnet_switch)
-
-# sh-5.1# ovn-nbctl lsp-list vmdata_ovn_localnet_switch
-# 07b8fd77-6f3a-49ed-9171-7942a9582c60 (default.vlan.1924_demo-virt_virt-launcher-rhel-node-1-bm7w9)
-# d24b1ba3-669e-474f-8557-52733b08ee8b (vmdata_ovn_localnet_port)
-
 ---
 apiVersion: nmstate.io/v1
 kind: NodeNetworkConfigurationPolicy
@@ -76,18 +7,13 @@ spec:
   nodeSelector:
     machine.openshift.io/cluster-api-machineset: hub-tq2sk-cnv
   desiredState:
-    ovn:
-      bridge-mappings:
-        # NADs reference this localnet values via spec.config.name
-        # NADs then create ports on the cooresponding OVS bridge
-        - localnet: vmdata
-          bridge: br-vmdata
-          state: present 
     interfaces:
       - name: br-vmdata
         description: |-
           A dedicated OVS bridge with ens224 as a port
-          allowing all VLANs and untagged traffic
+          allowing all VLANs and untagged traffic.
+          Networks will be mapped to this brige via ovn.bridge-mappings in NNCPs
+          associated with creation of those localnet networks.
         type: ovs-bridge
         state: up
         bridge:
