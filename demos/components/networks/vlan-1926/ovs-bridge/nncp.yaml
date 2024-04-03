@@ -7,6 +7,6 @@ spec:
   desiredState:
     ovn:
       bridge-mappings:
-        - localnet: localnet-1926
-          bridge: ovs-ens224
+        - localnet: vlan-1926
+          bridge: br-vmdata
           state: present 
