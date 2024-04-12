@@ -93,7 +93,7 @@ export TOKEN=$(oc create token builder -n openshift-mtv)
 
 [source,bash]
 ----
-podman login -u $REGISTRY_USER -p $TOKEN $REGISTRY
+podman login --tls-verify=false -u $REGISTRY_USER -p $TOKEN $REGISTRY
 ----
 
 * Build and push vddk image to OpenShift registry. See link:Makefile[Makefile]
