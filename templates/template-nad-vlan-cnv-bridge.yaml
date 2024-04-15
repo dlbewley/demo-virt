@@ -5,7 +5,7 @@ metadata:
   name: nad-vlan-cnv-bridge
   annotations:
     description: >-
-      A NetworkAttachmentDefinition resource to enable access to a VLAN via Bridge interface.
+      A NetworkAttachmentDefinition resource to enable access to a VLAN via a Linux bridge interface.
 
       Results can be used to multi-home pods using Multus.
 
