@@ -23,5 +23,5 @@ patches:
         }
       - op: replace
         path: /spec/desiredState/interfaces/0/bridge/port/0/name
-        value: ens6f0np0
+        value: ens224
 
