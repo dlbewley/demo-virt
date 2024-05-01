@@ -1,0 +1,40 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: network-operator-patcher
+  namespace: openshift-network-operator
+  generateName: network-operator-patcher-
+  labels:
+    app: network-operator-patcher
+spec:
+  template:
+    spec:
+      containers:
+        - name: patcher
+          image: registry.redhat.io/openshift4/ose-cli
+          env:
+            - name: key
+              value: 'useMultiNetworkPolicy'
+            - name: value 
+              value: 'true'
+          command:
+            - /bin/bash
+            - -c
+            - -x
+            - |
+              echo "Configuring OVN-Kubernetes CNI support for MultiNetworkPolicy"
+              echo "Setting ${key} ${value}"
+              echo "See https://docs.openshift.com/container-platform/4.14/networking/multiple_networks/configuring-multi-network-policy.html"
+              echo
+
+              oc get network.operator.openshift.io/cluster -o yaml || exit 1
+
+              oc patch network.operator.openshift.io/cluster \
+                -p '{"spec":{"'${key}'":'${value}'}}' --type=merge || exit 1
+
+              echo "Wait a few moments for any change"
+      restartPolicy: Never
+      serviceAccount: network-operator-patcher
+      serviceAccountName: network-operator-patcher
+  backoffLimit: 2
