@@ -2,10 +2,8 @@
 apiVersion: nmstate.io/v1
 kind: NodeNetworkConfigurationPolicy
 metadata:
-  name: br-vmdata-ovs
+  name: br-vmdata
 spec:
-  nodeSelector:
-    machine.openshift.io/cluster-api-machineset: hub-tq2sk-cnv
   desiredState:
     interfaces:
       - name: br-vmdata
@@ -13,7 +11,7 @@ spec:
           A dedicated OVS bridge with ens224 as a port
           allowing all VLANs and untagged traffic.
           Networks will be mapped to this brige via ovn.bridge-mappings in NNCPs
-          associated with creation of those localnet networks.
+          associated with creation of those networks via NetworkAttachmentDefinition.
         type: ovs-bridge
         state: up
         bridge:
