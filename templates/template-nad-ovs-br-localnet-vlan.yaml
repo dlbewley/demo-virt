@@ -1,12 +1,11 @@
-# create template in openshift namespace to make it visible cluster-wide
 ---
 apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
-  name: nad-ovn-br-localnet-vlan
+  name: nad-ovs-br-localnet-vlan
   annotations:
     description: >-
-      NetworkAttachmentDefinition resource to enable access to a OVN bridge via localnet topology and VLAN ID.
+      NetworkAttachmentDefinition resource and NoteNetworkConfigurationPolicy to enable access to a OVS bridge via localnet topology and VLAN ID.
 
       When defined in 'default' namespace the NAD is usable from all other namespaces.
 
@@ -23,7 +22,7 @@ objects:
       annotations:
         description: ${DESCRIPTION}
       labels:
-        template: nad-ovn-br-localnet-vlan
+        template: nad-ovs-br-localnet-vlan
       name: vlan-${VLAN}
       namespace: ${NAMESPACE}
     spec:
@@ -43,8 +42,6 @@ objects:
     metadata:
       name: ovs-bridge-mapping-${VLAN}
     spec:
-      #nodeSelector:
-      #  machine.openshift.io/cluster-api-machineset: hub-tq2sk-cnv
       desiredState:
         ovn:
           bridge-mappings:
@@ -53,7 +50,7 @@ objects:
               state: present 
 
 parameters:
-  - description: Existing OVN bridge carrying tagged traffic to peel the VLAN from
+  - description: Existing OVS bridge carrying tagged traffic to peel the VLAN from
     name: BRIDGE
     value: br-vmdata
     required: false
@@ -65,4 +62,4 @@ parameters:
     value: default
   - description: Net-attach-def description
     name: DESCRIPTION
-    value: Attachment to VLAN ${VLAN} through OVN bridge ${BRIDGE} and localnet topology
+    value: Attachment to VLAN ${VLAN} through OVS bridge ${BRIDGE} and localnet topology
