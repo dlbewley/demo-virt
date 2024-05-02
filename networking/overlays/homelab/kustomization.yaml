@@ -8,25 +8,28 @@ resources:
   - ../../base
 
 components:
-  - ../../../demos/components/networks/vlan-1924/ovs-bridge
-  - ../../../demos/components/networks/vlan-1926/ovs-bridge
+  - ../../../components/networks/vlan-1924/ovs-bridge
+  - ../../../components/networks/vlan-1926/ovs-bridge
 
 patches:
   - target:
       group: nmstate.io
       kind: NodeNetworkConfigurationPolicy
-      name: br-vmdata-ovs
+      name: br-vmdata
       version: v1
     patch: |-
       - op: replace
         path: /spec/nodeSelector
         value: {
-          "nodeSelector": {
               "machine.openshift.io/cluster-api-machineset": "hub-tq2sk-cnv"
-          }
         }
+
       - op: replace
-        path: /spec/desiredState/interfaces/0/bridge/port/0/name
+        path: /spec/desiredState/interfaces/0/name
+        value: ens224
+
+      - op: replace
+        path: /spec/desiredState/interfaces/1/bridge/port/0/name
         value: ens224
 
   - target:
@@ -38,9 +41,7 @@ patches:
       - op: replace
         path: /spec/nodeSelector
         value: {
-          "nodeSelector": {
               "machine.openshift.io/cluster-api-machineset": "hub-tq2sk-cnv"
-          }
         }
 
   - target:
@@ -52,7 +53,5 @@ patches:
       - op: replace
         path: /spec/nodeSelector
         value: {
-          "nodeSelector": {
               "machine.openshift.io/cluster-api-machineset": "hub-tq2sk-cnv"
-          }
         }

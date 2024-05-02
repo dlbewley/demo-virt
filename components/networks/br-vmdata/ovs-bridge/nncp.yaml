@@ -6,6 +6,14 @@ metadata:
 spec:
   desiredState:
     interfaces:
+      - name: ens224
+        ipv4:
+          enabled: false
+        ipv6:
+          enabled: false
+        state: up
+        type: ethernet
+
       - name: br-vmdata
         description: |-
           A dedicated OVS bridge with ens224 as a port
