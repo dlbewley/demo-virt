@@ -8,12 +8,12 @@ namespace: demo-virt
 
 components:
   # this should have already been applied elsewhere
-  #- ../components/networks/br-vmdata
+  #- ../components/networks/br-vmdata/linux-bridge
 
   # be sure to update VM patches below to match vlan and namespace
-  - ../components/networks/vlan-1924
+  - ../../components/networks/vlan-1924/linux-bridge
 
-  - ../components/vms/rhel9
+  - ../../components/vms/rhel9
 
 # the inline json patch can not learn of the random suffix
 generatorOptions:
