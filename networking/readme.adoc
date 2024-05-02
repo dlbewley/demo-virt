@@ -4,7 +4,17 @@ Configure networking to support OpenShift Virtualization.
 
 It may help to view this link:diagram.md[diagram] first.
 
-The link:base[] will setup an OVS Bridge using link:../components/networks/br-vmdata/ovs-bridge[] component.
+The link:base[base/kustomization.yaml] will setup an OVS Bridge using link:../components/networks/br-vmdata/ovs-bridge[../components/networks/br-vmdata/ovs-bridge/nncp.yaml] component.
 
+.Instructions
 * Create VLAN definitions in link:../components/networks[] dir.
-* Create an overlay to enable the br-vmdata bridge and appropriate network components. See example link:overlays/homelab[]
+* Create an overlay to enable the `br-vmdata` bridge and the appropriate network components. See example link:overlays/homelab[overlays/homelab/kustomization.yaml]
+* Apply the overlay.
+
+[source,bash]
+----
+# view the rendered resources
+oc kustomize overlays/homelab
+# create the rendered resources
+oc apply -k overlays/homelab
+----
