@@ -8,9 +8,9 @@ components:
   # this should have already been applied elsewhere
   #- ../components/networks/br-vmdata/ovs-bridge
 
-  - ../../components/multinetworkpolicy
-  - ../../components/networks/vlan-1924/ovs-bridge
-  - ../../components/networks/vlan-1926/ovs-bridge
+  - ../../networking/components/multinetworkpolicy
+  - ../../networking/components/vlan-1924/ovs-bridge
+  - ../../networking/components/vlan-1926/ovs-bridge
 
   # be sure to update VM patches below to match vlan and namespace
   - ../../components/vms/rhel9

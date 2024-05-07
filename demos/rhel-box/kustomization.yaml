@@ -11,7 +11,7 @@ components:
   #- ../components/networks/br-vmdata/linux-bridge
 
   # be sure to update VM patches below to match vlan and namespace
-  - ../../components/networks/vlan-1924/linux-bridge
+  - ../../networking/components/vlan-1924/linux-bridge
 
   - ../../components/vms/rhel9
 
