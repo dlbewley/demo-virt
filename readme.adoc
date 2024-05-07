@@ -25,13 +25,9 @@ This can be done by plumbing those networks to the Nodes and using the NMstate o
 
 An OpenShift Template can be used to make the writing of NNCPs a bit more repeatable and fault tolerant. As with most things in life, being organized and consistent is very important in networking. Please don't write a one-off NNCP. Nothing (very little) is ever "one-off".
 
-Some generated NNCPs can be found here link:networking/components[] and link:example[here].
+link:templates/template-nad-ovs-br-localnet-vlan.yaml[Template] to create a node network configuration policy.
 
-.link:templates/template-nad-ovs-br-localnet-vlan.yaml[Template] to create a node network configuration policy and 
-[source,yaml]
-----
-include::templates/template-nncp-nic-vlan-br.yaml[]
-----
+Some generated NNCPs can be found here link:networking/components[] and link:example[here].
 
 Because it is common to have different cluster Nodes allocated for different workloads, this template uses `NODE_SELECTOR_KEY` and `NODE_SELECTOR_VALUE` parameters to target the nodes which are expected to provide networking for virtual machines. This example uses the machineset used to provision the hypervisor nodes.
 
@@ -39,16 +35,16 @@ Because it is common to have different cluster Nodes allocated for different wor
 
 Attachment to a network is gated by a namespace scoped NetworkAttachmentDefinition resource used by Multus via annotations on pods.
 
-Network attachment definitions in the 'default' namespace are visible to all other namespaces by default. As a cluster administrator you may wish to restrict access by defining attachments in specific user namespaces.
+Network attachment definitions in the 'default' namespace are visible to all other namespaces by default. As a cluster administrator you may wish to restrict access by defining attachments in specific user namespaces. Because only an admin may create the NAD it may make sense to place them all in 'default'.
 
-.link:templates/template-nad-vlan-cnv-bridge.yaml[Template] to create a network attachment definition
-[source,yaml]
-----
-include::templates/template-nad-vlan-cnv-bridge.yaml[]
-----
+
+.**Templates**
+* link:templates/template-nad-vlan-cnv-bridge.yaml[Template] to create a CNV-Bridge network attachment definition
+* link:templates/template-nad-ovs-br-localnet-vlan.yaml[Template] to create a localnet CNI plugin network attachment definition
+
+Associating a network to an ovs-bridge requires a mapping defined via an NNCP. The template above creates a NNCP and a NAD for each VLAN.
 
 Take a peek at this link:networking/diagram.md[networking diagram] for a sense of how the NNCP and NAD will fit together.
-
 
 == Testing
 === Migration from VMware
