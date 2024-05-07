@@ -4,7 +4,7 @@ Configure networking to support OpenShift Virtualization.
 
 It may help to view this link:diagram.md[diagram] first.
 
-The link:base/kustomization.yaml[base] will setup an OVS Bridge using link:components/br-vmdata/ovs-bridge/nncp.yaml[../components/br-vmdata/ovs-bridge] component.
+The link:base/kustomization.yaml[base] will setup an OVS Bridge using link:components/br-vmdata/ovs-bridge/nncp.yaml[br-vmdata] and link:components/multinetworkpolicy[enable multinetwork policy] support.
 
 .Instructions
 * Create VLAN definitions in link:components/[] dir.
