@@ -20,3 +20,11 @@ spec:
         protocol: UDP
       - port: 68
         protocol: UDP
+      # - port: 80
+      #   protocol: TCP
+      # - port: 8080
+      #   protocol: TCP
+      # - port: 443
+      #   protocol: TCP
+      # - port: 8443
+      #   protocol: TCP
