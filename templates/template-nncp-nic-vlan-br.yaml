@@ -1,3 +1,25 @@
+# Example looping of template using zsh syntax
+# unset vlans
+# declare -A vlans
+# NIC=ens224
+# vlans[1924]="Lab"
+# vlans[1925]="Disco"
+# vlans[1926]="Trans Proxy"
+# vlans[1927]="Metal"
+# vlans[1928]="Provisioning"
+# 
+# for VLAN in ${(k)vlans}; do
+#   oc process \
+#     -p VLAN="$V" \
+#     -p NIC="$NIC" \
+#     -p NODE_SELECTOR_KEY=machine.openshift.io/cluster-api-machineset \
+#     -p NODE_SELECTOR_VALUE=hub-l7c56-cnv \
+#     -p DESCRIPTION="Add ${vlans[$VLAN]} VLAN ${VLAN} and Bridge br-${VLAN} on ${NIC}" \
+#     -f templates/template-nncp-nic-vlan-br.yaml \
+#     -o yaml \
+#     | yq e '.items[0]' > "networking/nncp/nncp-$NIC-br-vlan-$VLAN.yaml"
+#   echo $k
+# done
 ---
 apiVersion: template.openshift.io/v1
 kind: Template
