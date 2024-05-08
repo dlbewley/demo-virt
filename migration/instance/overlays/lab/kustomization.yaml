@@ -3,7 +3,7 @@ kind: Kustomization
 
 resources:
 - ../../base
-- networkmap.yaml
+#- networkmap.yaml
 - provider.yaml
 - rolebinding.yaml
-- storagemap.yaml
+#- storagemap.yaml

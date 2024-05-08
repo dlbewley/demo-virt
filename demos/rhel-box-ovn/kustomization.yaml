@@ -1,19 +1,22 @@
+---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 namespace: demo-virt
 
-#resources:
-#  - namespace.yaml
-
 components:
   # this should have already been applied elsewhere
-  #- ../components/networks/br-vmdata/linux-bridge
+  #- ../components/networks/br-vmdata/ovs-bridge
+
+  - ../../networking/components/multinetworkpolicy
+  - ../../networking/components/vlan-1924/ovs-bridge
+  - ../../networking/components/vlan-1926/ovs-bridge
 
   # be sure to update VM patches below to match vlan and namespace
-  - ../../networking/components/vlan-1924/linux-bridge
-
   - ../../components/vms/rhel9
+
+resources:
+  - multinetworkpolicy.yaml
 
 # the inline json patch can not learn of the random suffix
 generatorOptions:
@@ -27,9 +30,6 @@ secretGenerator:
   - name: admin-kubeconfig
     files:
       - secrets/kubeconfig
-
-# patchesStrategicMerge:
-#   - nested-virt/patch-vm.yaml
 
 patches:
 - target:
@@ -83,7 +83,24 @@ patches:
       value: {
         "name": "nic-vlan-1924",
         "multus": {
-          "networkName": "vlan-1924"
+          "networkName": "default/vlan-1924"
+        }
+      }
+
+    - op: add
+      path: /spec/template/spec/domain/devices/interfaces/-
+      value: {
+        "name": "nic-vlan-1926",
+        "bridge": {},
+        "model": "virtio"
+      }
+
+    - op: add
+      path: /spec/template/spec/networks/-
+      value: {
+        "name": "nic-vlan-1926",
+        "multus": {
+          "networkName": "default/vlan-1926"
         }
       }
 

@@ -1,0 +1,36 @@
+= BR-VMData
+
+Define a bridge for attaching Virtual Machines to "pyhysical" VLANs in the datacenter. This bridge is on an additional NIC or Bond as opposed to the existing `br-ex` bridge on the default interface.
+
+Assumes hypervisors have a 2nd interface to carry virtual machine traffic.
+The default is `ens224` this can be patched in link:../../../../networking/overlays/homelab[an overlay].
+
+The bridge carries the tagged VLANs which are fed to the ens224 interface via 802.1q trunk from the physical switch.
+
+Bridge `br-vmdata` may be of type "Linux Bridge" or "OVS Bridge". Choose of of the following.
+
+== OVS Bridge
+
+link:ovs-bridge[]
+
+Creates an OVS-Bridge which provides features like MultiNetworkPolicy and many pending features like IPAM.
+
+Networks will be mapped to the bridge via OVS bridge-mappings. See example NetworkAttachmentDefinition and NodeNetworkConfigurationPolicy link:../../vlan-1924/ovs-bridge[here].
+
+.Template
+* link:../../../../templates/template-nad-ovs-br-localnet-vlan.yaml[templates/template-nad-ovs-br-localnet-vlan.yaml]
+
+== Linux Bridge
+
+link:linux-bridge[]
+
+Creates a legacy linux-bridge interface which can not take advantage of current or future OVN enhancements.
+
+Bridge VLAN Filtering feature allows for NetworkAttachmentDefinitions to attach bridge ports to a pod (VM) which relay untagged VLAN traffic. As an alternative a VLAN interface may be created first and a bridge attached to each. This is slightly less efficient.
+
+
+* https://access.redhat.com/solutions/6972064
+* https://www.libertysys.com.au/2023/01/tech-nibble-linux-bridge-vlan-filtering/
+
+.Template
+* link:../../../../templates/template-nncp-nic-br.yaml[templates/template-nncp-nic-br.yaml]

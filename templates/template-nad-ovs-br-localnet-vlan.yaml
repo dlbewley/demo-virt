@@ -1,0 +1,65 @@
+---
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: nad-ovs-br-localnet-vlan
+  annotations:
+    description: >-
+      NetworkAttachmentDefinition resource and NoteNetworkConfigurationPolicy to enable access to a OVS bridge via localnet topology and VLAN ID.
+
+      When defined in 'default' namespace the NAD is usable from all other namespaces.
+
+    iconClass: icon-load-balancer
+    openshift.io/provider-display-name: GUIFreeLife
+    openshift.io/documentation-url: https://github.com/dlbewley/demo-virt
+    openshift.io/support-url: https://github.com/dlbewley/demo-virt/issues
+    tags: "networking,nmstate"
+
+objects:
+  - apiVersion: k8s.cni.cncf.io/v1
+    kind: NetworkAttachmentDefinition
+    metadata:
+      annotations:
+        description: ${DESCRIPTION}
+      labels:
+        template: nad-ovs-br-localnet-vlan
+      name: vlan-${VLAN}
+      namespace: ${NAMESPACE}
+    spec:
+      config: |
+        {
+          "name": "vlan-${VLAN}",
+          "cniVersion": "0.3.1",
+          "type": "ovn-k8s-cni-overlay", 
+          "topology": "localnet", 
+          "netAttachDefName": "${NAMESPACE}/vlan-${VLAN}",
+          "vlanID": ${VLAN}, 
+          "ipam": {}
+        }
+
+  - apiVersion: nmstate.io/v1
+    kind: NodeNetworkConfigurationPolicy
+    metadata:
+      name: ovs-bridge-mapping-${VLAN}
+    spec:
+      desiredState:
+        ovn:
+          bridge-mappings:
+            - localnet: vlan-${VLAN}
+              bridge: ${BRIDGE}
+              state: present 
+
+parameters:
+  - description: Existing OVS bridge carrying tagged traffic to peel the VLAN from
+    name: BRIDGE
+    value: br-vmdata
+    required: false
+  - description: ID of the VLAN
+    name: VLAN
+    required: true
+  - description: Namespace to hold the attachment. The 'default' namespace enables cluster-wide use of the attachment
+    name: NAMESPACE
+    value: default
+  - description: Net-attach-def description
+    name: DESCRIPTION
+    value: Attachment to VLAN ${VLAN} through OVS bridge ${BRIDGE} and localnet topology

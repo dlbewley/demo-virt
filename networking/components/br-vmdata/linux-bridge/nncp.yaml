@@ -8,21 +8,24 @@ apiVersion: nmstate.io/v1
 kind: NodeNetworkConfigurationPolicy
 metadata:
   annotations:
-    description: Create bridge br-vmdata with ens224 as a port
+    description: Create bridge Linux br-vmdata with ens224 as a port
   labels:
     template: nncp-nic-vlan-br
-  name: ens224-br-vmdata
+  name: br-vmdata
 spec:
   desiredState:
     interfaces:
-      - ipv4:
+      - name: ens224
+        type: ethernet
+        state: up
+        ipv4:
           enabled: false
         ipv6:
           enabled: false
-        name: ens224
+      - name: br-vmdata
+        type: linux-bridge
         state: up
-        type: ethernet
-      - bridge:
+        bridge:
           options:
             stp:
               enabled: false
@@ -32,8 +35,3 @@ spec:
           enabled: false
         ipv6:
           enabled: false
-        name: br-vmdata
-        state: up
-        type: linux-bridge
-  nodeSelector:
-    machine.openshift.io/cluster-api-machineset: hub-tq2sk-cnv

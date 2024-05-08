@@ -1,0 +1,30 @@
+# https://docs.openshift.com/container-platform/4.14/networking/multiple_networks/configuring-multi-network-policy.html
+# oc patch network.operator.openshift.io/cluster -p '{"spec":{"useMultiNetworkPolicy":true}}' --type=merge
+# wait a few moments...
+---
+apiVersion: k8s.cni.cncf.io/v1beta1
+kind: MultiNetworkPolicy
+metadata:
+  annotations:
+    k8s.v1.cni.cncf.io/policy-for: default/localnet-1924
+  name: allow-ssh-dhcp
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - ports:
+      - port: 22
+        protocol: TCP
+      - port: 67
+        protocol: UDP
+      - port: 68
+        protocol: UDP
+      # - port: 80
+      #   protocol: TCP
+      # - port: 8080
+      #   protocol: TCP
+      # - port: 443
+      #   protocol: TCP
+      # - port: 8443
+      #   protocol: TCP
