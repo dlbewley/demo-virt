@@ -16,8 +16,9 @@ graph TD;
 
   switch["Switch fa:fa-grip-vertical"]
   machinenet["fa:fa-network-wired Machine Network<br> 192.168.4.0/24"]
-  switch --> machinenet --> ens192
-  ens192 ==> br-ex[["fa:fa-grip-vertical fa:fa-bridge br-ex"]]
+  switch ==> machinenet ==> ens192
+  ens192 --> br-ex[["fa:fa-grip-vertical fa:fa-bridge br-ex"]]
+
   switch[[switch]] ==> T(["fa:fa-tags 802.1q Trunk"]) ==> ens224[ens224]
 
   subgraph node["CNV Worker"]
@@ -30,7 +31,7 @@ graph TD;
 
     subgraph nncp["fa:fa-code NNCP"]
       ens224["fa:fa-ethernet ens224"]
-      ens224 ==> br-vmdata[["fa:fa-grip-vertical fa:fa-bridge br-vmdata"]]
+      ens224 --> br-vmdata[["fa:fa-grip-vertical fa:fa-bridge br-vmdata"]]
       BM1924(["fa:fa-tags bridge mapping\nvlan-1924 to br-vmdata"]) -.-> br-vmdata
       BM1927(["fa:fa-tags bridge mapping\nvlan-1927 to br-vmdata"]) -.-> br-vmdata
 
@@ -97,6 +98,8 @@ graph TD;
   classDef ns2-vm fill:#cdd
   class ns2-vm1,ns2-vm2,ns2-vm3 ns2-vm
   style ns2 fill:#ccc
+
+  style nsdefault fill:#ccc
 ```
 
 
