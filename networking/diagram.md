@@ -9,7 +9,7 @@ An OVS logical switch will be created (`ovn-nbctl ls-list`) with a logical switc
 
 The network name as found in the NAD.spec.config.name is used as the selector to identify the appropriate bridge for a given network via the bridge mapping.
 
-The `name` in the config of a Network Attachment Definition defines "a network". Any NADs which grant access to this "network" must be the same.
+The `name` in the config of a Network Attachment Definition defines "a network". Any NADs which grant access to this "network" must be the same. The name of the NAD its self is only consequential when assigning it to an interface via Multus.
 
 ```mermaid
 graph TD;
