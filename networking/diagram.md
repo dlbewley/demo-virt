@@ -17,15 +17,16 @@ graph TD;
   switch["Switch fa:fa-grip-vertical"]
   machinenet["fa:fa-network-wired Machine Network<br> 192.168.4.0/24"]
   switch --> machinenet --> ens192
-  switch ==> T(["fa:fa-tags 802.1q Trunk"]) ==> ens224[ens224]
+  ens192 ==> br-ex[["fa:fa-grip-vertical fa:fa-bridge br-ex"]]
+  switch[[switch]] ==> T(["fa:fa-tags 802.1q Trunk"]) ==> ens224[ens224]
 
   subgraph node["CNV Worker"]
     ens192["fa:fa-ethernet ens192"]
     servicenet["fa:fa-network-wired Service Network<br> 172.30.0.0/16"]
     clusternet["fa:fa-network-wired Cluster Network<br> 10.128.0.0/14"]
 
-    ens192 --> servicenet
-    ens192 --> clusternet
+    br-ex --> servicenet
+    br-ex --> clusternet
 
     subgraph nncp["fa:fa-code NNCP"]
       ens224["fa:fa-ethernet ens224"]
@@ -35,7 +36,7 @@ graph TD;
 
     end
 
-    br-vmdata  --> vmdata_ovn_localnet_switch
+    br-vmdata  --> vmdata_ovn_localnet_switch[[vmdata_ovn_localnet_switch]]
 
   end
 
@@ -81,10 +82,10 @@ graph TD;
   class clusternet,nginx-nic,ns2-vm1-nic2 clusterNet
 
   classDef vlan-1924 fill:#bbf
-  class ens224.1924,br-1924,ns1-nad-1924,ns2-nad-1924,ns1-vm2-nic1,ns1-ws2-1924,ns2-vm1-nic1,ns2-vm2-nic2 vlan-1924
+  class ens224.1924,BM1924,ns1-nad-1924,ns2-nad-1924,ns1-vm2-nic1,ns1-ws2-1924,ns2-vm1-nic1,ns2-vm2-nic2 vlan-1924
 
   classDef vlan-1927 fill:#fbb
-  class ens224.1927,br-1927,ns1-nad-1927,ns2-nad-1927,ns2-vm2-nic1,ns2-vm3-nic1 vlan-1927
+  class ens224.1927,BM1927,ns1-nad-1927,ns2-nad-1927,ns2-vm2-nic1,ns2-vm3-nic1 vlan-1927
 
   style nncp stroke:#f66,stroke-width:2px,color:#999,stroke-dasharray: 5 5
   style T fill:white,stroke:darkgrey,stroke-width:1px,color:#333,stroke-dasharray: 2 2
@@ -111,6 +112,7 @@ graph LR;
   switch["Switch fa:fa-grip-vertical"]
   machinenet["fa:fa-network-wired Machine Network<br> 192.168.4.0/24"]
   switch --> machinenet --> ens192
+  ens192 ==> br-ex[["fa:fa-grip-vertical fa:fa-bridge br-ex"]]
   switch ==> T(["fa:fa-tags 802.1q Trunk"]) ==> ens224[ens224]
 
   subgraph node["CNV Worker"]
