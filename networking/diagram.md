@@ -37,7 +37,7 @@ graph TD;
 
     end
 
-    br-vmdata  --> vmdata_ovn_localnet_switch[[vmdata_ovn_localnet_switch]]
+    br-vmdata --> vmdata_ovn_localnet_switch[[vmdata_ovn_localnet_switch]]
 
   end
 
@@ -50,7 +50,7 @@ graph TD;
     subgraph ns1-vm1[fab:fa-linux VM Pod Net]
         nginx-nic["fa:fa-ethernet eth0"]
     end
-    clusternet ----> nginx-nic
+    clusternet --> nginx-nic
 
     subgraph ns1-vm2[fab:fa-windows WS VM]
         ns1-vm2-nic1["fa:fa-ethernet net1"]
