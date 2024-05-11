@@ -33,17 +33,18 @@ graph TD;
       ens224["fa:fa-ethernet ens224"]
       ens224 --> br-vmdata[["fa:fa-grip-vertical fa:fa-bridge br-vmdata"]]
       BM1924(["fa:fa-tags bridge mapping\nvlan-1924 to br-vmdata"]) -.-> br-vmdata
-      BM1927(["fa:fa-tags bridge mapping\nvlan-1927 to br-vmdata"]) -.-> br-vmdata
+      BM1926(["fa:fa-tags bridge mapping\nvlan-1926 to br-vmdata"]) -.-> br-vmdata
 
     end
 
-    br-vmdata --> vmdata_ovn_localnet_switch[[vmdata_ovn_localnet_switch]]
+    br-vmdata --> ovs1924[[vlan.1924_ovn_localnet_switch]]
+    br-vmdata --> ovs1926[[vlan.1926_ovn_localnet_switch]]
 
   end
 
   subgraph nsdefault["Namespace 'default'"]
     ns2-nad-1924[/"fa:fa-code NAD 'vlan-1924'\nlocalnet name 'vlan-1924'"/] -.- BM1924
-    ns2-nad-1927[/"fa:fa-code NAD 'vlan-1927'\nlocalnet name 'vlan-1927'"/] -.- BM1927
+    ns2-nad-1926[/"fa:fa-code NAD 'vlan-1926'\nlocalnet name 'vlan-1926'"/] -.- BM1926
   end
 
   subgraph ns1["Namespace 1"]
@@ -55,7 +56,7 @@ graph TD;
     subgraph ns1-vm2[fab:fa-windows WS VM]
         ns1-vm2-nic1["fa:fa-ethernet net1"]
     end
-    vmdata_ovn_localnet_switch  --> ns1-vm2-nic1
+    ovs1924  --> ns1-vm2-nic1
   end
 
   subgraph ns2["Namespace 2"]
@@ -75,29 +76,29 @@ graph TD;
         ns2-vm3-nic1["fa:fa-ethernet net1"]
     end
 
-    vmdata_ovn_localnet_switch --- ns2-vm1-nic1
-    vmdata_ovn_localnet_switch --- ns2-vm2-nic1
+    ovs1924 --- ns2-vm1-nic1
+    ocs1926 --- ns2-vm2-nic1
   end
 
   classDef clusterNet fill:#bfb
   class clusternet,nginx-nic,ns2-vm1-nic2 clusterNet
 
-  classDef vlan-1924 fill:#bbf
-  class ens224.1924,BM1924,ns1-nad-1924,ns2-nad-1924,ns1-vm2-nic1,ns1-ws2-1924,ns2-vm1-nic1,ns2-vm2-nic2 vlan-1924
+  classDef vlan-1924 fil:#ababff, fill:Green, color:White
+  class ens224.1924,BM1924,ns1-nad-1924,ns2-nad-1924,ns1-vm2-nic1,ns1-ws2-1924,ns2-vm1-nic1,ns2-vm2-nic2,ovs1924 vlan-1924
 
-  classDef vlan-1927 fill:#fbb
-  class ens224.1927,BM1927,ns1-nad-1927,ns2-nad-1927,ns2-vm2-nic1,ns2-vm3-nic1 vlan-1927
+  classDef vlan-1926 fil:#fbb, fill:Blue, color:White
+  class ens224.1926,BM1926,ns1-nad-1926,ns2-nad-1926,ns2-vm2-nic1,ns2-vm3-nic1,ovs1926 vlan-1926
 
   style nncp stroke:#f66,stroke-width:2px,color:#999,stroke-dasharray: 5 5
   style T fill:white,stroke:darkgrey,stroke-width:1px,color:#333,stroke-dasharray: 2 2
 
   classDef ns1-vm fill:#eff
   class ns1-vm1,ns1-vm2 ns1-vm
-  style ns1 fill:#eee
+  style ns1 fill:Grey
 
   classDef ns2-vm fill:#cdd
   class ns2-vm1,ns2-vm2,ns2-vm3 ns2-vm
-  style ns2 fill:#ccc
+  style ns2 fill:Grey
 
   style nsdefault fill:#ccc
 ```
