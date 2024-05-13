@@ -11,8 +11,21 @@ The network name as found in the NAD.spec.config.name is used as the selector to
 
 The `name` in the config of a Network Attachment Definition defines "a network". Any NADs which grant access to this "network" must be the same. The name of the NAD its self is only consequential when assigning it to an interface via Multus.
 
+<!-- https://dompl.medium.com/produce-great-looking-flowcharts-in-seconds-7f3bea64f2e2 -->
+<!-- 
+ovncli hub-tq2sk-cnv-qt59g
+sh-5.1# ovn-nbctl ls-list
+b126a387-8cf2-42be-a214-5a853b8929ec (ext_hub-tq2sk-cnv-qt59g)
+0efe6d8d-0ddf-4128-9ca1-a6ecbe77e063 (hub-tq2sk-cnv-qt59g)
+014427a8-b291-4b9a-98e6-cb503aca2fca (isolated_ovn_layer2_switch)
+282f5c3f-1ec1-426b-949e-6642197b3411 (join)
+5343e6cd-34b5-41fc-9f13-2a7590e7efed (transit_switch)
+b30b5253-7fe4-46a4-b74f-d21845c773c5 (vlan.1924_ovn_localnet_switch)
+4b795783-2692-42d0-be2b-4bb760a16b8d (vlan.1926_ovn_localnet_switch) -->
+
+
 ```mermaid
-graph TD;
+graph LR;
 
   switch["Switch fa:fa-grip-vertical"]
   machinenet["fa:fa-network-wired Machine Network<br> 192.168.4.0/24"]
@@ -29,11 +42,13 @@ graph TD;
     br-ex --> servicenet
     br-ex --> clusternet
 
+
+
     subgraph nncp["fa:fa-code NNCP"]
       ens224["fa:fa-ethernet ens224"]
       ens224 --> br-vmdata[["fa:fa-grip-vertical fa:fa-bridge br-vmdata"]]
-      BM1924(["fa:fa-tags bridge mapping\nvlan-1924 to br-vmdata"]) -.-> br-vmdata
-      BM1926(["fa:fa-tags bridge mapping\nvlan-1926 to br-vmdata"]) -.-> br-vmdata
+      BM1924[/"fa:fa-tags bridge mapping\nvlan-1924 to br-vmdata"/] -.-> br-vmdata
+      BM1926[/"fa:fa-tags bridge mapping\nvlan-1926 to br-vmdata"/] -.-> br-vmdata
 
     end
 
@@ -43,8 +58,10 @@ graph TD;
   end
 
   subgraph nsdefault["Namespace 'default'"]
-    ns2-nad-1924[/"fa:fa-code NAD 'vlan-1924'\nlocalnet name 'vlan-1924'"/] -.- BM1924
-    ns2-nad-1926[/"fa:fa-code NAD 'vlan-1926'\nlocalnet name 'vlan-1926'"/] -.- BM1926
+    subgraph nad["fa:fa-code NAD"]
+      ns2-nad-1924[/"fa:fa-code NAD 'vlan-1924'\nlocalnet name 'vlan-1924'"/] -.- BM1924
+      ns2-nad-1926[/"fa:fa-code NAD 'vlan-1926'\nlocalnet name 'vlan-1926'"/] -.- BM1926
+    end
   end
 
   subgraph ns1["Namespace 1"]
@@ -77,7 +94,7 @@ graph TD;
     end
 
     ovs1924 --- ns2-vm1-nic1
-    ocs1926 --- ns2-vm2-nic1
+    ovs1926 --- ns2-vm2-nic1
   end
 
   classDef clusterNet fill:#bfb
@@ -89,6 +106,10 @@ graph TD;
   classDef vlan-1926 fil:#fbb, fill:Blue, color:White
   class ens224.1926,BM1926,ns1-nad-1926,ns2-nad-1926,ns2-vm2-nic1,ns2-vm3-nic1,ovs1926 vlan-1926
 
+  classDef bridge color:#9999,file:cyan,stroke-dasharray: 5 5
+  class br-ex,br-vmdata bridge
+
+  style nad stroke:#f66,stroke-width:2px,color:#9999,file:none,stroke-dasharray: 5 5
   style nncp stroke:#f66,stroke-width:2px,color:#999,stroke-dasharray: 5 5
   style T fill:white,stroke:darkgrey,stroke-width:1px,color:#333,stroke-dasharray: 2 2
 
