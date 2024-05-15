@@ -1,0 +1,22 @@
+---
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  annotations:
+    description: Lab Network 192.168.6.0/24 V1926 OVS Bridge
+  name: vlan-1926
+  namespace: default
+spec:
+  # the name below is the name of a cluster-scoped "network"
+  # this network will be mapped to an appropriate bridge
+  # via NNCP in an OVN bridge-mapping
+  config: |-
+    {
+      "cniVersion": "0.3.1", 
+      "name": "vlan-1926", 
+      "type": "ovn-k8s-cni-overlay", 
+      "topology": "localnet", 
+      "netAttachDefName": "default/vlan-1926",
+      "vlanID": 1926,
+      "ipam": {}
+    }

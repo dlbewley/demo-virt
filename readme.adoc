@@ -2,13 +2,9 @@
 :source-highlighter: rouge
 :toc:
 
-This repo is a collection of configs to explore OpenShift Virtualization in a Nested Virtualization environment. It's not actually a Demo at this time. It will build upon learning described in https://guifreelife.com/blog/2022/05/13/OpenShift-Virtualization-on-vSphere/
+This repo is a collection of configs to explore OpenShift Virtualization and Networking.
 
-Note https://access.redhat.com/solutions/6972064
-How to create VLAN interface for VMs in OpenShift Virtualization
-
-== Installation
-=== Install OpenShift Virtualization
+== Installing OpenShift Virtualization
 
 We'll reuse the code from the https://github.com/redhat-cop/gitops-catalog/blob/main/virtualization-operator/base/kustomization.yaml[GitOps catalog] to install the operator, and then provide our own link:virtulization/instance/base/hyperconverged.yaml[Hyperconverged] resource to instantiate, or configure, the operator.
 
@@ -29,153 +25,24 @@ This can be done by plumbing those networks to the Nodes and using the NMstate o
 
 An OpenShift Template can be used to make the writing of NNCPs a bit more repeatable and fault tolerant. As with most things in life, being organized and consistent is very important in networking. Please don't write a one-off NNCP. Nothing (very little) is ever "one-off".
 
-Some generated NNCPs can be found
-here link:networking[networking/]
-and here link:demos/components/networks/[demos/components/networks/].
+link:templates/template-nad-ovs-br-localnet-vlan.yaml[Template] to create a node network configuration policy.
 
-.link:templates/template-nncp-nic-vlan-br.yaml[Template] to create a node network configuration policy
-[source,yaml]
-----
-include::templates/template-nncp-nic-vlan-br.yaml[]
-----
+Some generated NNCPs can be found here link:networking/components[] and link:example[here].
 
 Because it is common to have different cluster Nodes allocated for different workloads, this template uses `NODE_SELECTOR_KEY` and `NODE_SELECTOR_VALUE` parameters to target the nodes which are expected to provide networking for virtual machines. This example uses the machineset used to provision the hypervisor nodes.
-
-.Generate NodeNetworkConfigurationPolicies for multiple VLANs using a link:templates/template-nncp-nic-vlan-br.yaml[Template]
-[TIP]
-====
-[source,bash]
-----
-# zsh syntax
-unset vlans
-declare -A vlans
-NIC=ens224
-vlans[1924]="Lab"
-vlans[1925]="Disco"
-vlans[1926]="Trans Proxy"
-vlans[1927]="Metal"
-vlans[1928]="Provisioning"
-
-for VLAN in ${(k)vlans}; do
-  oc process \
-    -p VLAN="$V" \
-    -p NIC="$NIC" \
-    -p NODE_SELECTOR_KEY=machine.openshift.io/cluster-api-machineset \
-    -p NODE_SELECTOR_VALUE=hub-l7c56-cnv \
-    -p DESCRIPTION="Add ${vlans[$VLAN]} VLAN ${VLAN} and Bridge br-${VLAN} on ${NIC}" \
-    -f templates/template-nncp-nic-vlan-br.yaml \
-    -o yaml \
-    | yq e '.items[0]' > "networking/nncp/nncp-$NIC-br-vlan-$VLAN.yaml"
-  echo $k
-done
-----
-====
-
-The output can be seen in link:networking/nncp/[networking/nncp/].
-
-.Ensure kustomization.yaml includes the generated NNCP resources
-[source,bash]
-----
-pushd networking/nncp
-rm kustomization.yaml
-kustomize create --autodetect --labels template:nncp-nic-vlan-br
-popd
-----
-
-.Apply the generated NNCPs
-[source,bash]
-----
-oc apply -k networking/nncp
-----
-
-Examine the NNCPs for their status. Also check the NNCEs for any failures.
-
-Once applied, the nodes should have enacted the changes and will offer these new bridges as allocatable resources of the nodes.
-
-.Use the node selector to see which nodes will support scheduling based on availability of these bridge network resources.
-[source,bash]
-----
-oc get nodes \
-  -l machine.openshift.io/cluster-api-machineset=hub-l7c56-cnv \
-  -o json \
-  | jq '.items[] | {"node": .metadata.name, "allocatable": .status.allocatable | with_entries(select(.key|match("bridge")))}'
-----
-[source,json]
-----
-{
-  "node": "hub-l7c56-cnv-2vv8w",
-  "allocatable": {
-    "bridge.network.kubevirt.io/br-1924": "1k",
-    "bridge.network.kubevirt.io/br-1925": "1k",
-    "bridge.network.kubevirt.io/br-1926": "1k",
-    "bridge.network.kubevirt.io/br-1927": "1k",
-    "bridge.network.kubevirt.io/br-1928": "1k"
-  }
-}
-{
-  "node": "hub-l7c56-cnv-vk878",
-  "allocatable": {
-    "bridge.network.kubevirt.io/br-1924": "1k",
-    "bridge.network.kubevirt.io/br-1925": "1k",
-    "bridge.network.kubevirt.io/br-1926": "1k",
-    "bridge.network.kubevirt.io/br-1927": "1k",
-    "bridge.network.kubevirt.io/br-1928": "1k"
-  }
-}
-----
 
 === Configure Namespace Networking
 
 Attachment to a network is gated by a namespace scoped NetworkAttachmentDefinition resource used by Multus via annotations on pods.
 
-Network attachment definitions in the 'default' namespace are visible to all other namespaces by default. As a cluster administrator you may wish to restrict access by defining attachments in specific user namespaces.
+Network attachment definitions in the 'default' namespace are visible to all other namespaces by default. As a cluster administrator you may wish to restrict access by defining attachments in specific user namespaces. Because only an admin may create the NAD it may make sense to place them all in 'default'.
 
-.link:templates/template-nad-vlan-cnv-bridge.yaml[Template] to create a network attachment definition
-[source,yaml]
-----
-include::templates/template-nad-vlan-cnv-bridge.yaml[]
-----
 
-.Create Network-Attach-Defs for each VLAN from Template
-[source,bash]
-----
-# zsh syntax
-unset vlans
-declare -A vlans
-NAMESPACE=demo-virt
-vlans[1924]="Lab"
-vlans[1925]="Disco"
-vlans[1926]="Trans Proxy"
-vlans[1927]="Metal"
-vlans[1928]="Provisioning"
+.**Templates**
+* link:templates/template-nad-vlan-cnv-bridge.yaml[Template] to create a CNV-Bridge network attachment definition
+* link:templates/template-nad-ovs-br-localnet-vlan.yaml[Template] to create a localnet CNI plugin network attachment definition
 
-for VLAN in ${(k)vlans}; do
-  oc process \
-    -p VLAN=$VLAN \
-    -p DESCRIPTION="${vlans[$VLAN]} VLAN ${VLAN} by Bridge br-${VLAN}" \
-    -p NAMESPACE=$NAMESPACE \
-    -f templates/template-nad-vlan-cnv-bridge.yaml \
-    -o yaml \
-    | yq e '.items[0]' > networking/nad/nad-vlan-$VLAN.yaml
-done
-----
-
-The output can be seen in link:networking/nad/[networking/nad/].
-
-.Create Kustomizations from generated resources
-[source,bash]
-----
-pushd networking/nad
-rm kustomization.yaml
-kustomize create --autodetect --labels template:nad-vlan-cnv-bridge --namespace $NAMESPACE
-popd
-----
-
-.Apply the generated Net-attach-defs
-[source,bash]
-----
-oc apply -k networking/nad
-----
+Associating a network to an ovs-bridge requires a mapping defined via an NNCP. The template above creates a NNCP and a NAD for each VLAN.
 
 Take a peek at this link:networking/diagram.md[networking diagram] for a sense of how the NNCP and NAD will fit together.
 
@@ -460,3 +327,4 @@ spec:
 * https://docs.google.com/presentation/d/1p7NxcK_0xxxyKtndNC_zh9kCi_fZLieiXBLYjRxJDWk/edit#slide=id.g634ca58e56_0_218[OpenShift and OVN Deck]
 * https://guifreelife.com/blog/2022/05/13/OpenShift-Virtualization-on-vSphere/[GUI Free Life]
 * https://github.com/openshift/network-tools/blob/master/docs/user.md
+* https://access.redhat.com/solutions/6972064[How to create VLAN interface for VMs in OpenShift Virtualization?] - When using Linux Bridge as opposed to OVS Bridge

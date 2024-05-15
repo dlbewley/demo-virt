@@ -22,7 +22,7 @@ image: unarchive
 	podman tag $(IMAGE):$(VDDK_VER) $(REGISTRY)/$(NAMESPACE)/$(IMAGE):latest
 
 login:
-	podman login -u $(REGISTRY_USER) -p $(TOKEN) $(REGISTRY)
+	podman login --tls-verify=$(TLS_VERIFY) -u $(REGISTRY_USER) -p $(TOKEN) $(REGISTRY)
 
 push:
 	podman push --tls-verify=$(TLS_VERIFY) $(REGISTRY)/$(NAMESPACE)/$(IMAGE):$(VDDK_VER) && \

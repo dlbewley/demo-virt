@@ -1,0 +1,6 @@
+= VLAN-1926 Net-Attach-Def And OVS Bridge Mapping
+
+Assumes hypervisors have a bridge called ovs-ens224
+
+Creates a namespaced NetworkAttachmentDefinition of type ovn-k8s-cni-overlay and topology localnet to enabled accessing VLAN ID 1926 from datacenter netowkr. Use 'default' namespace to make NAD visible to all projects.
+

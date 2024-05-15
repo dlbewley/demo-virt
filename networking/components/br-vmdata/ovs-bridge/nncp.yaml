@@ -1,0 +1,29 @@
+---
+apiVersion: nmstate.io/v1
+kind: NodeNetworkConfigurationPolicy
+metadata:
+  name: br-vmdata
+spec:
+  desiredState:
+    interfaces:
+      - name: ens224
+        ipv4:
+          enabled: false
+        ipv6:
+          enabled: false
+        state: up
+        type: ethernet
+
+      - name: br-vmdata
+        description: |-
+          A dedicated OVS bridge with ens224 as a port
+          allowing all VLANs and untagged traffic.
+          Networks will be mapped to this brige via ovn.bridge-mappings in NNCPs
+          associated with creation of those networks via NetworkAttachmentDefinition.
+        type: ovs-bridge
+        state: up
+        bridge:
+          options:
+            stp: true
+          port:
+            - name: ens224
