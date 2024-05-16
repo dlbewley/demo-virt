@@ -23,6 +23,20 @@ b126a387-8cf2-42be-a214-5a853b8929ec (ext_hub-tq2sk-cnv-qt59g)
 b30b5253-7fe4-46a4-b74f-d21845c773c5 (vlan.1924_ovn_localnet_switch)
 4b795783-2692-42d0-be2b-4bb760a16b8d (vlan.1926_ovn_localnet_switch) -->
 
+<!-- ```mermaid
+gantt
+axisFormat %
+todayMarker on
+section Node Network Config
+    Switch Port : TA, 0, 1d
+    NIC Config : TB, after TA, 1d
+section Network Attachment 1924
+    NAD : TC, after TB, 1d
+    NNCP : TD, after TC, 1d
+section Network Attachment 1926
+    NAD : TE, after TB, 1d
+    NNCP : TF, after TE, 1d
+``` -->
 
 ```mermaid
 graph LR;
@@ -55,8 +69,8 @@ graph LR;
     br-vmdata --> ovs1924[[vlan.1924_ovn_localnet_switch]]
     br-vmdata --> ovs1926[[vlan.1926_ovn_localnet_switch]]
 
-  end
 
+  end
   subgraph nsdefault["Namespace 'default'"]
     subgraph nad["fa:fa-code NAD"]
       ns2-nad-1924[/"fa:fa-code NAD 'vlan-1924'\nlocalnet name 'vlan-1924'"/] -.- BM1924
@@ -78,35 +92,37 @@ graph LR;
 
   subgraph ns2["Namespace 2"]
     subgraph ns2-vm1[fab:fa-github Dev VM]
-        ns2-vm1-nic1["fa:fa-ethernet net1"]
         ns2-vm1-nic2["fa:fa-ethernet eth0"]
+        ns2-vm1-nic1["fa:fa-ethernet net1"]
     end
 
     clusternet --> ns2-vm1-nic2
 
     subgraph ns2-vm2["fa:fa-database DB VM"]
-        ns2-vm2-nic1["fa:fa-ethernet net1"]
         ns2-vm2-nic2["fa:fa-ethernet net2"]
+        ns2-vm2-nic1["fa:fa-ethernet net1"]
     end
 
     subgraph ns2-vm3["fab:fa-redhat WS VM"]
         ns2-vm3-nic1["fa:fa-ethernet net1"]
     end
 
+    ovs1924 --- ns2-vm2-nic2
     ovs1924 --- ns2-vm1-nic1
+    ovs1926 --- ns2-vm3-nic1
     ovs1926 --- ns2-vm2-nic1
   end
 
   classDef clusterNet fill:#bfb
   class clusternet,nginx-nic,ns2-vm1-nic2 clusterNet
 
-  classDef vlan-1924 fil:#ababff, fill:Green, color:White
+  classDef vlan-1924 fill:#bbf,color:black
   class ens224.1924,BM1924,ns1-nad-1924,ns2-nad-1924,ns1-vm2-nic1,ns1-ws2-1924,ns2-vm1-nic1,ns2-vm2-nic2,ovs1924 vlan-1924
 
-  classDef vlan-1926 fil:#fbb, fill:Blue, color:White
+  classDef vlan-1926 fill:#fbb, color:black
   class ens224.1926,BM1926,ns1-nad-1926,ns2-nad-1926,ns2-vm2-nic1,ns2-vm3-nic1,ovs1926 vlan-1926
 
-  classDef bridge color:#9999,file:cyan,stroke-dasharray: 5 5
+  classDef bridge color:#9999,file:cyan, color:black
   class br-ex,br-vmdata bridge
 
   style nad stroke:#f66,stroke-width:2px,color:#9999,file:none,stroke-dasharray: 5 5
