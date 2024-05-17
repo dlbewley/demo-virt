@@ -82,12 +82,12 @@ graph LR;
     subgraph ns1-vm1[fab:fa-linux VM Pod Net]
         nginx-nic["fa:fa-ethernet eth0"]
     end
-    clusternet --> nginx-nic
+    clusternet --- nginx-nic
 
     subgraph ns1-vm2[fab:fa-windows WS VM]
         ns1-vm2-nic1["fa:fa-ethernet net1"]
     end
-    ovs1924  --> ns1-vm2-nic1
+    ovs1924  --- ns1-vm2-nic1
   end
 
   subgraph ns2["Namespace 2"]
@@ -96,11 +96,11 @@ graph LR;
         ns2-vm1-nic1["fa:fa-ethernet net1"]
     end
 
-    clusternet --> ns2-vm1-nic2
+    clusternet --- ns2-vm1-nic2
 
     subgraph ns2-vm2["fa:fa-database DB VM"]
-        ns2-vm2-nic2["fa:fa-ethernet net2"]
         ns2-vm2-nic1["fa:fa-ethernet net1"]
+        ns2-vm2-nic2["fa:fa-ethernet net2"]
     end
 
     subgraph ns2-vm3["fab:fa-redhat WS VM"]
@@ -321,6 +321,109 @@ graph LR;
   classDef ns2-vm fill:#cdd
   class ns2-vm1,ns2-vm2,ns2-vm3 ns2-vm
   style ns2 fill:#ccc
+```
+
+## More OVN Spelunking
+
+Trying to visualize the OVN components on a node
+
+```
+osh-5.1# ovn-nbctl lr-list
+65edf48e-8e56-4cbb-a55d-54ca2b96cb04 (GR_hub-tq2sk-cnv-xcxw2) # <-- routing off the cluster (gatway)
+99aba237-a6ed-4a91-9b5d-eaf9dcc4878c (ovn_cluster_router) # <-- routing within the cluster
+
+sh-5.1# ovn-nbctl ls-list
+d77c4a1a-d128-44f8-8698-3236384917f1 (ext_hub-tq2sk-cnv-xcxw2) # <-- br-ex and GR
+d4222ecf-7a0d-47be-9cd0-cd14e9e3eba9 (hub-tq2sk-cnv-xcxw2)
+a0c4ae72-db54-4ac0-a4c0-dd1f7a65855b (join) #
+238fbbad-b6a3-474b-9944-6c0f99c5191b (transit_switch)
+8a4631c6-f1fa-4eec-aa7c-00f88e85f439 (vlan.1924_ovn_localnet_switch) # guess
+5047e67e-d8b6-483f-8718-c38468205e24 (vlan.1926_ovn_localnet_switch) # guess
+
+sh-5.1# ovn-nbctl lsp-list ext_hub-tq2sk-cnv-xcxw2
+3007e1e2-0d26-46da-a5a5-b2d5c97dfc77 (br-ex_hub-tq2sk-cnv-xcxw2)
+0ddee1da-4102-4f54-935a-e96fb994d147 (etor-GR_hub-tq2sk-cnv-xcxw2)
+
+sh-5.1# ovn-nbctl lrp-list ovn_cluster_router
+553af3a3-4663-445a-a1a1-5bbd86219a82 (rtoj-ovn_cluster_router)
+0ab8b4a0-2250-4252-a7d9-ea8405cfe921 (rtos-hub-tq2sk-cnv-xcxw2)
+d51c8aa7-84be-40cf-876b-8174d35852d0 (rtots-hub-tq2sk-cnv-xcxw2)
+
+sh-5.1# ovn-nbctl show ovn_cluster_router
+router 99aba237-a6ed-4a91-9b5d-eaf9dcc4878c (ovn_cluster_router)
+    port rtos-hub-tq2sk-cnv-xcxw2
+        mac: "0a:58:0a:82:06:01"
+        networks: ["10.130.6.1/23"]
+        gateway chassis: [f57f0c4e-5d93-4639-a016-7cea61281c04]
+    port rtoj-ovn_cluster_router
+        mac: "0a:58:64:40:00:01"
+        networks: ["100.64.0.1/16"]
+    port rtots-hub-tq2sk-cnv-xcxw2
+        mac: "0a:58:64:58:00:10"
+        networks: ["100.88.0.16/16"]
+
+sh-5.1# ovn-nbctl lrp-list GR_hub-tq2sk-cnv-xcxw2
+c06389bb-e92f-499e-8c86-4b64e711ac43 (rtoe-GR_hub-tq2sk-cnv-xcxw2)
+6c5ac19f-56af-4ac0-9b03-21cf14081434 (rtoj-GR_hub-tq2sk-cnv-xcxw2)
+
+sh-5.1# ovn-nbctl show GR_hub-tq2sk-cnv-xcxw2
+router 65edf48e-8e56-4cbb-a55d-54ca2b96cb04 (GR_hub-tq2sk-cnv-xcxw2)
+    port rtoj-GR_hub-tq2sk-cnv-xcxw2
+        mac: "0a:58:64:40:00:10"
+        networks: ["100.64.0.16/16"]
+    port rtoe-GR_hub-tq2sk-cnv-xcxw2
+        mac: "00:50:56:b4:76:06"
+        networks: ["192.168.4.45/24"]
+    nat 00380db1-95ad-4a34-b1db-ff134af85a34
+        external ip: "192.168.4.45"
+        logical ip: "10.130.6.97"
+        type: "snat"
+        ... many more nat objects ...
+```
+
+
+```mermaid
+graph LR;
+
+nic
+
+subgraph ext_hub-tq2sk-cnv-xcxw2["External Switch"]
+  sw-ext[[ext_hub-tq2sk-cnv-xcxw2\n br-ex]]
+end
+
+sw-ext --- nic
+
+subgraph join["Join Switch"]
+  sw-join[[join]]
+end
+
+subgraph GR_hub-tq2sk-cnv-xcxw2["Gateway Router"]
+  rt-gw{"GR_hub-tq2sk-cnv-xcxw2"}
+  rt-gw --(lrp:rtoj-GR_hub-tq2sk-cnv-xcxw2)--> sw-join
+  rt-gw --(lrp:rtoe-GR_hub-tq2sk-cnv-xcxw2)--> sw-ext
+end
+
+subgraph transit["Transit Switch"]
+  sw-transit[[transit_switch]]
+  sw-transit -.- master1
+  sw-transit -.- master2
+  sw-transit -.- master3
+  sw-transit -.- worker1
+end
+
+subgraph sw-rtos-hub-tq2sk-cnv-xcxw2["Local Switch "]
+   sw-local[["sw-rtos-hub-tq2sk-cnv-xcxw2\n10.130.6.1/23"]]
+   sw-local --> pod1
+   sw-local --> pod2
+   sw-local --> pod3
+end
+
+subgraph ovn_cluster_router["Cluster Router"]
+  rt-cluster{"ovn_cluster_router"}
+  rt-cluster --(lrp:rtos-hub-tq2sk-cnv-xcxw2\n 10.64.0.1/16)--> sw-local
+  rt-cluster --(lrp:rtots-hub-tq2sk-cnv-xcxw2\n 100.88.0.16/16)--> sw-transit
+  rt-cluster --(lrp:rtoj-ovn_cluster_router)--> sw-join
+end
 ```
 
 ## Examples
