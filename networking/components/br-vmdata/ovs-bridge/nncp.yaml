@@ -24,6 +24,6 @@ spec:
         state: up
         bridge:
           options:
-            stp: true
+            stp: false
           port:
             - name: ens224
