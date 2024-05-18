@@ -385,45 +385,84 @@ router 65edf48e-8e56-4cbb-a55d-54ca2b96cb04 (GR_hub-tq2sk-cnv-xcxw2)
 ```mermaid
 graph LR;
 
-nic
+  hostname["Key:\nHOST = hub-tq2sk-cnv-xcxw2"]
 
-subgraph ext_hub-tq2sk-cnv-xcxw2["External Switch"]
-  sw-ext[[ext_hub-tq2sk-cnv-xcxw2\n br-ex]]
-end
 
-sw-ext --- nic
+  nic
 
-subgraph join["Join Switch"]
-  sw-join[[join]]
-end
+  subgraph ext_hub-tq2sk-cnv-xcxw2["External Switch"]
+    sw-ext[[ext_$HOST\n br-ex]]
+  end
 
-subgraph GR_hub-tq2sk-cnv-xcxw2["Gateway Router"]
-  rt-gw{"GR_hub-tq2sk-cnv-xcxw2"}
-  rt-gw --(lrp:rtoj-GR_hub-tq2sk-cnv-xcxw2)--> sw-join
-  rt-gw --(lrp:rtoe-GR_hub-tq2sk-cnv-xcxw2)--> sw-ext
-end
+  sw-ext --> nic
 
-subgraph transit["Transit Switch"]
-  sw-transit[[transit_switch]]
-  sw-transit -.- master1
-  sw-transit -.- master2
-  sw-transit -.- master3
-  sw-transit -.- worker1
-end
+  subgraph join["Join Switch"]
+    sw-join[[join]]
+  end
 
-subgraph sw-rtos-hub-tq2sk-cnv-xcxw2["Local Switch "]
-   sw-local[["sw-rtos-hub-tq2sk-cnv-xcxw2\n10.130.6.1/23"]]
-   sw-local --> pod1
-   sw-local --> pod2
-   sw-local --> pod3
-end
+  subgraph GR_$HOST["Gateway Router"]
+    rt-gw{"GR_$HOST"}
+    rt-gw -- lrp:rtoj-GR_$HOST --> sw-join
+    rt-gw -- lrp:rtoe-GR_$HOST --> sw-ext
+  end
 
-subgraph ovn_cluster_router["Cluster Router"]
-  rt-cluster{"ovn_cluster_router"}
-  rt-cluster --(lrp:rtos-hub-tq2sk-cnv-xcxw2\n 10.64.0.1/16)--> sw-local
-  rt-cluster --(lrp:rtots-hub-tq2sk-cnv-xcxw2\n 100.88.0.16/16)--> sw-transit
-  rt-cluster --(lrp:rtoj-ovn_cluster_router)--> sw-join
-end
+  subgraph transit["Transit Switch"]
+    sw-transit[[transit_switch]]
+    sw-transit -.- master1
+    sw-transit -.- master2
+    sw-transit -.- master3
+    sw-transit -.- worker1
+  end
+
+  subgraph sw-rtos-$HOST["Local Switch "]
+    sw-local[["sw-rtos-$HOST\n10.130.6.1/23"]]
+    sw-local --> pod1
+    sw-local --> pod2
+    sw-local --> pod3
+  end
+
+  subgraph ovn_cluster_router["Cluster Router"]
+    rt-cluster{"ovn_cluster_router"}
+    rt-cluster -- lrp:rtos-$HOST\n 10.64.0.1/16 --> sw-local
+    rt-cluster -- lrp:rtots-$HOST\n 100.88.0.16/16 --> sw-transit
+    rt-cluster -- lrp:rtoj-ovn_cluster_router --> sw-join
+  end
+
+  classDef key fill:grey, color:white, stroke:black, stroke-width:4
+  class hostname key
+
+  classDef switch fill:#eff
+  class sw-join,sw-transit,sw-local,sw-ext switch
+
+  classDef router fill:#fef
+  class rt-gw,rt-cluster router
+
+  linkStyle default stroke:purple
+  linkStyle 0,2 stroke:blue
+  linkStyle 1,12 stroke:red
+  linkStyle 3,4,5,6 stroke:green
+  linkStyle 7,8,9,10 stroke:orange
+  linkStyle 11 stroke:green
+
+```
+
+  <!-- subgraph vlan-1924["Localnet Switch 1924"]
+    sw-1924[["vlan.1924_ovn_localnet_switch"]]
+    sw-1924 -- vm
+    rt-cluster -- lrp:?? -- sw-1924
+  end
+ -->
+
+## Examples
+
+[Network components](../demos/components/networks)
+
+## References
+
+* <https://kubevirt.io/2023/OVN-kubernetes-secondary-networks-localnet.html>
+* <https://access.redhat.com/solutions/6972064>
+* <https://developers.redhat.com/blog/2017/09/14/vlan-filter-support-on-bridge#without_vlan_filtering>
+
 ```
 
 ## Examples
