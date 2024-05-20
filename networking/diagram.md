@@ -385,6 +385,7 @@ router 65edf48e-8e56-4cbb-a55d-54ca2b96cb04 (GR_hub-tq2sk-cnv-xcxw2)
 ```mermaid
 graph LR;
 
+subgraph Node
   hostname["Key:\nHOST = hub-tq2sk-cnv-xcxw2"]
 
 
@@ -408,7 +409,7 @@ graph LR;
 
   subgraph transit["Transit Switch"]
     sw-transit[[transit_switch]]
-    sw-transit -.- master1
+    sw-transit -. tunnels .- master1
     sw-transit -.- master2
     sw-transit -.- master3
     sw-transit -.- worker1
@@ -428,7 +429,271 @@ graph LR;
     rt-cluster -- lrp:rtoj-ovn_cluster_router --> sw-join
   end
 
-  classDef key fill:grey, color:white, stroke:black, stroke-width:4
+  end
+  nic ==> ToR
+
+
+  classDef key fill:#ddd, color:black, stroke:black, stroke-width:2
+  class hostname key
+
+  classDef nodes fill:#fefefe, stroke:black, stroke-width:4
+  class Node nodes
+
+  classDef switch fill:#eff
+  class sw-join,sw-transit,sw-local,sw-ext switch
+
+  classDef router fill:#fef
+  class rt-gw,rt-cluster router
+
+  classDef routers fill:#fde
+  class ovn_cluster_router,GR_$HOST routers
+
+  style ext_hub-tq2sk-cnv-xcxw2 fill:#eef
+  style transit fill:#efe
+  style join fill:#fde
+  style sw-rtos-$HOST fill:#fee
+
+  classDef key fill:#ddd, color:black, stroke:black, stroke-width:2
+  class hostname key
+
+  classDef switch fill:#eff
+  class sw-join,sw-transit,sw-local,sw-ext switch
+
+  linkStyle default stroke:purple
+  linkStyle 0,2,13 stroke:blue
+  linkStyle 1,12 stroke:red
+  linkStyle 3,4,5,6 stroke:green
+  linkStyle 7,8,9,10 stroke:orange
+  linkStyle 11 stroke:green
+
+```
+
+```
+# ovncli
+sh-5.1# ovn-nbctl lsp-list vlan.1924_ovn_localnet_switch
+2bda361c-109e-49f8-986e-ef0156a55233 (default.vlan.1924_demo-virt_virt-launcher-rhel-node-1-mjktg)
+3816e460-4cce-4335-8fde-dd4c35174b24 (vlan.1924_ovn_localnet_port)
+
+# ssh
+[root@hub-tq2sk-cnv-k9wjv ~]# ovs-vsctl show
+9ba7b144-6826-4070-8173-a5d721290de0
+    Bridge br-vmdata
+        Port patch-vlan.1924_ovn_localnet_port-to-br-int
+            Interface patch-vlan.1924_ovn_localnet_port-to-br-int
+                type: patch
+                options: {peer=patch-br-int-to-vlan.1924_ovn_localnet_port}
+        Port ens224
+            Interface ens224
+                type: system
+    Bridge br-int
+        fail_mode: secure
+        datapath_type: system
+        Port f322e89f76b98ed
+            Interface f322e89f76b98ed
+        Port "62009a31c5ab00d"
+            Interface "62009a31c5ab00d"
+        Port ovn-977c70-0
+            Interface ovn-977c70-0
+                type: geneve
+                options: {csum="true", key=flow, remote_ip="192.168.4.102"}
+        Port ovn-71747d-0
+            Interface ovn-71747d-0
+                type: geneve
+                options: {csum="true", key=flow, remote_ip="192.168.4.89"}
+        Port "80cbd3e96532f08"
+            Interface "80cbd3e96532f08"
+        Port cc1f771e8a675cd
+            Interface cc1f771e8a675cd
+        Port "30481d3db2effed"
+            Interface "30481d3db2effed"
+        Port "6e3d9e21a693e86"
+            Interface "6e3d9e21a693e86"
+        Port ovn-f57f0c-0
+            Interface ovn-f57f0c-0
+                type: geneve
+                options: {csum="true", key=flow, remote_ip="192.168.4.45"}
+        Port "3c85cc3280c75ce"
+            Interface "3c85cc3280c75ce"
+        Port d5414d0c94db9d1
+            Interface d5414d0c94db9d1
+        Port "206ffdd73b5b3a5"
+            Interface "206ffdd73b5b3a5"
+            Interface "206ffdd73b5b3a5"
+        Port "76f353d59f64277"
+            Interface "76f353d59f64277"
+        Port ovn-881f13-0
+            Interface ovn-881f13-0
+                type: geneve
+                options: {csum="true", key=flow, remote_ip="192.168.4.181"}
+        Port br-int
+            Interface br-int
+                type: internal
+        Port ovn-86ab51-0
+            Interface ovn-86ab51-0
+                type: geneve
+                options: {csum="true", key=flow, remote_ip="192.168.4.82"}
+        Port ovn-02c2eb-0
+            Interface ovn-02c2eb-0
+                type: geneve
+                options: {csum="true", key=flow, remote_ip="192.168.4.163"}
+        Port ovn-05aff4-0
+            Interface ovn-05aff4-0
+                type: geneve
+                options: {csum="true", key=flow, remote_ip="192.168.4.68"}
+        Port patch-br-int-to-br-ex_hub-tq2sk-cnv-k9wjv
+            Interface patch-br-int-to-br-ex_hub-tq2sk-cnv-k9wjv
+                type: patch
+                options: {peer=patch-br-ex_hub-tq2sk-cnv-k9wjv-to-br-int}
+        Port ovn-7f6616-0
+            Interface ovn-7f6616-0
+                type: geneve
+                options: {csum="true", key=flow, remote_ip="192.168.4.77"}
+        Port "40c29fe163e8a4a"
+            Interface "40c29fe163e8a4a"
+        Port abfe226c6929180
+            Interface abfe226c6929180
+        Port "2ba29cf8e5bbe67"
+            Interface "2ba29cf8e5bbe67"
+        Port "511f63e8260de97"
+            Interface "511f63e8260de97"
+        Port "1ab671dbe37d093"
+            Interface "1ab671dbe37d093"
+        Port "50b89a888543926"
+            Interface "50b89a888543926"
+        Port "511f63e8260de_3"
+            Interface "511f63e8260de_3"
+        Port ovn-k8s-mp0
+            Interface ovn-k8s-mp0
+                type: internal
+        Port d073b63988d5f91
+            Interface d073b63988d5f91
+        Port "09e0bc834df0d0c"
+            Interface "09e0bc834df0d0c"
+        Port f43fa51a1518fb2
+            Interface f43fa51a1518fb2
+        Port ovn-801d28-0
+            Interface ovn-801d28-0
+                type: geneve
+                options: {csum="true", key=flow, remote_ip="192.168.4.168"}
+        Port "3aa5973e98ffb82"
+            Interface "3aa5973e98ffb82"
+        Port "2ebee70a5e9fa2b"
+            Interface "2ebee70a5e9fa2b"
+        Port c5df87045760c2e
+            Interface c5df87045760c2e
+        Port e087a462a9e90eb
+            Interface e087a462a9e90eb
+        Port ovn-543c74-0
+            Interface ovn-543c74-0
+                type: geneve
+                options: {csum="true", key=flow, remote_ip="192.168.4.161"}
+        Port patch-br-int-to-vlan.1924_ovn_localnet_port
+            Interface patch-br-int-to-vlan.1924_ovn_localnet_port
+                type: patch
+                options: {peer=patch-vlan.1924_ovn_localnet_port-to-br-int}
+        Port "8a914a3ad25dc5e"
+            Interface "8a914a3ad25dc5e"
+        Port "33283e081f080b9"
+            Interface "33283e081f080b9"
+        Port "53fba22e053ba42"
+            Interface "53fba22e053ba42"
+        Port ovn-03cb5c-0
+            Interface ovn-03cb5c-0
+                type: geneve
+                options: {csum="true", key=flow, remote_ip="192.168.4.188"}
+        Port ovn-8f754c-0
+            Interface ovn-8f754c-0
+                type: geneve
+                options: {csum="true", key=flow, remote_ip="192.168.4.80"}
+        Port a9a944fa882f3ce
+            Interface a9a944fa882f3ce
+        Port ab72476eec145b9
+            Interface ab72476eec145b9
+    Bridge br-ex
+        Port ens192
+            Interface ens192
+                type: system
+        Port br-ex
+            Interface br-ex
+                type: internal
+        Port patch-br-ex_hub-tq2sk-cnv-k9wjv-to-br-int
+            Interface patch-br-ex_hub-tq2sk-cnv-k9wjv-to-br-int
+                type: patch
+                options: {peer=patch-br-int-to-br-ex_hub-tq2sk-cnv-k9wjv}
+    ovs_version: "3.1.5"      
+
+```
+
+**DO NOT TRUST THIS DIAGRAM, WIP**
+
+```mermaid
+graph LR;
+
+subgraph Node
+  hostname["Key:\nHOST = hub-tq2sk-cnv-xcxw2"]
+
+
+  nic-ens192[ens192]
+  nic-ens224[ens224]
+
+  subgraph ext_hub-tq2sk-cnv-xcxw2["External Switch"]
+    sw-ext[[ext_$HOST\n br-ex]]
+  end
+
+  sw-ext --> nic-ens192
+
+  subgraph join["Join Switch"]
+    sw-join[[join]]
+  end
+
+  subgraph br-internal["Internal Bridge"]
+    br-int[[br-int]]
+  end
+
+  br-vmdata --> nic-ens224
+
+  subgraph bridge-vmdata["VM Data Bridge"]
+    br-vmdata[[br-vmdata]]
+    br-vmdata -- patch-vlan.1924_ovn_localnet_port-to-br-int --> br-int
+  end
+
+
+  subgraph GR_$HOST["Gateway Router"]
+    rt-gw{"GR_$HOST"}
+    rt-gw -- lrp:rtoj-GR_$HOST --> sw-join
+    rt-gw -- lrp:rtoe-GR_$HOST --> sw-ext
+  end
+
+  subgraph transit["Transit Switch"]
+    sw-transit[[transit_switch]]
+    sw-transit -. tunnels .- master1
+    sw-transit -.- master2
+    sw-transit -.- master3
+    sw-transit -.- worker1
+  end
+
+  subgraph sw-rtos-$HOST["Local Switch "]
+    sw-local[["sw-rtos-$HOST\n10.130.6.1/23"]]
+    sw-local --> pod1
+    sw-local --> pod2
+    sw-local --> pod3
+  end
+
+  subgraph ovn_cluster_router["Cluster Router"]
+    rt-cluster{"ovn_cluster_router"}
+    rt-cluster -- lrp:rtos-$HOST\n 10.64.0.1/16 --> sw-local
+    rt-cluster -- lrp:rtots-$HOST\n 100.88.0.16/16 --> sw-transit
+    rt-cluster -- lrp:rtoj-ovn_cluster_router --> sw-join
+  end
+
+  end
+  nic-ens192 ==> ToR
+  nic-ens224 ==> ToR
+
+  classDef nodes fill:#fefefe, stroke:black, stroke-width:4
+  class Node nodes
+
+  classDef key fill:#ddd, color:black, stroke:black, stroke-width:2
   class hostname key
 
   classDef switch fill:#eff
@@ -438,20 +703,28 @@ graph LR;
   class rt-gw,rt-cluster router
 
   linkStyle default stroke:purple
-  linkStyle 0,2 stroke:blue
+  linkStyle 0,2,13 stroke:blue
   linkStyle 1,12 stroke:red
   linkStyle 3,4,5,6 stroke:green
   linkStyle 7,8,9,10 stroke:orange
   linkStyle 11 stroke:green
 
+  classDef routers fill:#fde
+  class ovn_cluster_router,GR_$HOST routers
+
+  style ext_hub-tq2sk-cnv-xcxw2 fill:#eef
+  style transit fill:#efe
+  style join fill:#fde
+  style sw-rtos-$HOST fill:#fee
+
+
 ```
 
   <!-- subgraph vlan-1924["Localnet Switch 1924"]
-    sw-1924[["vlan.1924_ovn_localnet_switch"]]
-    sw-1924 -- vm
-    rt-cluster -- lrp:?? -- sw-1924
-  end
- -->
+      sw-1924[["vlan.1924_ovn_localnet_switch"]]
+      sw-1924 -- vm
+      rt-cluster -- lrp:?? -- sw-1924
+  end -->
 
 ## Examples
 
