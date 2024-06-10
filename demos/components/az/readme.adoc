@@ -2,11 +2,6 @@
 
 Include this Kustomize component in your overlay to quickly label nodes with a `toplogy.kubernetes.io/zone` label and unique values.
 
-Useful for testing affinity scheduling features. For example, see link:../affinity/[../affinity].
+This is useful for testing affinity scheduling features. For example, see link:../../affinity/[affinity demo].
 
-Confimap to drive the job is generated from this env file.
-
-[source,bash]
-----
-include::node-labeler.env[]
-----
+A confimap drives the job, it is generated from link:node-labeler.env[this env file].
