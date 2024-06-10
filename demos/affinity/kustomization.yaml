@@ -5,10 +5,10 @@ kind: Kustomization
 namespace: demo-virt
 
 components:
-  # label hypervisor nodes with topology zones simulating racks
   - ../components/az
 
 resources:
+  - namespace.yaml
   - virtualmachine-a.yaml
   - virtualmachine-b.yaml
 
