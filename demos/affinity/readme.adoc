@@ -1,0 +1,21 @@
+= VM AntiAffinity Demo
+
+Create "Availability Zones" by labeling nodes with this link:../components/az[az job].
+
+Spin up two RHEL9 VMs with label `app=anti-affinity-test`.
+
+Pods (VMs) matching this label must have a unique value for the `topologyKey`, i.e. the node label `topology.kubernetes.io/zone`
+
+Create a failure by labeling all nodes to the same zone.
+
+[source,bash]
+----
+oc label nodes -l topology.kubernetes.io/zone --overwrite topology.kubernetes.io/zone=rack-1
+----
+
+Create success by re-running the az job with `replace_zones=true` to make the zones unique again.
+
+[source,bash]
+----
+oc label nodes -l topology.kubernetes.io/zone --overwrite topology.kubernetes.io/zone=rack-1
+----
