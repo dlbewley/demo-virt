@@ -1,5 +1,12 @@
 = Enabling Availability Zones
 
-Quickly label nodes with a toplogy.kubernetes.io/zone label and unique values.
+Include this Kustomize component in your overlay to quickly label nodes with a `toplogy.kubernetes.io/zone` label and unique values.
 
-Useful for testing affinity scheduling features.
+Useful for testing affinity scheduling features. For example, see link:../affinity/[../affinity].
+
+Confimap to drive the job is generated from this env file.
+
+[source,bash]
+----
+include::node-labeler.env[]
+----

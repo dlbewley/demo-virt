@@ -8,30 +8,25 @@ metadata:
   labels:
     app: node-labeler
 spec:
+  backoffLimit: 2
   template:
     spec:
+      restartPolicy: Never
+      serviceAccount: node-labeler
+      serviceAccountName: node-labeler
       containers:
-        - name: patcher
+        - name: labeler
           image: registry.redhat.io/openshift4/ose-cli
-          env:
-            - name: selector
-              value: 'cpu-feature.node.kubevirt.io/vmx=true'
-              # value: 'node-role.kubernetes.io/worker'
-            - name: key
-              value: 'topology.kubernetes.io/zone'
-            - name: zone_format
-              value: 'rack-%d'
-            - name: nodes_per_zone
-              value: '2'
-            - name: replace_zones
-              value: 'true'
+          envFrom:
+            - configMapRef:
+                name: node-labeler
           command:
             - /bin/bash
             - -c
             - |
-              echo "Checking nodes which match '${selector}' for existing ${key}"
+              echo "Checking nodes which match '${selector}' for an existing label '${label}'"
 
-              nodes=$(oc get nodes --sort-by '{.metadata.name}' -l "${key}" -l "${selector}" -L "${key}" 2> /dev/null)
+              nodes=$(oc get nodes --sort-by '{.metadata.name}' -l "${label}" -l "${selector}" -L "${label}" 2> /dev/null)
 
               if [ -n "$nodes" ]; then
                 echo "Availability zone label already exists on:"
@@ -48,7 +43,7 @@ spec:
               fi
 
               echo
-              echo "Labeling nodes '${selector}' with availability zones '${key}=${zone_format}' maintaining $nodes_per_zone nodes per zone"
+              echo "Labeling nodes '${selector}' with availability zones '${label}=${zone_format}' maintaining $nodes_per_zone nodes per zone"
 
               selected_nodes=$(oc get nodes -l "${selector}" -o name --sort-by '{.metadata.name}')
 
@@ -59,15 +54,10 @@ spec:
                   (( zone++ ))
                 fi
 
-                oc label $node $overwrite "$key"="$(printf ${zone_format} $zone)"
+                oc label $node $overwrite "$label"="$(printf ${zone_format} $zone)"
 
                 (( counter++ ))
               done
 
               echo
-              oc get nodes -l "${key}" -L "${key}"
-
-      restartPolicy: Never
-      serviceAccount: node-labeler
-      serviceAccountName: node-labeler
-  backoffLimit: 2
+              oc get nodes -l "${label}" -L "${label}"
