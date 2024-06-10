@@ -646,9 +646,10 @@ subgraph Node
     sw-join[[join]]
   end
 
-  subgraph br-internal["Internal Bridge"]
+  subgraph br-internal["Integration Bridge"]
     br-int[[br-int]]
   end
+    sw-ext -- patch-br-ex_hub-tq2sk-cnv-k9wjv-to-br-int --> br-int
 
   br-vmdata --> nic-ens224
 
@@ -662,6 +663,14 @@ subgraph Node
     rt-gw{"GR_$HOST"}
     rt-gw -- lrp:rtoj-GR_$HOST --> sw-join
     rt-gw -- lrp:rtoe-GR_$HOST --> sw-ext
+  end
+
+  subgraph sw-1924["Localnet 1924 Switch"]
+    vlan.1924_ovn_localnet_switch
+  end
+
+  subgraph sw-1926["Localnet 1926 Switch"]
+    vlan.1926_ovn_localnet_switch
   end
 
   subgraph transit["Transit Switch"]
@@ -690,7 +699,7 @@ subgraph Node
   nic-ens192 ==> ToR
   nic-ens224 ==> ToR
 
-  classDef nodes fill:#fefefe, stroke:black, stroke-width:4
+  classDef nodes fill:#fefefe, stroke:grey, stroke-width:4
   class Node nodes
 
   classDef key fill:#ddd, color:black, stroke:black, stroke-width:2
