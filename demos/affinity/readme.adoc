@@ -1,10 +1,10 @@
-= VM AntiAffinity Demo
+= Virtual Machine AntiAffinity Demo
 
-Create "Availability Zones" by labeling nodes with this link:../components/az[az job].
+Create "Availability Zones" by labeling nodes with  `topology.kubernetes.io/zone`. This link:../components/az[az job] can do that for you.
 
-Spin up two RHEL9 VMs with label `app=anti-affinity-test`.
+Spin up two RHEL9 VMs (app-a and app-b) with the label `app=anti-affinity-test` appleid to them.
 
-Pods (VMs) matching this label must have a unique value for the `topologyKey`, i.e. the node label `topology.kubernetes.io/zone`
+Pods (VMs) matching this label must have a unique value for the `topologyKey`, i.e. the node label `topology.kubernetes.io/zone`n
 
 Create a failure by labeling all nodes to the same zone.
 
@@ -19,3 +19,10 @@ Create success by re-running the az job with `replace_zones=true` to make the zo
 ----
 oc label nodes -l topology.kubernetes.io/zone --overwrite topology.kubernetes.io/zone=rack-1
 ----
+
+
+== References
+
+* https://docs.openshift.com/container-platform/latest/nodes/scheduling/nodes-scheduler-pod-affinity.html
+* https://docs.openshift.com/container-platform/latest/virt/virtual_machines/advanced_vm_management/virt-specifying-nodes-for-vms.html
+* https://docs.openshift.com/container-platform/latest/virt/virtual_machines/advanced_vm_management/virt-schedule-vms.html
