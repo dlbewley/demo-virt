@@ -1,5 +1,38 @@
 = Enabling Availability Zones
 
-Quickly label nodes with a toplogy.kubernetes.io/zone label and unique values.
+Include this Kustomize component in your overlay to quickly label nodes with a `toplogy.kubernetes.io/zone` label and unique values.
 
-Useful for testing affinity scheduling features.
+This is useful for testing affinity scheduling features. For example, see link:../../affinity/[affinity demo].
+
+A confimap drives the job, it is generated from link:node-labeler.env[this env file].
+
+== Example Job Run
+
+.Job log message
+[source,]
+----
+Checking nodes which match 'cpu-feature.node.kubevirt.io/vmx=true' for existing topology.kubernetes.io/zone
+Availability zone label already exists on:
+NAME                  STATUS   ROLES    AGE   VERSION           ZONE
+hub-tq2sk-cnv-76nv5   Ready    worker   26d   v1.28.9+2f7b992   rack-1
+hub-tq2sk-cnv-k9wjv   Ready    worker   26d   v1.28.9+2f7b992   rack-1
+hub-tq2sk-cnv-xcxw2   Ready    worker   26d   v1.28.9+2f7b992   rack-1
+hub-tq2sk-cnv-xds4s   Ready    worker   26d   v1.28.9+2f7b992   rack-2
+hub-tq2sk-cnv-zr8t5   Ready    worker   26d   v1.28.9+2f7b992   rack-2
+
+Overwriting
+
+Labeling nodes 'cpu-feature.node.kubevirt.io/vmx=true' with availability zones 'topology.kubernetes.io/zone=rack-%d' maintaining 2 nodes per zone
+node/hub-tq2sk-cnv-76nv5 not labeled
+node/hub-tq2sk-cnv-k9wjv not labeled
+node/hub-tq2sk-cnv-xcxw2 labeled
+node/hub-tq2sk-cnv-xds4s not labeled
+node/hub-tq2sk-cnv-zr8t5 labeled
+
+NAME                  STATUS   ROLES    AGE   VERSION           ZONE
+hub-tq2sk-cnv-76nv5   Ready    worker   26d   v1.28.9+2f7b992   rack-1
+hub-tq2sk-cnv-k9wjv   Ready    worker   26d   v1.28.9+2f7b992   rack-1
+hub-tq2sk-cnv-xcxw2   Ready    worker   26d   v1.28.9+2f7b992   rack-2
+hub-tq2sk-cnv-xds4s   Ready    worker   26d   v1.28.9+2f7b992   rack-2
+hub-tq2sk-cnv-zr8t5   Ready    worker   26d   v1.28.9+2f7b992   rack-3
+----

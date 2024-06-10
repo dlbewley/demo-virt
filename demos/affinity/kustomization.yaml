@@ -1,0 +1,29 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: demo-virt
+
+components:
+  - ../components/az
+
+resources:
+  - namespace.yaml
+  - virtualmachine-a.yaml
+  - virtualmachine-b.yaml
+
+patches:
+- path: patch-vm-a.yaml
+  target:
+    kind: VirtualMachine
+    group: kubevirt.io
+    version: v1
+    name: app-a
+
+- path: patch-vm-b.yaml
+  target:
+    kind: VirtualMachine
+    group: kubevirt.io
+    version: v1
+    name: app-b
+

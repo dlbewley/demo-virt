@@ -1,0 +1,39 @@
+= Virtual Machine AntiAffinity Demo
+
+Create "Availability Zones" by labeling nodes with  `topology.kubernetes.io/zone`. This link:../components/az[az job] can do that for you.
+
+Spin up two RHEL9 VMs (app-a and app-b) in `demo-virt` namespace with the label `app=anti-affinity-test` applied to them.
+
+Pods with this label are treated as in scope for the link:patch-vm-a.yaml[anti-affinity rule applied] as a patch to the VMs.
+Pods (VMs) in this scope must have a unique value for the `topologyKey` (`topology.kubernetes.io/zone`) found on the nodes they schedule to.
+
+If a unique zone is not available during scheduling, the VM (pod) will remain stuck in pending.
+
+== Deploy
+
+[source,bash]
+----
+oc apply -k .
+----
+
+Create a failure by labeling all nodes to the same zone.
+
+[source,bash]
+----
+oc label nodes -l topology.kubernetes.io/zone --overwrite topology.kubernetes.io/zone=rack-1
+----
+
+Create success by re-running the az job with `replace_zones=true` to make the zones unique again.
+
+[source,bash]
+----
+oc delete job/node-labeler -n demo-virt
+# edit components/az/node-labeler.env to update configmap with `replace_zones=true` 
+oc apply -k .
+----
+
+== References
+
+* https://docs.openshift.com/container-platform/latest/nodes/scheduling/nodes-scheduler-pod-affinity.html
+* https://docs.openshift.com/container-platform/latest/virt/virtual_machines/advanced_vm_management/virt-specifying-nodes-for-vms.html
+* https://docs.openshift.com/container-platform/latest/virt/virtual_machines/advanced_vm_management/virt-schedule-vms.html

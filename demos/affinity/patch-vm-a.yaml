@@ -1,0 +1,21 @@
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: app-a
+  labels:
+    app: anti-affinity-test
+spec:
+  running: true
+  template:
+    metadata:
+      labels:
+        app: anti-affinity-test
+    spec:
+      evictionStrategy: LiveMigrate
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution: 
+          - labelSelector:
+              matchLabels:
+                app: anti-affinity-test
+            topologyKey: topology.kubernetes.io/zone
