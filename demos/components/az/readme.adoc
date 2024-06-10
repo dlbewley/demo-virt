@@ -1,0 +1,5 @@
+= Enabling Availability Zones
+
+Quickly label nodes with a toplogy.kubernetes.io/zone label and unique values.
+
+Useful for testing affinity scheduling features.

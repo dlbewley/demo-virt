@@ -1,0 +1,14 @@
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: node-labeler
+  namespace: demo-virt
+subjects:
+  - kind: ServiceAccount
+    name: node-labeler
+    namespace: demo-virt
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: node-labeler

@@ -1,0 +1,73 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: node-labeler
+  namespace: demo-virt
+  generateName: node-labeler-
+  labels:
+    app: node-labeler
+spec:
+  template:
+    spec:
+      containers:
+        - name: patcher
+          image: registry.redhat.io/openshift4/ose-cli
+          env:
+            - name: selector
+              value: 'cpu-feature.node.kubevirt.io/vmx=true'
+              # value: 'node-role.kubernetes.io/worker'
+            - name: key
+              value: 'topology.kubernetes.io/zone'
+            - name: zone_format
+              value: 'rack-%d'
+            - name: nodes_per_zone
+              value: '2'
+            - name: replace_zones
+              value: 'true'
+          command:
+            - /bin/bash
+            - -c
+            - |
+              echo "Checking nodes which match '${selector}' for existing ${key}"
+
+              nodes=$(oc get nodes --sort-by '{.metadata.name}' -l "${key}" -l "${selector}" -L "${key}" 2> /dev/null)
+
+              if [ -n "$nodes" ]; then
+                echo "Availability zone label already exists on:"
+                echo "$nodes"
+                echo
+
+                if [ "$replace_zones" = "true" ]; then
+                  echo "Overwriting"
+                  overwrite='--overwrite'
+                else
+                  echo "Quiting"
+                  exit 1
+                fi
+              fi
+
+              echo
+              echo "Labeling nodes '${selector}' with availability zones '${key}=${zone_format}' maintaining $nodes_per_zone nodes per zone"
+
+              selected_nodes=$(oc get nodes -l "${selector}" -o name --sort-by '{.metadata.name}')
+
+              counter=0
+              zone=0
+              for node in $selected_nodes; do
+                if (( counter % nodes_per_zone == 0 )); then
+                  (( zone++ ))
+                fi
+
+                oc label $node $overwrite "$key"="$(printf ${zone_format} $zone)"
+
+                (( counter++ ))
+              done
+
+              echo
+              oc get nodes -l "${key}" -L "${key}"
+
+      restartPolicy: Never
+      serviceAccount: node-labeler
+      serviceAccountName: node-labeler
+  backoffLimit: 2
