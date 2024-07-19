@@ -4,8 +4,8 @@ kind: Kustomization
 
 # Configure Basics of Homelab network while optionally specifying node selector and NIC name.
 
-#resources:
-#  - ../../base
+resources:
+  - ../../base
 
 components:
   - ../../components/vlan-1924/ovs-bridge

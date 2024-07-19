@@ -5,8 +5,8 @@ kind: Kustomization
 namespace: demo-virt
 
 components:
-  - ../../components/networks/br-vmdata/ovs-bridge
-  - ../../components/multinetworkpolicy
+  - ../components/br-vmdata/ovs-bridge
+  - ../components/multinetworkpolicy
 
 # enable VLANs in an overlay
 #  - ../../components/networks/vlan-1924/ovs-bridge
