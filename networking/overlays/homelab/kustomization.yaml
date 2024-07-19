@@ -4,12 +4,12 @@ kind: Kustomization
 
 # Configure Basics of Homelab network while optionally specifying node selector and NIC name.
 
-resources:
-  - ../../base
+#resources:
+#  - ../../base
 
 components:
-  - ../../../components/networks/vlan-1924/ovs-bridge
-  - ../../../components/networks/vlan-1926/ovs-bridge
+  - ../../components/vlan-1924/ovs-bridge
+  - ../../components/vlan-1926/ovs-bridge
 
 patches:
   - target:
@@ -21,7 +21,7 @@ patches:
       - op: replace
         path: /spec/nodeSelector
         value: {
-              "machine.openshift.io/cluster-api-machineset": "hub-tq2sk-cnv"
+              "machine.openshift.io/cluster-api-machineset": "hub-v4tbg-cnv"
         }
 
       - op: replace
@@ -41,7 +41,7 @@ patches:
       - op: replace
         path: /spec/nodeSelector
         value: {
-              "machine.openshift.io/cluster-api-machineset": "hub-tq2sk-cnv"
+              "machine.openshift.io/cluster-api-machineset": "hub-v4tbg-cnv"
         }
 
   - target:
@@ -53,5 +53,5 @@ patches:
       - op: replace
         path: /spec/nodeSelector
         value: {
-              "machine.openshift.io/cluster-api-machineset": "hub-tq2sk-cnv"
+              "machine.openshift.io/cluster-api-machineset": "hub-v4tbg-cnv"
         }
