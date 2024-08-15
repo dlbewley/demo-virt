@@ -1,0 +1,9 @@
+== Machine-net net-attach-def
+
+Accesses the machine network via the default `br-ex` interface.
+
+As of OCP 4.16 you still may not modify br-ex after installation, but you may map a network attachment to it.
+
+Br-ex may be attached directly to a physical interface, or it may be attached to a VLAN interface on that interface.
+
+This attachment will allow you to place a virtual machine interface on that same segment.

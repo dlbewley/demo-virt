@@ -1,0 +1,12 @@
+---
+apiVersion: nmstate.io/v1
+kind: NodeNetworkConfigurationPolicy
+metadata:
+  name: ovs-bridge-mapping-machine-net
+spec:
+  desiredState:
+    ovn:
+      bridge-mappings:
+        - localnet: machine-net
+          bridge: br-ex
+          state: present
