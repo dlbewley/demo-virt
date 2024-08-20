@@ -382,20 +382,16 @@ router 65edf48e-8e56-4cbb-a55d-54ca2b96cb04 (GR_hub-tq2sk-cnv-xcxw2)
 ```
 
 
+u
 ```mermaid
 graph LR;
 
 subgraph Node
-  hostname["Key:\nHOST = hub-tq2sk-cnv-xcxw2"]
 
-
-  nic
 
   subgraph ext_hub-tq2sk-cnv-xcxw2["External Switch"]
-    sw-ext[[ext_$HOST\n br-ex]]
+    sw-ext[[ext_$HOST]]
   end
-
-  sw-ext --> nic
 
   subgraph join["Join Switch"]
     sw-join[[join]]
@@ -430,7 +426,7 @@ subgraph Node
   end
 
   end
-  nic ==> ToR
+  sw-ext ==> ToR
 
 
   classDef key fill:#ddd, color:black, stroke:black, stroke-width:2
@@ -460,12 +456,10 @@ subgraph Node
   class sw-join,sw-transit,sw-local,sw-ext switch
 
   linkStyle default stroke:purple
-  linkStyle 0,2,13 stroke:blue
-  linkStyle 1,12 stroke:red
-  linkStyle 3,4,5,6 stroke:green
-  linkStyle 7,8,9,10 stroke:orange
-  linkStyle 11 stroke:green
-
+  linkStyle 12 stroke:blue
+  linkStyle 0,11 stroke:red
+  linkStyle 2,3,4,5,10 stroke:green
+  linkStyle 6,7,8,9 stroke:orange
 ```
 
 ```
@@ -624,7 +618,7 @@ sh-5.1# ovn-nbctl lsp-list vlan.1924_ovn_localnet_switch
 
 ```
 
-**DO NOT TRUST THIS DIAGRAM, WIP**
+**WIP**
 
 ```mermaid
 graph LR;
@@ -642,35 +636,31 @@ subgraph Node
 
   sw-ext --> nic-ens192
 
-  subgraph join["Join Switch"]
-    sw-join[[join]]
-  end
-
-  subgraph br-internal["Integration Bridge"]
-    br-int[[br-int]]
-  end
-    sw-ext -- patch-br-ex_hub-tq2sk-cnv-k9wjv-to-br-int --> br-int
-
-  br-vmdata --> nic-ens224
-
-  subgraph bridge-vmdata["VM Data Bridge"]
-    br-vmdata[[br-vmdata]]
-    br-vmdata -- patch-vlan.1924_ovn_localnet_port-to-br-int --> br-int
-  end
-
-
   subgraph GR_$HOST["Gateway Router"]
     rt-gw{"GR_$HOST"}
     rt-gw -- lrp:rtoj-GR_$HOST --> sw-join
     rt-gw -- lrp:rtoe-GR_$HOST --> sw-ext
   end
+  subgraph join["Join Switch"]
+    sw-join[[join]]
+  end
+
+  br-vmdata --> nic-ens224
+
+  subgraph bridge-vmdata["VM Data Bridge"]
+    br-vmdata[[br-vmdata]]
+  end
+
+
 
   subgraph sw-1924["Localnet 1924 Switch"]
-    vlan.1924_ovn_localnet_switch
+    ln-1924[vlan.1924_ovn_localnet_switch]
+    ln-1924 --> br-vmdata
   end
 
   subgraph sw-1926["Localnet 1926 Switch"]
-    vlan.1926_ovn_localnet_switch
+    ln-1926[vlan.1926_ovn_localnet_switch]
+    ln-1926 --> br-vmdata
   end
 
   subgraph transit["Transit Switch"]
@@ -706,17 +696,26 @@ subgraph Node
   class hostname key
 
   classDef switch fill:#eff
-  class sw-join,sw-transit,sw-local,sw-ext switch
+  class sw-join,sw-transit,sw-local,sw-ext,br-vmdata switch
+
+  classDef bridge-vmdata fill:#dff
+  class bridge-vmdata bridge-vmdata
 
   classDef router fill:#fef
   class rt-gw,rt-cluster router
 
   linkStyle default stroke:purple
-  linkStyle 0,2,13 stroke:blue
-  linkStyle 1,12 stroke:red
-  linkStyle 3,4,5,6 stroke:green
-  linkStyle 7,8,9,10 stroke:orange
-  linkStyle 11 stroke:green
+  linkStyle 0,2 stroke:blue
+  linkStyle 1,12,15 stroke:red
+  %% localnets to vm-data
+  linkStyle 3 stroke:purple
+  linkStyle 4 stroke:#bbf
+  style ln-1924 fill:#bbf
+  linkStyle 5 stroke:#fbb
+  style ln-1926 fill:#fbb
+  %% transit sw to nodes
+  linkStyle 6,7,8,9,14 stroke:green
+  linkStyle 10,11,12,13 stroke:orange
 
   classDef routers fill:#fde
   class ovn_cluster_router,GR_$HOST routers
@@ -745,7 +744,6 @@ subgraph Node
 * <https://access.redhat.com/solutions/6972064>
 * <https://developers.redhat.com/blog/2017/09/14/vlan-filter-support-on-bridge#without_vlan_filtering>
 
-```
 
 ## Examples
 
