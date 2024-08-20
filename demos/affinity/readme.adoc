@@ -32,6 +32,13 @@ oc delete job/node-labeler -n demo-virt
 oc apply -k .
 ----
 
+== Cleanup
+
+[source,bash]
+----
+oc kustomize . | kfilt -K namespace | oc delete -f -
+----
+
 == References
 
 * https://docs.openshift.com/container-platform/latest/nodes/scheduling/nodes-scheduler-pod-affinity.html
