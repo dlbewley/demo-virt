@@ -5,11 +5,14 @@ Example used to confirm that layer 2 plumbing to a NetworkAttachmentDefinition i
 This can be be used to confirm networking configuration for OpenShift Virtualization before we are ready to provision any virtual machines.
 
 This pod tests this by attaching this network to a second NIC called net1 and statically assigning an IP to it.
+See https://docs.openshift.com/container-platform/latest/networking/multiple_networks/attaching-pod.html
+
 Then a ping is initiated to the IP address of a known router (any host will do) on that same broadcast domain.
+
 
 [source,yaml]
 ----
-include:test-nad-pod.yaml[]
+include::test-multus-pod.yaml[]
 ----
 
 [source,bash]
