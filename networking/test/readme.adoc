@@ -1,0 +1,57 @@
+# Testing Multus access to localnet using a pod
+
+Example used to confirm that layer 2 plumbing to a NetworkAttachmentDefinition is working as expected.
+
+This can be be used to confirm networking configuration for OpenShift Virtualization before we are ready to provision any virtual machines.
+
+This pod tests this by attaching this network to a second NIC called net1 and statically assigning an IP to it.
+Then a ping is initiated to the IP address of a known router (any host will do) on that same broadcast domain.
+
+[source,yaml]
+----
+include:test-nad-pod.yaml[]
+----
+
+[source,bash]
+----
+$ oc create -f test-multus-pod.yaml
+pod/example-pod created
+
+$ oc logs example-pod
++ echo 'Show IPs'
+Show IPs
++ ip -br -c a
+lo               UNKNOWN        127.0.0.1/8 ::1/128
+eth0@if155       UP             10.130.4.135/23 fe80::858:aff:fe82:487/64
+net1@if156       UP             192.168.4.222/24 fe80::858:c0ff:fea8:4de/64
++ echo 'Show routes'
+Show routes
++ ip -br -c route
+default via 10.130.4.1 dev eth0
+10.128.0.0/14 via 10.130.4.1 dev eth0
+10.130.4.0/23 dev eth0 proto kernel scope link src 10.130.4.135
+100.64.0.0/16 via 10.130.4.1 dev eth0
+172.30.0.0/16 via 10.130.4.1 dev eth0
+192.168.4.0/24 dev net1 proto kernel scope link src 192.168.4.222
++ echo 'Ping gw on NAD'
+Ping gw on NAD
++ ping -c 10 -I net1 -B 192.168.4.1
+PING 192.168.4.1 (192.168.4.1) from 192.168.4.222 net1: 56(84) bytes of data.
+64 bytes from 192.168.4.1: icmp_seq=1 ttl=64 time=4.69 ms
+64 bytes from 192.168.4.1: icmp_seq=2 ttl=64 time=0.444 ms
+64 bytes from 192.168.4.1: icmp_seq=3 ttl=64 time=0.826 ms
+64 bytes from 192.168.4.1: icmp_seq=4 ttl=64 time=0.531 ms
+64 bytes from 192.168.4.1: icmp_seq=5 ttl=64 time=0.842 ms
+64 bytes from 192.168.4.1: icmp_seq=6 ttl=64 time=0.877 ms
+64 bytes from 192.168.4.1: icmp_seq=7 ttl=64 time=0.768 ms
+64 bytes from 192.168.4.1: icmp_seq=8 ttl=64 time=0.557 ms
+64 bytes from 192.168.4.1: icmp_seq=9 ttl=64 time=0.437 ms
+64 bytes from 192.168.4.1: icmp_seq=10 ttl=64 time=0.555 ms
+
+--- 192.168.4.1 ping statistics ---
+10 packets transmitted, 10 received, 0% packet loss, time 9111ms
+rtt min/avg/max/mdev = 0.437/1.053/4.693/1.223 ms
+Going to sleep
++ echo 'Going to sleep'
++ sleep infinity
+----

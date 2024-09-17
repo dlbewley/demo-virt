@@ -1,0 +1,43 @@
+---
+# https://docs.openshift.com/container-platform/4.16/networking/multiple_networks/attaching-pod.html
+apiVersion: v1
+kind: Pod
+metadata:
+  name: example-pod
+  annotations:
+    k8s.v1.cni.cncf.io/networks: '[
+      {
+        "name": "machine-net",
+        "namespace": "default",
+        "ips": [ "192.168.4.222/24" ]
+      }]'
+spec:
+  securityContext:
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+  - name: example-pod
+    image: quay.io/redhat-cop/tool-box
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: [ALL]
+    env:
+      - name: GW
+        value: '192.168.4.1'
+      - name: NIC 
+        value: 'net1'
+    command:
+      - /bin/bash
+      - -x
+      - -c
+      - |
+        echo "Show IPs"
+        ip -br -c a
+        echo "Show routes"
+        ip -br -c route
+        echo "Ping gw on NAD"
+         ping -c 10 -I $NIC -B $GW
+        echo "Going to sleep"
+        sleep infinity
