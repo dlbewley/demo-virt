@@ -9,30 +9,117 @@ Pods (VMs) in this scope must have a unique value for the `topologyKey` (`topolo
 
 If a unique zone is not available during scheduling, the VM (pod) will remain stuck in pending.
 
-== Deploy
+== Deployment
 
 [source,bash]
 ----
 oc apply -k .
 ----
 
-Create a failure by labeling all nodes to the same zone.
+.Possible Bug
+[NOTE]
+The first deployment may not successfully enforce the Anti Affinity. This may be a bug. As a workaround delete one of the VMs `oc delete vm app-b -n demo-virt` and repeat the `oc apply -k .`
+
+== Testing
+
+The contents of the link:../components/az/node-labeler.env[node-labeler configmap] show that at most only 2 nodes should be in a zone. With 3 nodes in scope that means we will have 2 zones.
 
 [source,bash]
 ----
-oc label nodes -l topology.kubernetes.io/zone --overwrite topology.kubernetes.io/zone=rack-1
+$ oc extract cm/node-labeler -n demo-virt --to=-
+# nodes_per_zone
+2
+# replace_zones
+false
+# selector
+cpu-feature.node.kubevirt.io/vmx=true
+# zone_format
+rack-%d
+# label
+topology.kubernetes.io/zone
 ----
+
+Observe the zone labels and confirm that VMs app-a and app-b are scheduled to nodes in different zones.
+
+[source,bash]
+----
+$ oc get nodes -l topology.kubernetes.io/zone -L topology.kubernetes.io/zone
+NAME                  STATUS   ROLES    AGE   VERSION           ZONE
+hub-v4tbg-cnv-99zmp   Ready    worker   95d   v1.29.8+f10c92d   rack-1
+hub-v4tbg-cnv-ddfmj   Ready    worker   98d   v1.29.8+f10c92d   rack-1
+hub-v4tbg-cnv-n5cfq   Ready    worker   66d   v1.29.8+f10c92d   rack-2
+
+$ oc get vmis -n demo-virt -o wide
+NAME    AGE   PHASE     IP             NODENAME              READY   LIVE-MIGRATABLE   PAUSED
+app-a   21m   Running   10.129.4.193   hub-v4tbg-cnv-99zmp   True    True
+app-b   14s   Running   10.130.4.185   hub-v4tbg-cnv-n5cfq   True    True
+----
+
+Create a conflict with the anti-affinity rule by labeling all nodes to the same zone.
+
+[source,bash]
+----
+$ oc label nodes -l topology.kubernetes.io/zone --overwrite topology.kubernetes.io/zone=rack-1
+node/hub-v4tbg-cnv-99zmp not labeled
+node/hub-v4tbg-cnv-ddfmj not labeled
+node/hub-v4tbg-cnv-n5cfq labeled
+
+$ oc get nodes -l topology.kubernetes.io/zone -L topology.kubernetes.io/zone
+NAME                  STATUS   ROLES    AGE   VERSION           ZONE
+hub-v4tbg-cnv-99zmp   Ready    worker   95d   v1.29.8+f10c92d   rack-1
+hub-v4tbg-cnv-ddfmj   Ready    worker   98d   v1.29.8+f10c92d   rack-1
+hub-v4tbg-cnv-n5cfq   Ready    worker   66d   v1.29.8+f10c92d   rack-1
+----
+
+Delete VM app-b
+
+[source,bash]
+----
+$ oc delete vm app-b -n demo-virt
+virtualmachine.kubevirt.io "app-b" deleted
+----
+
+Recreate VM app-b and observe that it is not able to be scheduled becaue there is now only one zone and app-a is already running there. It will remain in a _Scheduling_ state indefinitely.
+
+[source,bash]
+----
+$ oc apply -k .
+namespace/demo-virt unchanged
+serviceaccount/node-labeler unchanged
+clusterrole.rbac.authorization.k8s.io/node-labeler unchanged
+clusterrolebinding.rbac.authorization.k8s.io/node-labeler unchanged
+configmap/node-labeler unchanged
+job.batch/node-labeler unchanged
+virtualmachine.kubevirt.io/app-a configured
+virtualmachine.kubevirt.io/app-b created
+
+$ oc get vmis -n demo-virt -o wide
+NAME    AGE   PHASE        IP             NODENAME              READY   LIVE-MIGRATABLE   PAUSED
+app-a   39m   Running      10.129.4.193   hub-v4tbg-cnv-99zmp   True    True
+app-b   24s   Scheduling                                        False
+----
+
+[TODO]
+Make replace be the default setting for the job?
 
 Create success by re-running the az job with `replace_zones=true` to make the zones unique again.
 
 [source,bash]
 ----
+$ oc set data configmap/node-labeler replace_zones=true -n demo-virt
+configmap/node-labeler data updated
+
+# re run the job...
+$
+
 oc delete job/node-labeler -n demo-virt
 # edit components/az/node-labeler.env to update configmap with `replace_zones=true` 
 oc apply -k .
 ----
 
 == Cleanup
+
+Remove what was created, but leave the namespace.
 
 [source,bash]
 ----
