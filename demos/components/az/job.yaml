@@ -26,7 +26,7 @@ spec:
             - |
               echo "Checking nodes which match '${selector}' for an existing label '${label}'"
 
-              nodes=$(oc get nodes --sort-by '{.metadata.name}' -l "${label}" -l "${selector}" -L "${label}" 2> /dev/null)
+              nodes=$(oc get nodes --sort-by '{.metadata.name}' -l "${label}","${selector}" -L "${label}" 2> /dev/null)
 
               if [ -n "$nodes" ]; then
                 echo "Availability zone label already exists on:"
