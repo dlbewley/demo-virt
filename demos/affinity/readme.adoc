@@ -109,12 +109,22 @@ Create success by re-running the az job with `replace_zones=true` to make the zo
 $ oc set data configmap/node-labeler replace_zones=true -n demo-virt
 configmap/node-labeler data updated
 
-# re run the job...
-$
+$ oc delete -f ../components/az/job.yaml
+job.batch "node-labeler" deleted
 
-oc delete job/node-labeler -n demo-virt
-# edit components/az/node-labeler.env to update configmap with `replace_zones=true` 
-oc apply -k .
+$ oc create -f ../components/az/job.yaml
+job.batch/node-labeler created
+
+$ oc get nodes -l topology.kubernetes.io/zone -L topology.kubernetes.io/zone
+NAME                  STATUS   ROLES    AGE   VERSION           ZONE
+hub-v4tbg-cnv-99zmp   Ready    worker   95d   v1.29.8+f10c92d   rack-1
+hub-v4tbg-cnv-ddfmj   Ready    worker   98d   v1.29.8+f10c92d   rack-1
+hub-v4tbg-cnv-n5cfq   Ready    worker   66d   v1.29.8+f10c92d   rack-2
+
+$ oc get vmis -n demo-virt -o wide
+NAME    AGE   PHASE     IP             NODENAME              READY   LIVE-MIGRATABLE   PAUSED
+app-a   50m   Running   10.129.4.193   hub-v4tbg-cnv-99zmp   True    True
+app-b   11m   Running   10.130.4.186   hub-v4tbg-cnv-n5cfq   True    True
 ----
 
 == Cleanup
