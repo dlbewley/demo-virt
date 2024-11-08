@@ -9,6 +9,24 @@ The bridge carries the tagged VLANs which are fed to the ens224 interface via 80
 
 Bridge `br-vmdata` may be of type "Linux Bridge" or "OVS Bridge". Choose of of the following.
 
+.Are your tags really here?
+[TIP]
+====
+It's very common to find that a VLAN tag is not being trunk everwhere it is expected to be. You can use `tcpdump` to validate the presence of the expected VLAN tags.
+
+.Using tcpdump on OpenShift Node
+[source,bash]
+----
+oc debug node/$NODE
+chroot /host
+toolbox
+tcpdump -i $INTERFACE -nn -e vlan
+----
+
+Also see the OpenShift Packet Capture Helper https://access.redhat.com/labs/ocpch/
+
+====
+
 == OVS Bridge
 
 link:ovs-bridge[]
