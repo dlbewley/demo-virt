@@ -16,7 +16,7 @@ rh_subscription:
     - 'rhel-9-for-x86_64-appstream-rpms'
     - 'rhocp-4.15-for-rhel-9-x86_64-rpms'
     - 'fast-datapath-for-rhel-9-x86_64-rpms'
-# 
+
 packages:
   - openshift-clients
   - httpd

@@ -1,15 +1,15 @@
-= VMs with Firewall Demo
+# VMs with Firewall Demo
 
 Testing of L2 overlay networks
 
-[components/l2-front](Front Net) will have (../../components/vms/server-left)[Left Server] attached at `10.111.111.1/24`
+[Front Net](components/l2-front) will have [Left Server](../../components/vms/server-left) attached at `10.111.111.1/24`
 
-[components/l2-back](Back Net) will have (../../components/vms/server-right)[Right Server] attached at `10.222.222.2/24`
+[Back Net](components/l2-back) will have [Right Server](../../components/vms/server-right) attached at `10.222.222.2/24`
 
-(../../components/vms/firewall)[Firewall Server] will be attached to both at `10.111.111.254` and `10.222.222.254`
+[Firewall Server](../../components/vms/firewall) will be attached to both at `10.111.111.254` and `10.222.222.254`
 
 Left and Right servers will have a static route defined allowing them to ping either other through the Firewall
 
-Networking is configured at boot by (scripts/netsetup)[this script].
+Networking is configured at boot by [this script](scripts/netsetup).
 
-Currently, most of the VM configuration is applied via inline patches in (kustomization.yaml)[kustomization.yaml]
+Currently, most of the VM configuration is applied via inline patches in [kustomization.yaml](kustomization.yaml)
