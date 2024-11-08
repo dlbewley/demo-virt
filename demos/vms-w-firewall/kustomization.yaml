@@ -89,16 +89,6 @@ patches:
       path: /spec/template/spec/nodeSelector
       value: { "kubernetes.io/hostname": "hub-v4tbg-cnv-ddfmj" }
 
-    # live migrate VM if kicked off the node
-    - op: add
-      path: /spec/template/spec/evictionStrategy
-      value: "LiveMigrate"
-
-    # start VM at creation
-    - op: replace
-      path: /spec/running
-      value: true
-
 - target:
     group: kubevirt.io
     kind: VirtualMachine
@@ -133,8 +123,6 @@ patches:
         }
       }
 
-
-
     # add a 2nd NIC
     - op: add
       path: /spec/template/spec/domain/devices/interfaces/-
@@ -153,16 +141,6 @@ patches:
           "networkName": "demo-virt/l2-back"
         }
       }
-
-    # start VM at creation
-    - op: replace
-      path: /spec/running
-      value: true
-
-    # live migrate VM if kicked off the node
-    - op: add
-      path: /spec/template/spec/evictionStrategy
-      value: "LiveMigrate"
 
     # pick the same node to run on for now
     - op: add
@@ -237,16 +215,6 @@ patches:
           "networkName": "demo-virt/l2-back"
         }
       }
-
-    # start VM at creation
-    - op: replace
-      path: /spec/running
-      value: true
-
-    # live migrate VM if kicked off the node
-    - op: add
-      path: /spec/template/spec/evictionStrategy
-      value: "LiveMigrate"
 
     # pick the same node to run on for now
     - op: add

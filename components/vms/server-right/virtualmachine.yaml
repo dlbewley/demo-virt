@@ -1,9 +1,10 @@
 # oc process \
-#   template/rhel9-server-small \
+#   template/rhel9-server-tiny \
 #   -n openshift \
 #   -p NAME=server-right \
 #   -o yaml \
-#   | yq e '.items[0]' > virtualmachine-server-right.yaml
+#   | yq e '.items[0] | .spec.running = true | .spec.template.spec += {"evictionStrategy":"LiveMigrate"}' \
+#   > virtualmachine.yaml
 ---
 apiVersion: kubevirt.io/v1
 kind: VirtualMachine
@@ -41,7 +42,7 @@ spec:
           resources:
             requests:
               storage: 30Gi
-  running: false
+  running: true
   template:
     metadata:
       annotations:
@@ -91,6 +92,7 @@ spec:
             userData: |-
               #cloud-config
               user: cloud-user
-              password: cwjw-v7kp-v8h5
+              password: awgk-7cbg-fdlu
               chpasswd: { expire: False }
           name: cloudinitdisk
+      evictionStrategy: LiveMigrate
