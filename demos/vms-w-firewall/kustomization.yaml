@@ -1,0 +1,254 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: demo-virt
+
+components:
+  - components/l2-front
+  - components/l2-back
+
+  - ../../components/vms/server-left
+  - ../../components/vms/server-right
+  - ../../components/vms/firewall
+
+# the inline json patch can not learn of the random suffix
+generatorOptions:
+  disableNameSuffixHash: true
+
+secretGenerator:
+  - name: cloudinitdisk-vms-w-firewall
+    files:
+      - scripts/userData
+
+  - name: netsetup-vms-w-firewall
+    files:
+      - scripts/netsetup
+
+  # - name: authorized-keys
+  #   files:
+  #     - secrets/authorized-keys
+
+patches:
+- target:
+    group: kubevirt.io
+    kind: VirtualMachine
+    name: server-left
+    version: v1
+  patch: |-
+    # pull cloud init script from secret
+    - op: replace
+      path: /spec/template/spec/volumes/1/cloudInitNoCloud
+      value: {
+        "secretRef": {
+          "name": "cloudinitdisk-vms-w-firewall"
+        }
+      }
+
+    # add secret holding script as volume
+    - op: add
+      path: /spec/template/spec/volumes/-
+      value: {
+        "name": "netsetup-vms-w-firewall",
+        "secret": {
+          "secretName": "netsetup-vms-w-firewall"
+        }
+      }
+    # add secret volume as a disk
+    - op: add
+      path: /spec/template/spec/domain/devices/disks/-
+      value: {
+        "name": "netsetup-vms-w-firewall",
+        "serial": "netsetup",
+        "disk": {
+          "bus": "virtio"
+        }
+      }
+
+    # add a 2nd NIC
+    - op: add
+      path: /spec/template/spec/domain/devices/interfaces/-
+      value: {
+        "name": "nic-front",
+        "bridge": {},
+        "model": "virtio"
+      }
+ 
+    # add a network for 2nd NIC
+    - op: add
+      path: /spec/template/spec/networks/-
+      value: {
+        "name": "nic-front",
+        "multus": {
+          "networkName": "demo-virt/l2-front"
+        }
+      }
+
+    # pick the same node to run on for now
+    - op: add
+      path: /spec/template/spec/nodeSelector
+      value: { "kubernetes.io/hostname": "hub-v4tbg-cnv-ddfmj" }
+
+    # live migrate VM if kicked off the node
+    - op: add
+      path: /spec/template/spec/evictionStrategy
+      value: "LiveMigrate"
+
+    # start VM at creation
+    - op: replace
+      path: /spec/running
+      value: true
+
+- target:
+    group: kubevirt.io
+    kind: VirtualMachine
+    name: server-right
+    version: v1
+  patch: |-
+    # pull cloud init script from secret
+    - op: replace
+      path: /spec/template/spec/volumes/1/cloudInitNoCloud
+      value: {
+        "secretRef": {
+          "name": "cloudinitdisk-vms-w-firewall"
+        }
+      }
+    # add secret holding script as volume
+    - op: add
+      path: /spec/template/spec/volumes/-
+      value: {
+        "name": "netsetup-vms-w-firewall",
+        "secret": {
+          "secretName": "netsetup-vms-w-firewall"
+        }
+      }
+    # add secret volume as a disk
+    - op: add
+      path: /spec/template/spec/domain/devices/disks/-
+      value: {
+        "name": "netsetup-vms-w-firewall",
+        "serial": "netsetup",
+        "disk": {
+          "bus": "virtio"
+        }
+      }
+
+
+
+    # add a 2nd NIC
+    - op: add
+      path: /spec/template/spec/domain/devices/interfaces/-
+      value: {
+        "name": "nic-back",
+        "bridge": {},
+        "model": "virtio"
+      }
+ 
+    # add a network for 2nd NIC
+    - op: add
+      path: /spec/template/spec/networks/-
+      value: {
+        "name": "nic-back",
+        "multus": {
+          "networkName": "demo-virt/l2-back"
+        }
+      }
+
+    # start VM at creation
+    - op: replace
+      path: /spec/running
+      value: true
+
+    # live migrate VM if kicked off the node
+    - op: add
+      path: /spec/template/spec/evictionStrategy
+      value: "LiveMigrate"
+
+    # pick the same node to run on for now
+    - op: add
+      path: /spec/template/spec/nodeSelector
+      value: { "kubernetes.io/hostname": "hub-v4tbg-cnv-ddfmj" }
+
+- target:
+    group: kubevirt.io
+    kind: VirtualMachine
+    name: firewall
+    version: v1
+  patch: |-
+    # pull cloud init script from secret
+    - op: replace
+      path: /spec/template/spec/volumes/1/cloudInitNoCloud
+      value: {
+        "secretRef": {
+          "name": "cloudinitdisk-vms-w-firewall"
+        }
+      }
+    # add secret holding script as volume
+    - op: add
+      path: /spec/template/spec/volumes/-
+      value: {
+        "name": "netsetup-vms-w-firewall",
+        "secret": {
+          "secretName": "netsetup-vms-w-firewall"
+        }
+      }
+    # add secret volume as a disk
+    - op: add
+      path: /spec/template/spec/domain/devices/disks/-
+      value: {
+        "name": "netsetup-vms-w-firewall",
+        "serial": "netsetup",
+        "disk": {
+          "bus": "virtio"
+        }
+      }
+
+
+    # add a 2nd NIC for front
+    - op: add
+      path: /spec/template/spec/domain/devices/interfaces/-
+      value: {
+        "name": "nic-front",
+        "bridge": {},
+        "model": "virtio"
+      }
+    - op: add
+      path: /spec/template/spec/networks/-
+      value: {
+        "name": "nic-front",
+        "multus": {
+          "networkName": "demo-virt/l2-front"
+        }
+      }
+
+    # add a 3rd NIC for back
+    - op: add
+      path: /spec/template/spec/domain/devices/interfaces/-
+      value: {
+        "name": "nic-back",
+        "bridge": {},
+        "model": "virtio"
+      }
+    - op: add
+      path: /spec/template/spec/networks/-
+      value: {
+        "name": "nic-back",
+        "multus": {
+          "networkName": "demo-virt/l2-back"
+        }
+      }
+
+    # start VM at creation
+    - op: replace
+      path: /spec/running
+      value: true
+
+    # live migrate VM if kicked off the node
+    - op: add
+      path: /spec/template/spec/evictionStrategy
+      value: "LiveMigrate"
+
+    # pick the same node to run on for now
+    - op: add
+      path: /spec/template/spec/nodeSelector
+      value: { "kubernetes.io/hostname": "hub-v4tbg-cnv-ddfmj" }
