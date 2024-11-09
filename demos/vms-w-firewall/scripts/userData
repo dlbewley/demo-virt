@@ -1,0 +1,43 @@
+#cloud-config
+users:
+  - name: cloud-user
+    lock_passwd: false
+    plain_text_passwd: EXAMPLE
+    groups: wheel
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDcYGv4QhrNhDB9ahXEp2x6kn9YZ2RV5GEXcRRYvk4yLpFidvSFJxkE3AonLuOgi7WBVwMofCCWbHDEgBIWNv6RzR41gKQYI+ZgcT5bSZ9ZFhkkgBvTE66q0XyFXYeON+QV1Woxb7FDDmkvpMi9Sp32EMLOaSQwgnWCsI00zmUgM4UYy66UatWqSRaPtLe8ES2IqA/WUcRfxexcFjtS6jsn2R3Xyz+w9IpexWMhTjWmKpH97Ps8Sj61pCgGgMkkvuBDWBhnVy58Hf0tNg2YZnILCUdh0vVZ1LWPpsno2HB+gBzNhJZznSC5x+emUKtpQwOzrdFn51h1ZCEQDAmyZ+Vb acm@bunny
+
+rh_subscription:
+  org: 00000000 
+  activation-key: EXAMPLE
+  enable-repo:
+    - 'rhel-9-for-x86_64-baseos-rpms'
+    - 'rhel-9-for-x86_64-appstream-rpms'
+    - 'rhocp-4.16-for-rhel-9-x86_64-rpms'
+    - 'fast-datapath-for-rhel-9-x86_64-rpms'
+
+packages:
+  - openshift-clients
+  - httpd
+  - jq
+
+write_files:
+  - content: |
+      #!/bin/bash
+      bash /opt/netsetup $@
+    path: /usr/local/bin/netsetup
+    permissions: '0755'
+    owner: root:root
+
+mounts:
+  - [ /dev/disk/by-id/virtio-netsetup, /opt, iso9660, 'defaults' ]
+
+runcmd:
+  - [systemctl, daemon-reload]
+  - [sed, -iE, 's/^Listen 80/Listen 8080/', /etc/httpd/conf/httpd.conf]
+  - [systemctl, enable, httpd.service]
+  - [systemctl, start, --no-block, httpd.service]
+  # this does not reliably run every time for some reason
+  # maybe use a oneshot service that waits for the fs mount?
+  - /usr/local/bin/netsetup

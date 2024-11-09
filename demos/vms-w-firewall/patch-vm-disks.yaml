@@ -1,0 +1,20 @@
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: .*
+spec:
+  template:
+    spec:
+      domain:
+        devices:
+          disks:
+          - name: rootdisk
+            disk:
+              bus: virtio
+          - name: cloudinitdisk
+            disk:
+              bus: virtio
+          - name: netsetup-vms-w-firewall
+            disk:
+              bus: virtio
+            serial: netsetup

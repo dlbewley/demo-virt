@@ -1,0 +1,180 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: demo-virt
+commonLabels:
+  demo: vms-w-firewall
+
+components:
+  - components/l2-front
+  - components/l2-back
+
+  - ../../components/vms/server-left
+  - ../../components/vms/server-right
+  - ../../components/vms/firewall
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+secretGenerator:
+  - name: cloudinitdisk-vms-w-firewall
+    files:
+      - scripts/userData
+
+configMapGenerator:
+  - name: netsetup-vms-w-firewall
+    files:
+      - scripts/netsetup
+
+patches:
+  # ensure each VM runs on a unique host
+  - path: patch-vm-affinity.yaml
+    target:
+      kind: VirtualMachine
+      group: kubevirt.io
+      version: v1
+
+  # add created volumes as disks
+  - path: patch-vm-disks.yaml
+    target:
+      kind: VirtualMachine
+      group: kubevirt.io
+      version: v1
+
+  - target:
+      group: kubevirt.io
+      kind: VirtualMachine
+      name: server-left
+      version: v1
+    patch: |-
+      # add volumes for secret and configmap
+      - op: replace
+        path: /spec/template/spec/volumes/1/cloudInitNoCloud
+        value: {
+          "secretRef": {
+            "name": "cloudinitdisk-vms-w-firewall"
+          }
+        }
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value: {
+          "name": "netsetup-vms-w-firewall",
+          "configMap": {
+            "name": "netsetup-vms-w-firewall"
+          }
+        }
+
+      # attach eth1 network
+      - op: add
+        path: /spec/template/spec/domain/devices/interfaces/-
+        value: {
+          "name": "nic-front",
+          "bridge": {},
+          "model": "virtio"
+        }
+      - op: add
+        path: /spec/template/spec/networks/-
+        value: {
+          "name": "nic-front",
+          "multus": {
+            "networkName": "demo-virt/l2-front"
+          }
+        }
+
+  - target:
+      group: kubevirt.io
+      kind: VirtualMachine
+      name: server-right
+      version: v1
+    patch: |-
+      # add volumes for secret and configmap
+      - op: replace
+        path: /spec/template/spec/volumes/1/cloudInitNoCloud
+        value: {
+          "secretRef": {
+            "name": "cloudinitdisk-vms-w-firewall"
+          }
+        }
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value: {
+          "name": "netsetup-vms-w-firewall",
+          "configMap": {
+            "name": "netsetup-vms-w-firewall"
+          }
+        }
+
+      # attach eth1 network
+      - op: add
+        path: /spec/template/spec/domain/devices/interfaces/-
+        value: {
+          "name": "nic-back",
+          "bridge": {},
+          "model": "virtio"
+        }
+      - op: add
+        path: /spec/template/spec/networks/-
+        value: {
+          "name": "nic-back",
+          "multus": {
+            "networkName": "demo-virt/l2-back"
+          }
+        }
+
+  - target:
+      group: kubevirt.io
+      kind: VirtualMachine
+      name: firewall
+      version: v1
+    patch: |-
+      # add volumes for secret and configmap
+      - op: replace
+        path: /spec/template/spec/volumes/1/cloudInitNoCloud
+        value: {
+          "secretRef": {
+            "name": "cloudinitdisk-vms-w-firewall"
+          }
+        }
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value: {
+          "name": "netsetup-vms-w-firewall",
+          "configMap": {
+            "name": "netsetup-vms-w-firewall"
+          }
+        }
+
+      # attach eth1 network
+      - op: add
+        path: /spec/template/spec/domain/devices/interfaces/-
+        value: {
+          "name": "nic-front",
+          "bridge": {},
+          "model": "virtio"
+        }
+      - op: add
+        path: /spec/template/spec/networks/-
+        value: {
+          "name": "nic-front",
+          "multus": {
+            "networkName": "demo-virt/l2-front"
+          }
+        }
+
+      # attach eth2 network
+      - op: add
+        path: /spec/template/spec/domain/devices/interfaces/-
+        value: {
+          "name": "nic-back",
+          "bridge": {},
+          "model": "virtio"
+        }
+      - op: add
+        path: /spec/template/spec/networks/-
+        value: {
+          "name": "nic-back",
+          "multus": {
+            "networkName": "demo-virt/l2-back"
+          }
+        }
