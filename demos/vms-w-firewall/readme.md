@@ -14,7 +14,7 @@ Each server will be scheduled to a unique node through the use of an [AntiAffini
 
 Networking is configured at boot by [this script](scripts/netsetup).
 
-Currently, most of the VM configuration is applied via inline patches in [kustomization.yaml](kustomization.yaml)
+Currently, most of the VM configuration is applied via inline patches in [kustomization.yaml](kustomization.yaml) that apply to [component VM definitions](../../components/vms/).
 
 ```mermaid
 graph TD;
@@ -28,8 +28,8 @@ graph TD;
     end
 
     subgraph Networks["Overlay Networks"]
-        net-left[Left<br> 10.111.111.0/24]:::network;
-        net-right[Right<br> 10.222.222.0/24]:::network;
+        net-left[Front Net<br> 10.111.111.0/24]:::network;
+        net-right[Back Net<br> 10.222.222.0/24]:::network;
     end
 
     subgraph Server-Left
