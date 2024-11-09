@@ -1,0 +1,14 @@
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: .*
+spec:
+  template:
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution: 
+          - topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchLabels:
+                demo: vms-w-firewall

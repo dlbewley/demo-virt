@@ -1,21 +1,27 @@
 #!/bin/bash
 
-function netsetup {
-  # fails
-  # ip link add link eth1 name eth1.$VLAN type vlan id $VLAN
-  # ip addr add $IP dev eth1.$VLAN
-  # ip link set dev eth1.$VLAN up
-  # works
+# This script exists to make it easier to test non-persistent network settings
+
+# does not work
+function tagged {
+  ip link add link $NIC name $NIC.$VLAN type vlan id $VLAN
+  ip addr add $IP dev $NIC.$VLAN
+  ip link set dev $NIC.$VLAN up
+}
+
+function untagged {
   ip addr add $IP dev $NIC
-  ip link set dev $NIC 
+  ip link set dev $NIC up
+}
 
-  # ping -c 1 ${NET_FRONT}.1
-  # ping -c 1 ${NET_FRONT}.2
-  # ping -c 1 ${NET_FRONT}.254
+function nettest {
+  ping -c 1 ${NET_FRONT}.1
+  ping -c 1 ${NET_FRONT}.2
+  ping -c 1 ${NET_FRONT}.254
 
-  # ping -c 1 ${NET_BACK}.1
-  # ping -c 1 ${NET_BACK}.2
-  # ping -c 1 ${NET_BACK}.254
+  ping -c 1 ${NET_BACK}.1
+  ping -c 1 ${NET_BACK}.2
+  ping -c 1 ${NET_BACK}.254
 }
 
 function write_status {
@@ -33,6 +39,9 @@ function write_status {
   } | tee -a /var/www/html/index.html
 }
 
+netsetup=untagged
+#netsetup=tagged
+
 NIC=eth1
 NET_FRONT=10.111.111
 VLAN_FRONT=111
@@ -42,17 +51,20 @@ VLAN_BACK=222
 HOST=`hostname`
 
 case "$HOST" in
+
   server-left)
     IP=${NET_FRONT}.1/24
     VLAN=$VLAN_FRONT
-    netsetup
+    $netsetup
+
     ip route add ${NET_BACK}.0/24 via ${NET_FRONT}.254
     ;;
 
   server-right)
     IP=${NET_BACK}.2/24
     VLAN=$VLAN_BACK
-    netsetup
+    $netsetup
+
     ip route add ${NET_FRONT}.0/24 via ${NET_BACK}.254
     ;;
 
@@ -60,12 +72,12 @@ case "$HOST" in
     IP=${NET_FRONT}.254/24
     VLAN=$VLAN_FRONT
     NIC=eth1
-    netsetup
+    $netsetup
 
     IP=${NET_BACK}.254/24
     VLAN=$VLAN_BACK
     NIC=eth2
-    netsetup
+    $netsetup
 
     sysctl -w net.ipv4.ip_forward=1
     ;;
@@ -73,3 +85,4 @@ case "$HOST" in
 esac
 
 write_status
+#nettest
