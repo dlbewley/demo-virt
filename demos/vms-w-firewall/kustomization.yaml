@@ -48,7 +48,7 @@ patches:
       name: server-left
       version: v1
     patch: |-
-      # pull cloud init script from secret
+      # add volumes for secret and configmap
       - op: replace
         path: /spec/template/spec/volumes/1/cloudInitNoCloud
         value: {
@@ -56,8 +56,6 @@ patches:
             "name": "cloudinitdisk-vms-w-firewall"
           }
         }
-
-      # add secret holding script as volume
       - op: add
         path: /spec/template/spec/volumes/-
         value: {
@@ -67,7 +65,7 @@ patches:
           }
         }
 
-      # add a 2nd NIC
+      # attach eth1 network
       - op: add
         path: /spec/template/spec/domain/devices/interfaces/-
         value: {
@@ -75,8 +73,6 @@ patches:
           "bridge": {},
           "model": "virtio"
         }
-  
-      # add a network for 2nd NIC
       - op: add
         path: /spec/template/spec/networks/-
         value: {
@@ -92,7 +88,7 @@ patches:
       name: server-right
       version: v1
     patch: |-
-      # pull cloud init script from secret
+      # add volumes for secret and configmap
       - op: replace
         path: /spec/template/spec/volumes/1/cloudInitNoCloud
         value: {
@@ -100,8 +96,6 @@ patches:
             "name": "cloudinitdisk-vms-w-firewall"
           }
         }
-
-      # add secret holding script as volume
       - op: add
         path: /spec/template/spec/volumes/-
         value: {
@@ -111,7 +105,7 @@ patches:
           }
         }
 
-      # add a 2nd NIC
+      # attach eth1 network
       - op: add
         path: /spec/template/spec/domain/devices/interfaces/-
         value: {
@@ -119,8 +113,6 @@ patches:
           "bridge": {},
           "model": "virtio"
         }
-  
-      # add a network for 2nd NIC
       - op: add
         path: /spec/template/spec/networks/-
         value: {
@@ -136,7 +128,7 @@ patches:
       name: firewall
       version: v1
     patch: |-
-      # pull cloud init script from secret
+      # add volumes for secret and configmap
       - op: replace
         path: /spec/template/spec/volumes/1/cloudInitNoCloud
         value: {
@@ -144,7 +136,6 @@ patches:
             "name": "cloudinitdisk-vms-w-firewall"
           }
         }
-      # add secret holding script as volume
       - op: add
         path: /spec/template/spec/volumes/-
         value: {
@@ -154,7 +145,7 @@ patches:
           }
         }
 
-      # add a 2nd NIC for front
+      # attach eth1 network
       - op: add
         path: /spec/template/spec/domain/devices/interfaces/-
         value: {
@@ -162,8 +153,6 @@ patches:
           "bridge": {},
           "model": "virtio"
         }
-
-      # add a network for 2nd NIC
       - op: add
         path: /spec/template/spec/networks/-
         value: {
@@ -173,7 +162,7 @@ patches:
           }
         }
 
-      # add a 3rd NIC for back
+      # attach eth2 network
       - op: add
         path: /spec/template/spec/domain/devices/interfaces/-
         value: {
@@ -181,8 +170,6 @@ patches:
           "bridge": {},
           "model": "virtio"
         }
-
-      # add a network for 3rd NIC
       - op: add
         path: /spec/template/spec/networks/-
         value: {
