@@ -12,7 +12,9 @@ Left and Right servers will have a static route defined allowing them to ping ei
 
 Each server will be scheduled to a unique node through the use of an [AntiAffinity rule](patch-vm-affinity.yaml) based on hypervisor node hostname.
 
-Networking is configured at boot by [this script](scripts/netsetup).
+The initial OS setup uses [this cloud-init script](scripts/userData).
+
+Networking in the VMs is ephemerally configured by [this script](scripts/netsetup). This can be run after boot at `/usr/local/bin/netsetup`.
 
 Currently, most of the VM configuration is applied via inline patches in [kustomization.yaml](kustomization.yaml) that apply to [component VM definitions](../../components/vms/).
 
