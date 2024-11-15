@@ -45,7 +45,7 @@ graph TD;
     classDef neighbor fill:#ffeb99,stroke:#333,stroke-width:2px;
 
     subgraph Cluster ["Primary Cluster Network"]
-        net-pod[Default<br> 10.0.2.0/24]:::network;
+        net-pod[Default<br> 10.128.0.0/23]:::network;
         %% net-pod --(NAT)--> internet %%
     end
 
