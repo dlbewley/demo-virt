@@ -1,0 +1,18 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: featuregate-patcher
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+rules:
+  - apiGroups:
+      - config.openshift.io
+    resources:
+      - featuregates
+    resourceNames:
+      - cluster
+    verbs:
+      - get
+      - list
+      - patch

@@ -1,0 +1,41 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: featuregate-patcher
+  namespace: openshift-config
+  generateName: featuregate-patcher-
+  labels:
+    app: featuregate-patcher
+spec:
+  template:
+    spec:
+      containers:
+        - name: patcher
+          image: registry.redhat.io/openshift4/ose-cli
+          env:
+            - name: resource 
+              value: featuregates.config.openshift.io/cluster
+            - name: key
+              value: 'spec'
+            - name: value 
+              value: '{"spec":{"customNoUpgrade":{"enabled":["UserDefinedNetwork","UserNamespacesSupport"]},"featureSet":"TechPreviewNoUpgrade"}}'
+          command:
+            - /bin/bash
+            - -c
+            - -x
+            - |
+              echo "Enable UDN"
+              echo "Setting ${key} ${value}"
+              echo
+
+              oc get $resource -o yaml || exit 1
+
+              oc patch $resource \
+                -p '{"spec":{"'${key}'":'${value}'}}' --type=merge || exit 1
+
+              echo "Wait a few moments for any change"
+      restartPolicy: Never
+      serviceAccount: featuregate-patcher
+      serviceAccountName: featuregate-patcher
+  backoffLimit: 2
