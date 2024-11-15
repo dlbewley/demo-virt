@@ -1,0 +1,12 @@
+---
+apiVersion: k8s.ovn.org/v1
+kind: UserDefinedNetwork
+metadata:
+  name: l2-back
+spec:
+  topology: Layer2
+  layer2:
+    ipamLifecycle: Persistent
+    role: Primary
+    subnets:
+      - 10.222.222.0/24
