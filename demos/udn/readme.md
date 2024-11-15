@@ -12,7 +12,7 @@ oc apply -k .
 
 * Install OCP 4.18 ec3
 
-* Enable UDN with [this job](../../network/components/udn/)
+* Enable UDN with [this job](../../networking/components/enable-udn/)
 
 * Create a [Layer2 UDN](../../networking/components/l2-back/udn/udn.yaml) in demo-udn namespace
 
