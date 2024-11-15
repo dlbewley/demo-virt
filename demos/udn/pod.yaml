@@ -1,0 +1,68 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: udn-httpd
+  labels:
+    app: httpd
+spec:
+  securityContext:
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+  initContainers:
+  - name: init-webroot
+    image: registry.redhat.io/openshift4/ose-cli
+    command:
+      - /bin/sh
+    args:
+      - -x
+      - -c
+      - "( hostname; ip -br -c a; ip -c route ) | tee /var/www/html/index.html"
+    volumeMounts:
+      - mountPath: "/var/www/html"
+        name: webroot
+  containers:
+    - name: httpd
+      image: registry.redhat.io/rhel9/httpd-24
+      ports:
+        - containerPort: 8080
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+      volumeMounts:
+        - mountPath: "/var/www/html"
+          name: webroot
+  volumes:
+    - name: webroot
+      emptyDir:
+        sizeLimit: 5Mi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: udn-client
+  labels:
+    app: client
+spec:
+  securityContext:
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+    - name: client
+      image: registry.redhat.io/openshift4/ose-cli
+      command:
+        - /bin/sh
+      args:
+        - -x
+        - -c
+        - "hostname; ip -br -c a; ip -c route; sleep infinity"
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+

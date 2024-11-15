@@ -1,0 +1,38 @@
+# Test User Defined Networks
+
+Right now just testing with plain containers rather than VMs.
+
+[Enable UDN](../../network/components/udn/)
+
+Create a Layer2 UDN
+
+
+```mermaid
+graph TD;
+    classDef interface fill:#ffcc00,stroke:#333,stroke-width:2px;
+    classDef network fill:#0ddd,stroke:#333,stroke-width:2px;
+    classDef neighbor fill:#ffeb99,stroke:#333,stroke-width:2px;
+
+    subgraph Cluster ["Primary Cluster Network"]
+        net-pod[Default<br> 10.0.2.0/24]:::network;
+        %% net-pod --(NAT)--> internet %%
+    end
+
+    subgraph Networks["User Defined Network"]
+        net-right[L2 Back Net<br> 10.222.222.0/24]:::network;
+    end
+
+    subgraph Httpd
+        server-left-eth0[eth0<br>10.128.0.145/23]:::interface;
+        server-left-eth0 --> net-pod
+        server-left-eth1[eth1<br>10.222.222.7/24]:::interface;
+        server-left-eth1 ==> net-right
+    end
+
+    subgraph Client
+        server-right-eth0[eth0<br>10.128.0.144/24]:::interface;
+        server-right-eth0 --> net-pod
+        server-right-eth1[eth1<br>10.222.222.6/24]:::interface;
+        server-right-eth1 ==> net-right
+    end
+```
