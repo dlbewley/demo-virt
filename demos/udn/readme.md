@@ -36,13 +36,7 @@ spec:
 
 * `oc rsh` to the client pod and curl the httpd pod on port 8080
 
-**Observations**
-
-* the pods have 2 interfaces automatically. "look ma, no multus!"
-* eth0 is on the cluster network 10.128.0.0/14
-* eth1 is given an IP on the range associated with the Layer 2 UDN
-* pods can only contact each other over eth1 😕
-
+## Diagram
 
 ```mermaid
 graph TD;
@@ -73,3 +67,12 @@ graph TD;
         server-right-eth1 ==> net-right
     end
 ```
+
+## Observations
+
+* the pods have 2 interfaces automatically. "look ma, no multus!"
+* eth0 is on the cluster network 10.128.0.0/14
+* eth1 is given an IP on the range associated with the Layer 2 UDN
+* pods can only contact each other over eth1 😕
+
+![../../img/udn-l2-pod-test.png](../../img/udn-l2-pod-test.png)
