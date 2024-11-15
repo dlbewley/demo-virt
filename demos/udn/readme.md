@@ -75,4 +75,6 @@ graph TD;
 * eth1 is given an IP on the range associated with the Layer 2 UDN
 * pods can only contact each other over eth1 😕
 
+[![asciicast](https://asciinema.org/a/689869.svg)](https://asciinema.org/a/689869)
+
 ![../../img/udn-l2-pod-test.png](../../img/udn-l2-pod-test.png)
