@@ -1,5 +1,7 @@
 # Test User Defined Networks
 
+Testing [User Defined Networking](https://docs.openshift.com/container-platform/4.17/networking/multiple_networks/understanding-user-defined-network.html)
+
 Right now just testing with plain containers rather than VMs.
 
 ## Quick Deploy 
@@ -53,6 +55,10 @@ graph TD;
         net-right[L2 Back Net<br> 10.222.222.0/24]:::network;
     end
 
+    subgraph Networks["Masquerade Network"]
+        net-masquerade[Masquerade Subnet<br> 169.254.0.0/17]:::network;
+    end
+
     subgraph Httpd
         server-left-eth0[eth0<br>10.128.0.145/23]:::interface;
         server-left-eth0 --> net-pod
@@ -75,7 +81,9 @@ graph TD;
 * eth1 is given an IP on the range associated with the Layer 2 UDN
 * pods can only contact each other over eth1 😕
 
-[![asciicast](https://asciinema.org/a/689869.svg)](https://asciinema.org/a/689869)
+[![asciicast demo](https://asciinema.org/a/689869.svg)](https://asciinema.org/a/689869)
+
+[![asciicast ovn](https://asciinema.org/a/690175.svg)](https://asciinema.org/a/690175)
 
 ![../../img/udn-l2-pod-test.png](../../img/udn-l2-pod-test.png)
 
