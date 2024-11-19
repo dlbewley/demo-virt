@@ -1,0 +1,15 @@
+---
+#CNV_VERSION=4.18
+#STARTING_CSV=$(oc get packagemanifest -l catalog=cnv-nightly-catalog-source \
+#  -o jsonpath="{$.items[?(@.metadata.name=='kubevirt-hyperconverged')].status.channels[?(@.name==\"nightly-${CNV_VERSION}\")].currentCSV}")
+- op: replace
+  path: /spec/source
+  value: cnv-nightly-catalog-source
+
+- op: replace
+  path: /spec/channel
+  value: nightly-4.18
+
+- op: add
+  path: /spec/startingCSV
+  value: kubevirt-hyperconverged-operator.4.18.0-239
