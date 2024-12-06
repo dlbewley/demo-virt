@@ -10,7 +10,9 @@ labels:
 
 components:
   - ../../networking/components/enable-udn
-  - ../../networking/components/l2-back/udn
+  #  - ../../networking/components/l2-back/udn
+  # https://docs.openshift.com/container-platform/4.17/networking/multiple_networks/understanding-user-defined-network.html
+  - ../../networking/components/l3-back/udn
 
 resources:
   - namespace.yaml

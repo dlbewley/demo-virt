@@ -2,6 +2,8 @@
 
 Testing [User Defined Networking](https://docs.openshift.com/container-platform/4.17/networking/multiple_networks/understanding-user-defined-network.html)
 
+https://ovn-kubernetes.io/api-reference/userdefinednetwork-api-spec/
+
 Right now just testing with plain containers rather than VMs.
 
 ## Quick Deploy 
@@ -12,7 +14,7 @@ oc apply -k .
 
 ## Detailed Deploy
 
-* Install OCP 4.18 ec3
+* Install OCP [4.18 ec4](https://mirror.openshift.com/pub/openshift-v4/clients/ocp-dev-preview/4.18.0-ec.4/)
 
 * Enable UDN with [this job](../../networking/components/enable-udn/)
 
@@ -79,7 +81,8 @@ graph TD;
 * the pods have 2 interfaces automatically. "look ma, no multus!"
 * eth0 is on the cluster network 10.128.0.0/14
 * eth1 is given an IP on the range associated with the Layer 2 UDN
-* pods can only contact each other over eth1 😕
+* pods can only contact each other over eth1
+* a net-attach-def is automatically created 
 
 [![asciicast demo](https://asciinema.org/a/689869.svg)](https://asciinema.org/a/689869)
 

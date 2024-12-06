@@ -1,44 +1,51 @@
-DEMO=udn arec 
+#!/bin/bash
 
+# git clone https://github.com/paxtonhare/demo-magic.git
+source ~/src/demos/demo-magic/demo-magic.sh
+TYPE_SPEED=100
+PROMPT_TIMEOUT=2
+#DEMO_PROMPT="${CYAN}\W${GREEN}➜ ${COLOR_RESET}"
+DEMO_PROMPT="${CYAN}\W ${GREEN}$ ${COLOR_RESET}"
+DEMO_COMMENT_COLOR=$GREEN
 
-# setup
-export RED='\033[1;31m'
-export BLUE='\033[1;36m'
-export PURPLE='\033[1;35m'
-export ORANGE='\033[0;33m'
-export NC='\033[0m' # No Color
-N=master-2
 # https://archive.zhimingwang.org/blog/2015-09-21-zsh-51-and-bracketed-paste.html
-unset zle_bracketed_paste
+#unset zle_bracketed_paste
+N=master-2
 clear
 
-echo "${BLUE}# script to access the 'control plane' of OVN${NC}"
-bat `which ovncli`
+p "# here is a script to access the 'control plane' of OVN"
+pei 'bat `which ovncli`'
 
+p
+p '# view existing UserDefinedNetworks'
+pei 'oc get userdefinednetworks -n demo-udn'
+pei "oc get userdefinednetworks -n demo-udn l2-back -o yaml | yq .spec"
 
-oc get userdefinednetworks -n demo-udn 
+p '# view the example httpd and client pods'
+pe 'oc get -n demo-udn pods -o wide'
 
-echo "${BLUE}# script to access the 'control plane' of OVN${NC}"
-oc get pods -n demo-udn -o wide
+p '# view IP in udn-client pod'
+pei "oc rsh -n demo-udn udn-client ip -c -br -4 a 2>/dev/null"
 
-#echo "${BLUE}# connect to OVN northbound db pod on $N ${NC}"
-#ovncli $N
+p "# use above script to list logical switches on $N"
+p "# notice that namespace 'demo-udn' became 'demo.udn' and netork 'l2-back' became 'l2.back'"
+pei "ovncli $N ovn-nbctl ls-list"
 
-echo "${BLUE}# list logical switches on $N${NC}"
-ovncli $N ovn-nbctl ls-list
+p "# list logical switch ports on our UDN switch on $N"
+p "# notice the pods"
+pei "ovncli $N ovn-nbctl lsp-list demo.udn.l2.back_ovn_layer2_switch"
 
-echo "${BLUE}# list logical switch ports on our UDN switch on $N ${NC}"
-ovncli $N ovn-nbctl lsp-list demo.udn.l2.back_ovn_layer2_switch
+p
+p "# list logical switch ports on $N node switch"
+pei "ovncli $N ovn-nbctl lsp-list $N"
 
-echo "${BLUE}# list logical switch ports on $N node switch ${NC}"
-ovncli $N ovn-nbctl lsp-list $N
+p
+p "# list logical routers on $N"
+pei "ovncli $N ovn-nbctl lr-list"
 
-echo "${BLUE}# list logical routers on $N ${NC}"
-ovncli $N ovn-nbctl lr-list
+p "# list routes on UDN gateway router on $N"
+pei "ovncli $N ovn-nbctl lr-route-list GR_demo.udn.l2.back_master-2"
 
-echo "${BLUE}# list routes on UDN gateway router on $N ${NC}"
-ovncli $N ovn-nbctl lr-route-list GR_demo.udn.l2.back_master-2
-
-echo "${BLUE}# list routes on cluster gateway router on $N ${NC}"
-ovncli $N ovn-nbctl lr-route-list GR_master-2
+p "# list routes on cluster gateway router on $N"
+pei "ovncli $N ovn-nbctl lr-route-list GR_master-2"
 
