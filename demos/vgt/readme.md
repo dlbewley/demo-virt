@@ -15,7 +15,9 @@ Test setup for ovn-kubernetes localnet topology (ovs-bridge). Truns out this is 
 
 ## linux-bridge
 
-Adding a 2nd linux bridge `br-trunk` to the NIC (eg ens224) underlying the OVS-bridge `br-vmdata` does work.
+Creating 2nd linux-bridge `br-trunk` on the NIC (eg ens224) does work.
+
+Using linux-bridge and ovs-bridge on the same NIC is not supported. In my test the ovs-bridge stopped working.
 
 * [br-trunk Linux Bridge](networking/components/br-trunk/linux-bridge/) (pass)
 * [trunk Network Attachment](networking/components/trunk/linux-bridge/) (pass)
