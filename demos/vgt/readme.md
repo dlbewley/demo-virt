@@ -4,7 +4,7 @@ Pass multiple VLANs to a single virtual machine guest interface on OpenShift via
 
 Configure only one option at a time: [ovs-bridge](overlays/ovs-bridge) or [linux-bridge](overlays/linux-bridge).
 
-Generally ovs-bridge is the preferred technology, but this testing confirmed a second use case that prefers (requires) traditional linux-bride; this use case and the case when a VM must have 2 NICs on the same NAD.
+Generally ovs-bridge is the preferred technology, but this testing confirmed a second use case that prefers (requires) traditional linux-bridge; this use case and the case when a VM must have 2 NICs on the same NAD.
 
 ## ovs-bridge
 
