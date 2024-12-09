@@ -1,14 +1,14 @@
 # VLAN Guest Tagging
 
-Pass multiple VLANs to a single interface on virtual machine guest on OpenShift via 802.1q trunk.
+Pass multiple VLANs to a single virtual machine guest interface on OpenShift via 802.1q trunk.
 
-Choose only one option at a time: [ovs-bridge](overlays/ovs-bridge) or [linux-bridge](overlays/linux-bridge).
+Configure only one option at a time: [ovs-bridge](overlays/ovs-bridge) or [linux-bridge](overlays/linux-bridge).
+
+Generally ovs-bridge is the preferred technology, but this testing confirmed a second use case that prefers (requires) traditional linux-bride; this use case and the case when a VM must have 2 NICs on the same NAD.
 
 ## ovs-bridge
 
-* Test setup for ovn-kubernetes localnet topology (ovs-bridge). Truns out this is not yet supported. https://issues.redhat.com/browse/RFE-6831
-[![asciicast](https://asciinema.org/a/693745.svg)](https://asciinema.org/a/693745)
-
+Test setup for ovn-kubernetes localnet topology (ovs-bridge). Truns out this is not yet supported. https://issues.redhat.com/browse/RFE-6831
 
 * [br-trunk OVS Bridge](networking/components/br-trunk/ovs-bridge/) (not tested)
 * [trunk Network Attachment](networking/components/trunk/ovs-bridge/) (fail)
@@ -17,6 +17,16 @@ Choose only one option at a time: [ovs-bridge](overlays/ovs-bridge) or [linux-br
 
 Adding a 2nd linux bridge `br-trunk` to the NIC (eg ens224) underlying the OVS-bridge `br-vmdata` does work.
 
-See
 * [br-trunk Linux Bridge](networking/components/br-trunk/linux-bridge/) (pass)
 * [trunk Network Attachment](networking/components/trunk/linux-bridge/) (pass)
+
+## Demo
+
+### OVS-Bridge to Localnet Net-Attach-Def
+
+* [![asciicast](https://asciinema.org/a/693745.svg)](https://asciinema.org/a/693745)
+* [demo-script.sh](demo-script.sh)
+
+### Linx-Bridge to cnv-bridge Net-Attach-Def
+
+* Not yet recorded. It works though.
