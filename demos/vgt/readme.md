@@ -7,6 +7,8 @@ Test the passing of multiple VLANs to a single virtual machine guest interface o
 
 # Setup
 
+Using linux-bridge and ovs-bridge on the same NIC is not supported. In my test the ovs-bridge stopped working.
+
 Configure only one option at a time: [ovs-bridge](overlays/ovs-bridge) or [linux-bridge](overlays/linux-bridge).
 
 > [!IMPORTANT]
@@ -14,16 +16,25 @@ Configure only one option at a time: [ovs-bridge](overlays/ovs-bridge) or [linux
 
 ## ovs-bridge
 
-Test setup for ovn-kubernetes localnet topology (ovs-bridge). Turns out this is not yet supported. https://issues.redhat.com/browse/RFE-6831
+```bash
+oc apply -k overlays/ovs-bridge
+```
+
+Test setup for ovn-kubernetes localnet topology (ovs-bridge).
 
 * [br-trunk OVS Bridge](components/br-trunk/ovs-bridge/) (not tested)
 * [trunk Network Attachment](components/trunk/ovs-bridge/) (fail)
 
+Turns out this is not yet supported. https://issues.redhat.com/browse/RFE-6831
+
 ## linux-bridge
 
-Using linux-bridge and ovs-bridge on the same NIC is not supported. In my test the ovs-bridge stopped working.
+```bash
+oc apply -k overlays/linux-bridge
+```
 
-Creating a linux-bridge `br-trunk` on a new dedicated NIC (eg ens224) does work.
+Test setup for cnv-bridge ove linux bridge.
+This does work. VLAN tags visible on VM.
 
 * [br-trunk Linux Bridge](components/br-trunk/linux-bridge/) (pass)
 * [trunk Network Attachment](components/trunk/linux-bridge/) (pass)
@@ -34,8 +45,9 @@ Creating a linux-bridge `br-trunk` on a new dedicated NIC (eg ens224) does work.
 
 <!-- * [![asciicast](https://asciinema.org/a/693745.svg)](https://asciinema.org/a/693745) -->
 * [demo-script-ovs.sh](demo-script-ovs.sh)
-* [demo-script-linux.sh](demo-script-linux.sh)
 
 ## Linx-Bridge to cnv-bridge Net-Attach-Def
 
 * Not yet recorded. It works though.
+
+* [demo-script-linux.sh](demo-script-linux.sh)
