@@ -1,0 +1,28 @@
+---
+apiVersion: nmstate.io/v1
+kind: NodeNetworkConfigurationPolicy
+metadata:
+  name: br-trunk
+spec:
+  desiredState:
+    interfaces:
+      - name: ens256
+        ipv4:
+          enabled: false
+        ipv6:
+          enabled: false
+        state: up
+        type: ethernet
+
+      - name: br-trunk
+        description: |-
+          A dedicated OVS bridge with ens256 as a port
+          allowing all VLANs and untagged traffic.
+        type: ovs-bridge
+        state: up
+        bridge:
+          allow-extra-patch-ports: true
+          options:
+            stp: false
+          port:
+            - name: ens256

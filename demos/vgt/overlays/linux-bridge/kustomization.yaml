@@ -2,13 +2,26 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: demo-trunk
+namespace: demo-vgt
 
 resources:
   - ../../base
 
 components:
   # bridge interace
-  #- ../../../../networking/components/br-trunk/linux-bridge
+  - ../../components/br-trunk/linux-bridge
   # network attachment
-  - ../../../../networking/components/trunk/linux-bridge
+  - ../../components/trunk/linux-bridge
+
+patches:
+  - target:
+      group: nmstate.io
+      kind: NodeNetworkConfigurationPolicy
+      name: br-trunk
+      version: v1
+    patch: |-
+      - op: replace
+        path: /spec/nodeSelector
+        value: {
+              "machine.openshift.io/cluster-api-machineset": "hub-v4tbg-cnv"
+        }
