@@ -14,6 +14,9 @@ DEMO_ROOT=$GIT_ROOT/demos/vgt
 #unset zle_bracketed_paste
 clear
 
+p "# all the things"
+pei tree -L 3 $DEMO_ROOT
+p
 p "# here is the NNCP to create linux bridge called 'br-trunk'"
 p "# the NIC receives an 802.1q trunk from its switch"
 pei 'bat $DEMO_ROOT/components/br-trunk/linux-bridge/nncp.yaml'
@@ -41,9 +44,11 @@ pei "oc get nnce -l nmstate.io/policy=br-trunk"
 
 p
 
-p "# now wait for the VM to come up"
+p "# now wait for the VM to come up. meanwhile..."
+p "# here is the script that tries to setup the VLAN interface "
 
-sleep 30
+pei "bat $DEMO_ROOT/base/scripts/netsetup"
+sleep 60
 
 p "# check the VM's network interfaces"
 pei "ssh cloud-user@rhel-node-1.demo-vgt.cnv nmcli con 2>/dev/null"
@@ -55,4 +60,17 @@ p "# tcpdump should reveal some VLAN tags on the trunk interface"
 pei "ssh cloud-user@rhel-node-1.demo-vgt.cnv sudo tcpdump -nni eth1 -e -c5 2>/dev/null |grep vlan"
 
 p "# success!"
+ 
+DEMO_COMMENT_COLOR=$BLUE
+p "# Time to clean up"
+DEMO_COMMENT_COLOR=$GREEN
+p "# deleting an NNCP does not delete created interfaces, change the state to absent"
+p "# and remove the NNCP after the change is applied"
+p
+oc patch -n demo-vgt nncp/br-trunk --type=json \
+  -p='[{"op":"replace", "path":"/spec/desiredState/interfaces/1/state", "value": "absent"}]'
+
+oc wait nncp/br-trunk --for=condition=Available=True
+
+oc delete -k overlays/linux-bridge
 exit
