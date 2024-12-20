@@ -3,9 +3,13 @@
 # This script exists to make it easier to test non-persistent network settings
 
 function tagged {
-  ip link add link $NIC name $NIC.$VLAN type vlan id $VLAN
-  ip addr add $IP dev $NIC.$VLAN
-  ip link set dev $NIC.$VLAN up
+  nmcli connection add type vlan con-name $NIC.$VLAN ifname $NIC.$VLAN vlan.parent $NIC vlan.id $VLAN
+
+  nmcli connection modify $NIC.$VLAN \
+    ipv4.route-metric 200 \
+    ipv4.method auto
+
+  nmcli connection up $NIC.$VLAN
 }
 
 function untagged {
@@ -15,12 +19,7 @@ function untagged {
 
 function nettest {
   ping -c 1 ${NET_FRONT}.1
-  ping -c 1 ${NET_FRONT}.2
-  ping -c 1 ${NET_FRONT}.254
-
-  ping -c 1 ${NET_BACK}.1
-  ping -c 1 ${NET_BACK}.2
-  ping -c 1 ${NET_BACK}.254
+  tcpdump -i $NIC -c 5 -nne 2>/dev/null | grep vlan
 }
 
 function write_status {
@@ -42,7 +41,7 @@ function write_status {
 netsetup=tagged
 
 NIC=eth1
-NET_FRONT=10.111.111
+NET_FRONT=192.168.4
 VLAN_FRONT=1924
 NET_BACK=10.222.222
 VLAN_BACK=222
@@ -61,4 +60,4 @@ case "$HOST" in
 esac
 
 write_status
-#nettest
+nettest

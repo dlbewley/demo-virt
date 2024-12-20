@@ -8,7 +8,7 @@ metadata:
 spec:
   # the name below is the name of a cluster-scoped "network"
   # this network will be mapped to an appropriate bridge via NNCP in an OVN bridge-mapping
-  # omitting vlan on Linux Bridge results in all VLANs passed
+  # omitting vlanId on Linux Bridge results in all VLANs passed
   # omitting vlan on OVS Bridge results in only VLAN 0 passing
   config: |-
     {
