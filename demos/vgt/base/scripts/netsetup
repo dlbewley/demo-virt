@@ -1,63 +1,12 @@
 #!/bin/bash
 
-# This script exists to make it easier to test non-persistent network settings
-
-function tagged {
-  nmcli connection add type vlan con-name $NIC.$VLAN ifname $NIC.$VLAN vlan.parent $NIC vlan.id $VLAN
-
-  nmcli connection modify $NIC.$VLAN \
-    ipv4.route-metric 200 \
-    ipv4.method auto
-
-  nmcli connection up $NIC.$VLAN
-}
-
-function untagged {
-  ip addr add $IP dev $NIC
-  ip link set dev $NIC up
-}
-
-function nettest {
-  ping -c 1 ${NET_FRONT}.1
-  tcpdump -i $NIC -c 5 -nne 2>/dev/null | grep vlan
-}
-
-function write_status {
-  mkdir -p /var/www/html
-  {
-    echo -n "<h1>Host:</h1> ";
-    hostname;
-    echo "<h1>IPs</h1><pre>";
-    ip -br a;
-    echo "</pre><h1>Links</h1><pre>";
-    ip -br link;
-    echo "</pre><h1>Routes</h1><pre>";
-    ip -br route;
-    echo "</pre>";
-  } | tee -a /var/www/html/index.html
-}
-
-#netsetup=untagged
-netsetup=tagged
-
 NIC=eth1
-NET_FRONT=192.168.4
 VLAN_FRONT=1924
-NET_BACK=10.222.222
-VLAN_BACK=222
 
-HOST=`hostname`
+nmcli connection add type vlan con-name $NIC.$VLAN ifname $NIC.$VLAN vlan.parent $NIC vlan.id $VLAN
 
-case "$HOST" in
+nmcli connection modify $NIC.$VLAN \
+  ipv4.route-metric 200 \
+  ipv4.method auto
 
-  *)
-    IP=${NET_FRONT}.222/24
-    VLAN=$VLAN_FRONT
-    NIC=eth1
-    $netsetup
-    ;;
-
-esac
-
-write_status
-nettest
+nmcli connection up $NIC.$VLAN
