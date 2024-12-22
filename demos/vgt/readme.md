@@ -14,6 +14,11 @@ Configure only one option at a time: [ovs-bridge](overlays/ovs-bridge) or [linux
 > [!IMPORTANT]
 > Generally ovs-bridge is the preferred technology, but this testing has confirmed that at this time, linux-bridge is the only option that supports VGT functionality.
 
+## Cleanup
+
+> [!NOTE] Some patch examples
+
+
 ## ovs-bridge
 
 ```bash
@@ -27,6 +32,21 @@ Test setup for ovn-kubernetes localnet topology (ovs-bridge).
 
 Turns out this is not yet supported. https://issues.redhat.com/browse/RFE-6831
 
+**Cleanup**
+
+```bash
+oc patch -n demo-vgt nncp/br-trunk --type=json \
+  -p='[{"op":"replace", "path":"/spec/desiredState/interfaces/1/state", "value": "absent"}]'
+
+oc patch -n demo-vgt nncp/ovs-bridge-mapping-trunk --type=json \
+  -p='[{"op":"replace", "path":"/spec/desiredState/ovn/bridge-mappings/0/state", "value": "absent"}
+
+oc wait nncp/br-trunk --for=condition=Available=True
+oc wait nncp/ovs-bridge-mapping-trunk --for=condition=Available=True
+
+oc delete -k overlays/ovs-bridge
+```
+
 ## linux-bridge
 
 ```bash
@@ -39,6 +59,16 @@ This does work. VLAN tags visible on VM.
 * [br-trunk Linux Bridge](components/br-trunk/linux-bridge/) (pass)
 * [trunk Network Attachment](components/trunk/linux-bridge/) (pass)
 
+```bash
+oc patch -n demo-vgt nncp/br-trunk --type=json \
+  -p='[{"op":"replace", "path":"/spec/desiredState/interfaces/1/state", "value": "absent"}]'
+
+oc wait nncp/br-trunk --for=condition=Available=True
+
+oc delete -k overlays/linux-bridge
+```
+
+
 # Demo
 
 ## OVS-Bridge to Localnet Net-Attach-Def
@@ -48,6 +78,8 @@ This does work. VLAN tags visible on VM.
 
 ## Linx-Bridge to cnv-bridge Net-Attach-Def
 
-* Not yet recorded. It works though.
-
 * [demo-script-linux.sh](demo-script-linux.sh)
+* VM [demo](base/scripts/demo)
+* VM [netsetup](base/scripts/netsetup)
+
+[![asciicast](https://asciinema.org/a/695824.svg)](https://asciinema.org/a/695824)
