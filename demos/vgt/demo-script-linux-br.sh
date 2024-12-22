@@ -17,60 +17,54 @@ clear
 p "# all the things"
 pei tree -L 3 $DEMO_ROOT
 p
-p "# here is the NNCP to create linux bridge called 'br-trunk'"
+p "# 🔍 here is the NNCP to create linux bridge called 'br-trunk'"
 p "# the NIC receives an 802.1q trunk from its switch"
 pei 'bat $DEMO_ROOT/components/br-trunk/linux-bridge/nncp.yaml'
 
 p
 
-p "# here is the NAD to create a cnv-bridge called 'trunk'"
+p "# 🔍 here is the NAD to create a cnv-bridge called 'trunk'"
 pei 'bat -H 11 -H 21 $DEMO_ROOT/components/trunk/linux-bridge/nad.yaml'
-p "# the vlanId: {} line is key to seeing all VLANs"
-p
-
-p "# it uses a base to create the VM using the trunk network attachment"
-pei "bat -P $DEMO_ROOT/base/kustomization.yaml"
+p "# the vlanId: {} line is key to passing all VLAN tags through the NAD"
 
 p
 
-p "# apply the ovs-bridge overlay to create everything including a VM"
+p "# 🔧 apply the linux-bridge overlay to create the trunk, attachment, and a test VM"
 pei "oc apply -k $DEMO_ROOT/overlays/linux-bridge"
 
 p
 
-p "# confirm results of NNCP and NNCE"
+p "# 🔍 confirm results of NNCP and NNCE"
 pei "oc wait nncp/br-trunk --for=condition=Available=True"
 pei "oc get nnce -l nmstate.io/policy=br-trunk"
 
 p
 
-p "# now wait for the VM to come up. meanwhile..."
+p "# ⌛ wait for the VM to come up. meanwhile..."
 p "# here is the script that tries to setup the VLAN interface "
 
-pei "bat $DEMO_ROOT/base/scripts/netsetup"
-sleep 60
+pei "bat -l bash $DEMO_ROOT/base/scripts/netsetup"
+sleep 90
 
-p "# check the VM's network interfaces"
-pei "ssh cloud-user@rhel-node-1.demo-vgt.cnv nmcli con 2>/dev/null"
-pei "ssh cloud-user@rhel-node-1.demo-vgt.cnv ip -br -c -4 a 2>/dev/null"
+p "# 💻 login to the VM and take a look at the network interfaces"
+pei "ssh cloud-user@rhel-node-1.demo-vgt.cnv"
 
 p
 
-p "# tcpdump should reveal some VLAN tags on the trunk interface"
-pei "ssh cloud-user@rhel-node-1.demo-vgt.cnv sudo tcpdump -nni eth1 -e -c5 2>/dev/null |grep vlan"
-
-p "# success!"
+p "# 🎉 SUCCESS!"
  
 DEMO_COMMENT_COLOR=$BLUE
-p "# Time to clean up"
+p "# 🚿 time to clean up"
 DEMO_COMMENT_COLOR=$GREEN
+
 p "# deleting an NNCP does not delete created interfaces, change the state to absent"
 p "# and remove the NNCP after the change is applied"
+pei 'oc patch -n demo-vgt nncp/br-trunk --type=json \
+  -p="[{"op":"replace", "path":"/spec/desiredState/interfaces/1/state", "value": "absent"}]"'
+
+pei "oc wait nncp/br-trunk --for=condition=Available=True"
+
 p
-oc patch -n demo-vgt nncp/br-trunk --type=json \
-  -p='[{"op":"replace", "path":"/spec/desiredState/interfaces/1/state", "value": "absent"}]'
 
-oc wait nncp/br-trunk --for=condition=Available=True
-
-oc delete -k overlays/linux-bridge
+pei "oc delete -k overlays/linux-bridge"
 exit
