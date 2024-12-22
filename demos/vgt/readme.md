@@ -78,7 +78,7 @@ oc delete -k overlays/linux-bridge
 
 ## Linx-Bridge to cnv-bridge Net-Attach-Def
 
-* [demo-script-linux.sh](demo-script-linux.sh)
+* Local [demo-script-linux-br.sh](demo-script-linux-br.sh)
 * VM [demo](base/scripts/demo)
 * VM [netsetup](base/scripts/netsetup)
 
