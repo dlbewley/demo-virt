@@ -25,11 +25,11 @@ p
 
 p "# 🔍 here is the NAD to create a cnv-bridge called 'trunk'"
 pei 'bat -H 11 -H 21 $DEMO_ROOT/components/trunk/linux-bridge/nad.yaml'
-p "# the vlanId: {} line is key to passing all VLAN tags through the NAD"
+p "# the vlanId: {} line is key to passing all VLAN tags into the bridge"
 
 p
 
-p "# 🔧 apply the linux-bridge overlay to create the trunk, attachment, and a test VM"
+p "# 🔧 apply the linux-bridge overlay to create the trunk, network attachment, and a VM"
 pei "oc apply -k $DEMO_ROOT/overlays/linux-bridge"
 
 p
@@ -40,10 +40,11 @@ pei "oc get nnce -l nmstate.io/policy=br-trunk"
 
 p
 
-p "# ⌛ wait for the VM to come up. meanwhile..."
-p "# here is the script that tries to setup the VLAN interface "
+p "# ⌛ wait for the VM to come up..."
+p "# meanwhile here is the script to setup the VLAN interface on the VM"
 
 pei "bat -l bash $DEMO_ROOT/base/scripts/netsetup"
+
 sleep 90
 
 p "# 💻 login to the VM and take a look at the network interfaces"
@@ -57,10 +58,10 @@ DEMO_COMMENT_COLOR=$BLUE
 p "# 🚿 time to clean up"
 DEMO_COMMENT_COLOR=$GREEN
 
-p "# deleting an NNCP does not delete created interfaces, change the state to absent"
+p "# deleting an NNCP does not delete created interfaces, so change the state to absent"
 p "# and remove the NNCP after the change is applied"
-pei 'oc patch -n demo-vgt nncp/br-trunk --type=json \
-  -p="[{"op":"replace", "path":"/spec/desiredState/interfaces/1/state", "value": "absent"}]"'
+pei 'oc patch -n demo-vgt nncp/br-trunk --type=json -p="[{\"op\":\"replace\",\"path\":\"/spec/desiredState/interfaces/1/state\",\"value\":\"absent\"}]" '
+p
 
 pei "oc wait nncp/br-trunk --for=condition=Available=True"
 
