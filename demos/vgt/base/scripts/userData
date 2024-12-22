@@ -1,8 +1,7 @@
 #cloud-config
 users:
   - name: cloud-user
-    lock_passwd: false
-    plain_text_passwd: tree-can-surely
+    lock_passwd: true
     groups: wheel
     sudo: ALL=(ALL) NOPASSWD:ALL
     ssh_authorized_keys:
@@ -16,10 +15,17 @@ write_files:
       #!/bin/bash
       bash /opt/netsetup $@
 
+  - path: /usr/local/bin/demo
+    permissions: '0755'
+    owner: root:root
+    content: |
+      #!/bin/bash
+      bash /opt/demo $@
+
 mounts:
-  - [ /dev/disk/by-id/virtio-netsetup, /opt, iso9660, 'defaults' ]
+  - [ /dev/disk/by-id/virtio-demo, /opt, iso9660, 'defaults' ]
 
 runcmd:
-  # this does not reliably run every time for some reason
-  # maybe use a oneshot service that waits for the fs mount?
+  - yum -y install https://rpmfind.net/linux/epel/9/Everything/x86_64/Packages/p/pv-1.6.20-1.el9.x86_64.rpm
+  - curl -s https://raw.githubusercontent.com/paxtonhare/demo-magic/refs/heads/master/demo-magic.sh > /usr/local/bin/demo-magic.sh
   - /usr/local/bin/netsetup

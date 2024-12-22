@@ -16,9 +16,10 @@ generatorOptions:
   disableNameSuffixHash: true
 
 configMapGenerator:
-  - name: netsetup-vgt
+  - name: demo-vgt
     files:
       - scripts/netsetup
+      - scripts/demo
 
 secretGenerator:
   - name: cloudinitdisk-vgt
@@ -64,16 +65,16 @@ patches:
       - op: add
         path: /spec/template/spec/volumes/-
         value: {
-          "name": "netsetup",
+          "name": "demo",
           "configMap": {
-            "name": "netsetup-vgt"
+            "name": "demo-vgt"
           }
         }
       - op: add
         path: /spec/template/spec/domain/devices/disks/-
         value: {
-          "name": "netsetup",
-          "serial": "netsetup",
+          "name": "demo",
+          "serial": "demo",
           "disk": {
             "bus": "virtio"
           }
