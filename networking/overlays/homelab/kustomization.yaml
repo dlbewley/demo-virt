@@ -10,6 +10,8 @@ resources:
 components:
   - ../../components/vlan-1924/ovs-bridge
   - ../../components/vlan-1926/ovs-bridge
+  - ../../components/br-trunk/ovs-bridge
+  - ../../components/trunk/ovs-bridge
 
 patches:
   - target:
@@ -55,3 +57,17 @@ patches:
         value: {
               "machine.openshift.io/cluster-api-machineset": "hub-v4tbg-cnv"
         }
+
+  - target:
+      group: nmstate.io
+      kind: NodeNetworkConfigurationPolicy
+      name: br-trunk
+      version: v1
+    patch: |-
+      - op: replace
+        path: /spec/nodeSelector
+        value: {
+              "kubernetes.io/hostname": "hub-v4tbg-cnv-n5cfq"
+
+        }
+
