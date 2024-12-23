@@ -64,14 +64,14 @@ graph TD;
     subgraph Httpd
         server-left-eth0[eth0<br>10.128.0.145/23]:::interface;
         server-left-eth0 --> net-pod
-        server-left-eth1[eth1<br>10.222.222.7/24]:::interface;
+        server-left-eth1[ovn-udn1<br>10.222.222.7/24]:::interface;
         server-left-eth1 ==> net-right
     end
 
     subgraph Client
         server-right-eth0[eth0<br>10.128.0.144/24]:::interface;
         server-right-eth0 --> net-pod
-        server-right-eth1[eth1<br>10.222.222.6/24]:::interface;
+        server-right-eth1[ovn-udn1<br>10.222.222.6/24]:::interface;
         server-right-eth1 ==> net-right
     end
 ```
@@ -79,9 +79,8 @@ graph TD;
 ## Observations
 
 * the pods have 2 interfaces automatically. "look ma, no multus!"
-* eth0 is on the cluster network 10.128.0.0/14
-* eth1 is given an IP on the range associated with the Layer 2 UDN
-* pods can only contact each other over eth1
+* `eth0` is on the cluster network 10.128.0.0/14
+* `onv-udn1` is given an IP on the range associated with the Layer 2 UDN
 * a net-attach-def is automatically created 
 
 [![asciicast demo](https://asciinema.org/a/689869.svg)](https://asciinema.org/a/689869)
