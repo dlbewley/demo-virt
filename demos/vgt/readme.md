@@ -16,7 +16,8 @@ Configure only one option at a time: [ovs-bridge](overlays/ovs-bridge) or [linux
 
 ## Cleanup
 
-> [!NOTE] Some patch examples
+> [!NOTE]
+> NNCP does not have a state controller, so it cleanup is not as straightforward as deleting the NNCP. A NNCP should be patched to reverse its affect and allowed to reconcile before deleting.
 
 
 ## ovs-bridge
