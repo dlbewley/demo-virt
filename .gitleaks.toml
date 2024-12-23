@@ -1,0 +1,9 @@
+[allowlist]
+  description = "Global Allowlist"
+
+  # Ignore based on any subset of the file path
+  paths = [
+    # Ignore virtualmachine skels generated from Templates holding cloud-init pass
+    paths = [
+    '''virtualmachine.yaml'''
+    ]'

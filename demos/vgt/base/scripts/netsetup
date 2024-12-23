@@ -1,0 +1,20 @@
+#!/bin/bash
+
+NIC=eth1
+VLAN=1924
+
+nmcli -f connection.id con show $NIC.$VLAN 2>&1 > /dev/null
+
+if [ $? -ne 0 ]; then
+  nmcli connection add type vlan \
+    con-name $NIC.$VLAN \
+    ifname $NIC.$VLAN \
+    vlan.parent $NIC \
+    vlan.id $VLAN
+fi
+
+nmcli connection modify $NIC.$VLAN \
+  ipv4.route-metric 200 \
+  ipv4.method auto
+
+nmcli connection up $NIC.$VLAN

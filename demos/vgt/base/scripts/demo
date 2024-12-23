@@ -1,0 +1,32 @@
+#!/bin/bash
+# demo script to run on VM
+source /usr/local/bin/demo-magic.sh
+TYPE_SPEED=100
+PROMPT_TIMEOUT=2
+DEMO_PROMPT="[${CYAN}\u@\h \W${COLOR_RESET}]${GREEN}$ ${COLOR_RESET}"
+DEMO_COMMENT_COLOR=$GREEN
+
+p
+p "# 🔍 tcpdump should reveal some VLAN tags on the eth1 interface"
+pei "sudo tcpdump -nni eth1 -e -c9 2>/dev/null | grep vlan"
+
+p
+
+sudo /usr/local/bin/netsetup
+
+p "# 🔍 here is the network setup"
+pei "nmcli con"
+p
+p "# dhcp on native VLAN gives use an 192.168.1 IP on eth1"
+p "# dhcp on 1924   VLAN gives use an 192.168.4 IP on eth1.1924"
+pei "ip -br -c -4 a"
+p
+p "# we intentionally raised the metric on the VLAN interface to keep default intact"
+pei "ip -c route"
+p
+p "# 🔧 confirm connectivity on the VLAN interface"
+pei "ip -c route get 192.168.4.1"
+p
+pei "ping -c 3 192.168.4.1"
+p
+pei "ip -c neigh"

@@ -1,0 +1,3 @@
+= trunk Net-Attach-Def
+
+Assumes hypervisors have a bridge called br-trunk.

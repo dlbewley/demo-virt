@@ -1,0 +1,23 @@
+---
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  annotations:
+    description: 802.1q Trunk Connection
+  name: trunk
+  namespace: default
+spec:
+  # the name below is the name of a cluster-scoped "network"
+  # this network will be mapped to an appropriate bridge via NNCP in an OVN bridge-mapping
+  # omitting vlan on Linux Bridge results in all VLANs passed
+  # omitting vlan on OVS Bridge results in only VLAN 0 passing
+  config: |-
+    {
+      "cniVersion": "0.4.0", 
+      "name": "trunk",
+      "type": "ovn-k8s-cni-overlay", 
+      "topology": "localnet", 
+      "netAttachDefName": "default/trunk",
+      "vlan": {},
+      "ipam": {}
+    }
