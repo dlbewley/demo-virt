@@ -14,7 +14,7 @@ spec:
     {
       "cniVersion": "0.4.0",
       "name": "trunk",
-      "type": "cnv-bridge",
+      "type": "bridge",
       "macspoof": false,
       "bridge": "br-trunk",
       "netAttachDefName": "demo-vgt/trunk",

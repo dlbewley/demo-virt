@@ -23,7 +23,7 @@ pei 'bat $DEMO_ROOT/components/br-trunk/linux-bridge/nncp.yaml'
 
 p
 
-p "# 🔍 here is the NAD to create a cnv-bridge called 'trunk'"
+p "# 🔍 here is the NAD to create a bridge attachment called 'trunk'"
 pei 'bat -H 11 -H 21 $DEMO_ROOT/components/trunk/linux-bridge/nad.yaml'
 p "# the vlanId: {} line is key to passing all VLAN tags into the bridge"
 
