@@ -3,15 +3,23 @@
 apiVersion: hco.kubevirt.io/v1beta1
 kind: HyperConverged
 metadata:
+  name: kubevirt-hyperconverged
   annotations:
     deployOVS: 'false'
-  name: kubevirt-hyperconverged
   namespace: openshift-cnv
-  finalizers:
-    - kubevirt.io/hyperconverged
-  labels:
-    app: kubevirt-hyperconverged
 spec:
+  virtualMachineOptions:
+    disableFreePageReporting: false
+    disableSerialConsoleLog: true
+  higherWorkloadDensity:
+    memoryOvercommitPercentage: 100
+  liveMigrationConfig:
+    allowAutoConverge: false
+    allowPostCopy: false
+    completionTimeoutPerGiB: 800
+    parallelMigrationsPerCluster: 5
+    parallelOutboundMigrationsPerNode: 2
+    progressTimeout: 150
   certConfig:
     ca:
       duration: 48h0m0s
@@ -19,21 +27,30 @@ spec:
     server:
       duration: 24h0m0s
       renewBefore: 12h0m0s
+  applicationAwareConfig:
+    allowApplicationAwareClusterResourceQuota: false
+    vmiCalcConfigName: DedicatedVirtualResources
   featureGates:
-    deployTektonTaskResources: true
+    deployTektonTaskResources: false
     enableCommonBootImageImport: true
-    nonRoot: true
     withHostPassthroughCPU: false
-  infra: {}
-  liveMigrationConfig:
-    completionTimeoutPerGiB: 800
-    parallelMigrationsPerCluster: 5
-    parallelOutboundMigrationsPerNode: 2
-    progressTimeout: 150
-  uninstallStrategy: BlockUninstallIfWorkloadsExist
+    downwardMetrics: false
+    disableMDevConfiguration: false
+    enableApplicationAwareQuota: false
+    deployKubeSecondaryDNS: false
+    nonRoot: true
+    alignCPUs: false
+    enableManagedTenantQuota: false
+    primaryUserDefinedNetworkBinding: false
+    deployVmConsoleProxy: false
+    persistentReservation: false
+    autoResourceLimits: false
+    deployKubevirtIpamController: false
   workloadUpdateStrategy:
     batchEvictionInterval: 1m0s
     batchEvictionSize: 10
     workloadUpdateMethods:
       - LiveMigrate
-  workloads: {}
+  uninstallStrategy: BlockUninstallIfWorkloadsExist
+  resourceRequirements:
+    vmiCPUAllocationRatio: 10
