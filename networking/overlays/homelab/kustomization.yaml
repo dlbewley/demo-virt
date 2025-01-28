@@ -23,7 +23,7 @@ patches:
       - op: replace
         path: /spec/nodeSelector
         value: {
-              "machine.openshift.io/cluster-api-machineset": "hub-v4tbg-cnv"
+              "machine.openshift.io/cluster-api-machineset": "hub-q7dgr-cnv"
         }
 
       - op: replace
@@ -43,7 +43,7 @@ patches:
       - op: replace
         path: /spec/nodeSelector
         value: {
-              "machine.openshift.io/cluster-api-machineset": "hub-v4tbg-cnv"
+              "machine.openshift.io/cluster-api-machineset": "hub-q7dgr-cnv"
         }
 
   - target:
@@ -55,7 +55,7 @@ patches:
       - op: replace
         path: /spec/nodeSelector
         value: {
-              "machine.openshift.io/cluster-api-machineset": "hub-v4tbg-cnv"
+              "machine.openshift.io/cluster-api-machineset": "hub-q7dgr-cnv"
         }
 
   - target:
@@ -67,7 +67,7 @@ patches:
       - op: replace
         path: /spec/nodeSelector
         value: {
-              "kubernetes.io/hostname": "hub-v4tbg-cnv-n5cfq"
+              "kubernetes.io/hostname": "NNCP-DISABLED"
 
         }
 
