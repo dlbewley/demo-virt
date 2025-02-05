@@ -7,7 +7,7 @@ metadata:
   name: vlan-1926-test
   namespace: default
 spec:
-  # the name below is the name of a cluster-scoped "network"
+  # the 'physicalNetworkName' can be reused in other NADs unlike the 'name'
   # this network will be mapped to an appropriate bridge
   # via NNCP in an OVN bridge-mapping
   config: |-
