@@ -28,3 +28,17 @@ spec:
             stp: false
           port:
             - name: ens224
+---
+apiVersion: nmstate.io/v1
+kind: NodeNetworkConfigurationPolicy
+metadata:
+  name: ovs-bridge-mapping-br-vmdata
+  annotation:
+    description: Map any localnet NAD which physicalNetworkName of 'vmdata-physnet' to br-vmdata
+spec:
+  desiredState:
+    ovn:
+      bridge-mappings:
+        - localnet: vmdata-physnet
+          bridge: br-vmdata
+          state: present

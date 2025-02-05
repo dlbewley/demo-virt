@@ -4,7 +4,7 @@ kind: NetworkAttachmentDefinition
 metadata:
   annotations:
     description: Lab Network 192.168.6.0/24 V1926 OVS Bridge
-  name: vlan-1926
+  name: vlan-1926-test
   namespace: default
 spec:
   # the name below is the name of a cluster-scoped "network"
@@ -12,11 +12,12 @@ spec:
   # via NNCP in an OVN bridge-mapping
   config: |-
     {
-      "cniVersion": "0.3.1", 
-      "name": "vlan-1926", 
+      "cniVersion": "0.4.0", 
+      "name": "vlan-1926-test", 
       "type": "ovn-k8s-cni-overlay", 
       "topology": "localnet", 
-      "netAttachDefName": "default/vlan-1926",
+      "netAttachDefName": "default/vlan-1926-test",
+      "physicalNetworkName": "vmdata-physnet",
       "vlanID": 1926,
       "ipam": {}
     }

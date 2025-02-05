@@ -4,4 +4,3 @@ kind: Component
 
 resources:
   - nad.yaml
-  - nncp.yaml
