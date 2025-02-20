@@ -10,8 +10,7 @@ resources:
 components:
   - ../../components/vlan-1924/ovs-bridge
   - ../../components/vlan-1926/ovs-bridge
-  - ../../components/br-trunk/ovs-bridge
-  - ../../components/trunk/ovs-bridge
+  - ../../components/br-trunk/linux-bridge
 
 patches:
   - target:
@@ -68,6 +67,5 @@ patches:
         path: /spec/nodeSelector
         value: {
               "kubernetes.io/hostname": "NNCP-DISABLED"
-
         }
 
