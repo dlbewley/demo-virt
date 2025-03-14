@@ -1,0 +1,81 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: demo-frr
+
+labels:
+  - includeSelectors: true
+    pairs:
+      demo: frr
+
+components:
+  - ../components/vms/frr
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+configMapGenerator:
+  - name: demo-frr
+    files:
+      - scripts/frr.conf
+
+secretGenerator:
+  - name: cloudinitdisk-frr
+    files:
+      - scripts/userData
+
+resources:
+  - namespace.yaml
+
+patches:
+
+  - target:
+      group: kubevirt.io
+      kind: VirtualMachine
+      name: .*
+      version: v1
+    patch: |-
+      - op: add
+        path: /spec/template/spec/domain/devices/interfaces/-
+        value: {
+          "name": "nic-1924",
+          "bridge": {},
+          "model": "virtio"
+        }
+      - op: add
+        path: /spec/template/spec/networks/-
+        value: {
+          "name": "nic-1924",
+          "multus": {
+            "networkName": "default/vlan-1924"
+          }
+        }
+      - op: replace
+        path: /spec/running
+        value: true
+      # add volumes for secret and configmap
+      - op: replace
+        path: /spec/template/spec/volumes/1/cloudInitNoCloud
+        value: {
+          "secretRef": {
+            "name": "cloudinitdisk-frr"
+          }
+        }
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value: {
+          "name": "demo",
+          "configMap": {
+            "name": "demo-frr"
+          }
+        }
+      - op: add
+        path: /spec/template/spec/domain/devices/disks/-
+        value: {
+          "name": "demo",
+          "serial": "demo",
+          "disk": {
+            "bus": "virtio"
+          }
+        }
