@@ -9,7 +9,7 @@ users:
 
 rh_subscription:
   org: 00000000
-  activation-key: example
+  activation-key: EXAMPLE
   enable-repo:
     - 'rhel-9-for-x86_64-baseos-rpms'
     - 'rhel-9-for-x86_64-appstream-rpms'
@@ -21,8 +21,11 @@ mounts:
   - [ /dev/disk/by-id/virtio-demo, /opt, iso9660, 'defaults' ]
 
 runcmd:
-  - sed -i 's/bgpd=no/bgpd=yes/' /etc/frr/daemons
+  # copy the frr.conf file from the mounted configmap to enable mutability
   - cp /opt/frr.conf /etc/frr/frr.conf
+  # enable bgp protocol in frr
+  - sed -i 's/bgpd=no/bgpd=yes/' /etc/frr/daemons
+  # enable and start the frr service
   - [systemctl, daemon-reload]
   - [systemctl, enable, frr.service]
   - [systemctl, start, frr.service]
