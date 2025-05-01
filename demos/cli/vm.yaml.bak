@@ -1,0 +1,39 @@
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  creationTimestamp: null
+  name: rhel-9-minimal
+spec:
+  dataVolumeTemplates:
+  - metadata:
+      creationTimestamp: null
+      name: imported-volume-8w4mq
+    spec:
+      sourceRef:
+        kind: DataSource
+        name: rhel9
+        namespace: openshift-virtualization-os-images
+      storage:
+        resources: {}
+  instancetype:
+    inferFromVolume: imported-volume-8w4mq
+    inferFromVolumeFailurePolicy: Ignore
+  preference:
+    inferFromVolume: imported-volume-8w4mq
+    inferFromVolumeFailurePolicy: Ignore
+  runStrategy: Always
+  template:
+    metadata:
+      creationTimestamp: null
+    spec:
+      domain:
+        devices: {}
+        memory:
+          guest: 512Mi
+        resources: {}
+      terminationGracePeriodSeconds: 180
+      volumes:
+      - dataVolume:
+          name: imported-volume-8w4mq
+        name: imported-volume-8w4mq
+status: {}
