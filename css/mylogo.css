@@ -1,0 +1,55 @@
+/*!
+ * MyLogo 
+ *
+ * @theme mylogo
+ * @author dlbewley
+ *
+ * @auto-scaling true
+ * @size 16:9 1920px 1090px
+ * @size 4:3 960px 720px
+ */
+/* mylogo.css */
+@import "default";
+
+/* Logo */
+section.title img[alt*="logo"] {
+  --offset: -5%;
+  --rotate: 0deg;
+
+  /* Position in lower right, by default */
+  position: absolute;
+  margin: 0;
+  right:  var(--offset);
+  bottom: 0;
+
+  width: 350px;
+  object-fit: contain;
+
+  /* Rotate it slightly */
+  transform: rotate(var(--rotate));
+  opacity: 0.5;
+
+}
+section {
+  column-gap: 2em;
+  column-rule: 1px solid #ccc;
+}
+
+section.icon img[alt*="logo"] {
+  --offset: -5%;
+  --rotate: -45deg;
+
+  /* Position in lower right, by default */
+  position: absolute;
+  margin: 0;
+  right:  var(--offset);
+  bottom: 0;
+
+  width: 350px;
+  object-fit: contain;
+
+  /* Rotate it slightly */
+  transform: rotate(var(--rotate));
+  opacity: 0.5;
+
+}

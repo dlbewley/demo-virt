@@ -1,0 +1,142 @@
+/*!
+ * Palette 3 - A modern take on LaTeX beamer | Default
+ *
+ * @theme palette-3
+ * @author Embracket / mikael-ros
+ *
+ * @auto-scaling true
+ * @size 16:9 1920px 1090px
+ * @size 4:3 960px 720px
+ */
+/* palette-3.css */
+@import "default";
+
+/* Logo */
+section.title img[alt*="logo"] {
+  --offset: -5%;
+  --rotate: 0deg;
+
+  /* Position in lower right, by default */
+  position: absolute;
+  margin: 0;
+  right:  var(--offset);
+  bottom: 0;
+
+  width: 350px;
+  object-fit: contain;
+
+  /* Rotate it slightly */
+  transform: rotate(var(--rotate));
+  opacity: 0.5;
+}
+
+/* Slide-level overrides */
+section {
+  /* Core palette */
+  --color-primary:        #316DC1;  /* rich blue */
+  --color-secondary:      #A7C0E4;  /* sky blue */
+  --color-tertiary:       #5F0000;  /* dark maroon */
+  --color-quaternary:     #EE0000;  /* vivid red */
+
+  /* Background & text */
+  --backgroundColor:      #E2EAF6;  /* pale sky */
+  --textColor:            #261A4C;  /* deep indigo */
+
+  /* Links */
+  --linkColor:            #A7C0E4;  /* sky blue */
+
+  /* Headings */
+  --headingColor:         var(--color-primary);
+
+  /* Blockquotes */
+  --blockquoteBackgroundColor: #FDDBDB; /* soft blush */
+  --blockquoteBorderColor:     var(--color-tertiary);
+  --blockquoteTextColor:       var(--textColor);
+
+  /* Code blocks */
+  --code-block-background:     #FDDBDB;
+  --code-block-border:         #F56D6D;  /* coral */
+
+  /* Tables */
+  --tableBorderColor:          var(--color-primary);
+  --tableHeaderBackgroundColor:#A7C0E4;
+  --tableRowEvenBackgroundColor: #FDDBDB;
+}
+
+/* Fine‐tuning some elements */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--headingColor);
+}
+
+a {
+  color: var(--linkColor);
+}
+
+strong {
+  color: var(--color-quaternary);
+}
+
+em {
+  color: var(--color-tertiary);
+}
+  
+/* Code blocks */
+pre {
+  background-color: var(--code-block-background);
+  border: 1px solid var(--code-block-border);
+  color: var(--textColor);
+}
+
+code {
+  background-color: var(--code-block-background);
+  border: 1px solid var(--code-block-border);
+  color: var(--textColor);
+  font-size: 0.85em;
+}
+
+section.bg-secondary {
+  /* uses your “secondary” variable */
+  background-color: var(--color-secondary);
+  color: var(--textColor);
+}
+section.bg-tertiary {
+  /* uses your “secondary” variable */
+  background-color: var(--color-tertiary);
+  color: var(--textColor);
+}
+section.bg-quaternary {
+  /* uses your “secondary” variable */
+  background-color: var(--color-quaternary);
+  color: var(--textColor);
+}
+/* utility classes for scaling slide text */
+section.font-sm {
+  font-size: 0.85em;
+}
+
+section.font-xs {
+  font-size: 0.75em;
+}
+
+section.font-xxs {
+  font-size: 0.65em;
+}
+
+font-xxs {
+  font-size: 0.65em;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.container {
+  display: flex;
+}
+.col {
+  flex: 1;
+}
