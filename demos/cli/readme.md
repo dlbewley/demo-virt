@@ -16,7 +16,7 @@ size: 4k
 > NA West OpenShift 🐯 Team
 > Red Hat
 
-![logo Logo](../../img/logo.png)
+![logo Logo](../../img/me-gta5.png)
 
 ---
 <!-- header: Command line tools -->
@@ -470,9 +470,10 @@ spec:
 
 ---
 <!-- class: title invert logo -->
+<!-- header: '' -->
 
 ![bg grayscale opacity:20%](../../img/openshift.png)
-![logo Logo](../../img/logo.png)
+![logo Logo](../../img/me-gta5.png)
 
 # Thank you
 
