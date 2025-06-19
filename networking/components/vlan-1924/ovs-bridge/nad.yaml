@@ -12,11 +12,12 @@ spec:
   # via NNCP in an OVN bridge-mapping
   config: |-
     {
-      "cniVersion": "0.3.1", 
+      "cniVersion": "0.4.0",
       "name": "vlan-1924",
-      "type": "ovn-k8s-cni-overlay", 
-      "topology": "localnet", 
+      "type": "ovn-k8s-cni-overlay",
+      "topology": "localnet",
       "netAttachDefName": "default/vlan-1924",
       "vlanID": 1924,
+      "mtu": 1500,
       "ipam": {}
     }
