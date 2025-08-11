@@ -1,0 +1,57 @@
+---
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: nad-vlan-cnv-bridge
+  annotations:
+    description: >-
+      A NetworkAttachmentDefinition resource to enable access to a VLAN via Linux Bridge interface.
+
+      Results can be used to multi-home pods using Multus.
+
+    iconClass: icon-load-balancer
+    openshift.io/provider-display-name: Tiger Team
+    openshift.io/documentation-url: https://github.com/dlbewley/demo-virt
+    openshift.io/support-url: https://github.com/dlbewley/demo-virt/issues
+    tags: "networking,nmstate"
+  labels:
+    deprecated: "true"
+
+objects:
+  - apiVersion: k8s.cni.cncf.io/v1
+    kind: NetworkAttachmentDefinition
+    metadata:
+      annotations:
+        description: ${DESCRIPTION}
+        k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/${BRIDGE}
+      name: ${NAME}
+      namespace: ${NAMESPACE}
+    spec:
+      config: |-
+        {
+          "cniVersion": "0.4.0",
+          "name": "${NAME}",
+          "type": "bridge",
+          "macspoofchk": false
+          "bridge": "${BRIDGE}",
+          "vlanId": ${VLAN},
+          "netAttachDefName": "${NAMESPACE}/${NAME}",
+          "ipam": {},
+        }
+
+parameters:
+  - description: Network Attachment Definition name
+    name: NAME
+    value: nad-vlan-trunk
+  - description: VLAN ID. Use '{}' to see all VLANs enabling VGT.
+    name: VLAN
+    value: '{}'
+  - description: Linux Bridge name
+    name: BRIDGE
+    value: 'br-trunk'
+  - description: Namespace
+    name: NAMESPACE
+    value: default
+  - description: Net-attach-def description
+    name: DESCRIPTION
+    value: Attachment to linux bridge.

@@ -1,25 +1,3 @@
-# Example looping of template using zsh syntax
-# unset vlans
-# declare -A vlans
-# NIC=ens224
-# vlans[1924]="Lab"
-# vlans[1925]="Disco"
-# vlans[1926]="Trans Proxy"
-# vlans[1927]="Metal"
-# vlans[1928]="Provisioning"
-# 
-# for VLAN in ${(k)vlans}; do
-#   oc process \
-#     -p VLAN="$V" \
-#     -p NIC="$NIC" \
-#     -p NODE_SELECTOR_KEY=machine.openshift.io/cluster-api-machineset \
-#     -p NODE_SELECTOR_VALUE=hub-l7c56-cnv \
-#     -p DESCRIPTION="Add ${vlans[$VLAN]} VLAN ${VLAN} and Bridge br-${VLAN} on ${NIC}" \
-#     -f templates/template-nncp-nic-vlan-br.yaml \
-#     -o yaml \
-#     | yq e '.items[0]' > "networking/nncp/nncp-$NIC-br-vlan-$VLAN.yaml"
-#   echo $k
-# done
 ---
 apiVersion: template.openshift.io/v1
 kind: Template
@@ -27,20 +5,19 @@ metadata:
   name: nncp-nic-vlan-br
   annotations:
     description: >-
-      A NodeNetworkConfigurationPolicy to add a VLAN interface to a NIC and attach a bridge for the VLAN. The bridge can be targeted by namespaced NetworkAttachmentDefinitions.
+      A NodeNetworkConfigurationPolicy to add a VLAN interface to a NIC and attach a linux bridge
+      for the VLAN. The bridge can be targeted by namespaced NetworkAttachmentDefinitions.
 
-      |<802.1q>|
-      |<-- NNCP ----------------->|<-- NAD -->|
-      [host-NIC]--+-[vlan1]-[BR1]--[guest-nic]
-                   \[vlan2]-[BR2]--[guest-nic]
-
-      See https://access.redhat.com/solutions/6972064
+      Resulting interfaces look like:
+       NIC -> NIC.VLAN -> BR-VLAN
 
     iconClass: icon-load-balancer
-    openshift.io/provider-display-name: GUIFreeLife
+    openshift.io/provider-display-name: Tiger Team
     openshift.io/documentation-url: https://github.com/dlbewley/demo-virt
     openshift.io/support-url: https://github.com/dlbewley/demo-virt/issues
     tags: "networking,nmstate"
+  labels:
+    deprecated: "true"
 
 objects:
   - apiVersion: nmstate.io/v1
@@ -49,15 +26,13 @@ objects:
       name: ${NIC}-v${VLAN}
       annotations:
         description: ${DESCRIPTION}
-      labels:
-        template: nncp-nic-vlan-br
     spec:
       nodeSelector:
         ${NODE_SELECTOR_KEY}: ${NODE_SELECTOR_VALUE}
       desiredState:
         interfaces:
           - name: ${NIC}
-            type: ${NIC_TYPE}
+            type: ethernet
             state: up
             ipv4:
               enabled: false
@@ -98,13 +73,13 @@ parameters:
   - description: NIC Interface type. eg ethernet, bond
     name: NIC_TYPE
     value: ethernet
-    required: false
+    required: true
   - description: VLAN ID
     name: VLAN
     required: true
   - description: Node Selector Key
     name: NODE_SELECTOR_KEY
-    value: machine.openshift.io/cluster-api-machineset
+    value: node-role.kubernetes.io/worker
   - description: Node Selector Value
     name: NODE_SELECTOR_VALUE
     value: ''
@@ -112,4 +87,4 @@ parameters:
   - description: Policy description
     name: DESCRIPTION
     # modify these by hand in the NNCP resource
-    value: Add VLAN ${VLAN} and Bridge br-${VLAN} on ${NIC}
+    value: Add VLAN ${VLAN} and Linux Bridge br-${VLAN} on ${NIC}

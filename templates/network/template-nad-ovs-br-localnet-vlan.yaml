@@ -5,12 +5,12 @@ metadata:
   name: nad-ovs-br-localnet-vlan
   annotations:
     description: >-
-      NetworkAttachmentDefinition resource and NoteNetworkConfigurationPolicy to enable access to a OVS bridge via localnet topology and VLAN ID.
+      NetworkAttachmentDefinition resource and NodeNetworkConfigurationPolicy to enable access to a OVS bridge via localnet topology and VLAN ID.
 
       When defined in 'default' namespace the NAD is usable from all other namespaces.
 
     iconClass: icon-load-balancer
-    openshift.io/provider-display-name: GUIFreeLife
+    openshift.io/provider-display-name: Tiger Team
     openshift.io/documentation-url: https://github.com/dlbewley/demo-virt
     openshift.io/support-url: https://github.com/dlbewley/demo-virt/issues
     tags: "networking,nmstate"
@@ -28,7 +28,7 @@ objects:
     spec:
       config: |
         {
-          "name": "vlan-${VLAN}",
+          "name": "${NAMESPACE}-vlan-${VLAN}",
           "cniVersion": "0.4.0",
           "type": "ovn-k8s-cni-overlay", 
           "topology": "localnet", 
@@ -41,12 +41,14 @@ objects:
   - apiVersion: nmstate.io/v1
     kind: NodeNetworkConfigurationPolicy
     metadata:
-      name: ovs-bridge-mapping-${VLAN}
+      name: br-mapping-${NAMESPACE}-vlan-${VLAN}
     spec:
+      nodeSelector:
+        ${NODE_SELECTOR_KEY}: ${NODE_SELECTOR_VALUE}
       desiredState:
         ovn:
           bridge-mappings:
-            - localnet: vlan-${VLAN}
+            - localnet: ${NAMESPACE}-vlan-${VLAN}
               bridge: ${BRIDGE}
               state: present 
 
@@ -63,8 +65,14 @@ parameters:
     value: default
   - description: MTU of the VLAN. Match the MTU of the bridge.
     name: MTU
-    value: 1500
+    value: "1500"
     required: false
   - description: Net-attach-def description
     name: DESCRIPTION
-    value: Attachment to VLAN ${VLAN} through OVS bridge ${BRIDGE} and localnet topology
+    value: Attachment to VLAN X through OVS bridge ${BRIDGE} and localnet topology
+  - description: Node Selector Key
+    name: NODE_SELECTOR_KEY
+    value: node-role.kubernetes.io/worker
+  - description: Node Selector Value
+    name: NODE_SELECTOR_VALUE
+    value: ''

@@ -1,36 +1,301 @@
-= Templates for creation of network resources for OpenShift Virtualization
+:source-highlighter: rouge
 
-== CLI Usage
+= OpenShift Templates
 
-Generate static resources to store in git for application via GitOps. 
+This directory contains OpenShift templates for network configuration and virtualization scenarios. These templates provide reusable configurations for common networking patterns in OpenShift clusters.
 
-.Example NNCP creation from template on CLI
-[source,bash]
-----
-oc process -f templates/template-nncp-nic-br-vmdata.yaml \
-  -p NIC=ens224 \
-  -p NODE_SELECTOR_KEY=machine.openshift.io/cluster-api-machineset \
-  -p NODE_SELECTOR_VALUE=hub-tq2sk-cnv \
-  -o yaml \
-  | yq e '.items[0]' - > nncp-ens224-br-vmdata.yaml
-----
+For more information about OpenShift Templates, see the link:https://docs.redhat.com/en/documentation/openshift_container_platform/4.18/html/template_apis/template-template-openshift-io-v1[OpenShift Templates API documentation].
 
-.Example NAD creation from template on CLI 
-[source,bash]
-----
-oc process -f templates/template-nad-br-cnv-bridge-vlan.yaml \
-  -p VLAN=1924 \
-  -p DESCRIPTION="Lab Network 192.168.4.0/24 V1924" \
-  -o yaml \
-  | yq e '.items[0]' > nad-vlan-1924.yaml
-----
+== Available Network Templates
 
-See link:../demos/components/networks[components/networks] outputs.
+=== Network Attachment Definitions (NAD)
 
-== Developer Catalog
+==== link:network/template-nad-physnet-localnet-vlan.yaml[template-nad-physnet-localnet-vlan.yaml]
 
-Install these templates in openshift namespace, and use them in the Developer Console. 
+Creates a NetworkAttachmentDefinition and NodeNetworkConfigurationPolicy for OVS bridge with localnet topology using a standardized physical network naming convention.
 
-image:../img/nad-template-catalog.png[]
+*Purpose*: Enables OVS bridge integration with OVN-Kubernetes using localnet topology for VLAN access. This template uses the `physnet-${BRIDGE}` physical network name convention, allowing a single bridge mapping to cover all localnets using the same bridge.
 
-image:../img/nad-template-instantiate.png[]
+*Key Difference*: Uses standardized physical network naming (`physnet-${BRIDGE}`) instead of bridge-specific mapping, enabling more efficient bridge mapping management.
+
+.*Parameters*:
+- `BRIDGE`: OVS bridge name (default: br-vmdata)
+- `DESCRIPTION`: Description for the NAD (default: Attachment to VLAN X through OVS bridge ${BRIDGE} and localnet topology)
+- `MTU`: Interface MTU (default: 1500)
+- `NAMESPACE`: Target namespace (default: default)
+- `NODE_SELECTOR_KEY`: Node selector key (default: node-role.kubernetes.io/worker)
+- `NODE_SELECTOR_VALUE`: Node selector value (default: empty string)
+- `VLAN`: VLAN ID (required)
+
+*Usage*:
+```bash
+oc process -f network/template-nad-physnet-localnet-vlan.yaml -p VLAN=200 -p BRIDGE=br-vmdata | oc apply -f -
+```
+
+*Creating Multiple VLAN Attachments*:
+
+```bash
+#!/bin/bash
+# process VLANs from file to create NAD and NNCP from OpenShift Template using physnet naming
+
+BRIDGE=br-vmdata
+TMPDIR=$(mktemp -d)
+
+# read VLAN IDs and optional names from file
+awk '/^[0-9]+/ {print $1 "|" substr($0, length($1)+2)}' network/vlans.txt \
+    | while IFS='|' read -r vlan_id vlan_name; do
+    if [[ -n "$vlan_id" ]]; then
+        description="${vlan_name:-VLAN-$vlan_id}"
+        oc process \
+            -f network/template-nad-physnet-localnet-vlan.yaml \
+            -p VLAN="$vlan_id" \
+            -p BRIDGE="br-vmdata" \
+            -p DESCRIPTION="Attachment to $description VLAN $vlan_id through OVS bridge $BRIDGE" \
+            -o yaml | yq '.items[0]'> "$TMPDIR/nad-$vlan_id.yaml"
+        echo "$TMPDIR/nad-$vlan_id.yaml $description"
+    fi
+done
+
+oc process \
+    -f network/template-nad-physnet-localnet-vlan.yaml \
+    -p VLAN="1" \
+    -p BRIDGE="br-vmdata" \
+    -o yaml | yq '.items[1]'> "$TMPDIR/nncp-physnet-mapping.yaml"
+```
+
+
+==== link:network/template-nad-ovs-br-localnet-vlan.yaml[template-nad-ovs-br-localnet-vlan.yaml] (deprecated)
+Creates a NetworkAttachmentDefinition and NodeNetworkConfigurationPolicy for OVS bridge with localnet topology.
+
+*Purpose*: Enables OVS bridge integration with OVN-Kubernetes using localnet topology for VLAN access.
+
+.*Parameters*:
+- `BRIDGE`: OVS bridge name (default: br-vmdata)
+- `DESCRIPTION`: Description for the NAD
+- `MTU`: Interface MTU (default: 1500)
+- `NAMESPACE`: Target namespace (default: default)
+- `NODE_SELECTOR_KEY`: Node selector key (default: node-role.kubernetes.io/worker)
+- `NODE_SELECTOR_VALUE`: Node selector value (default: empty string)
+- `VLAN`: VLAN ID (required)
+
+*Usage*:
+```bash
+oc process -f network/template-nad-ovs-br-localnet-vlan.yaml -p VLAN=200 -p BRIDGE=br-vmdata | oc apply -f -
+```
+
+*Creating Multiple VLAN Attachments*:
+
+```bash
+cat <<EOF > network/vlans.txt
+#VLAN_ID Optional Name to end of line
+1924 Lab
+1925 Disco
+1926 Transparent Proxy
+1927 Metal
+1928 
+1929 Prod Data
+1930
+EOF
+```
+
+```bash
+#!/bin/bash
+# process VLANs from file to create NAD and NNCP from OpenShift Template
+
+BRIDGE=br-vmdata
+TMPDIR=$(mktemp -d)
+
+# read VLAN IDs and optional names from file
+awk '/^[0-9]+/ {print $1 "|" substr($0, length($1)+2)}' network/vlans.txt \
+    | while IFS='|' read -r vlan_id vlan_name; do
+    if [[ -n "$vlan_id" ]]; then
+        description="${vlan_name:-VLAN-$vlan_id}"
+        oc process \
+            -f network/template-nad-ovs-br-localnet-vlan.yaml \
+            -p VLAN="$vlan_id" \
+            -p DESCRIPTION="Attachment to $description VLAN $vlan_id through OVS bridge $BRIDGE" \
+            -o yaml > "$TMPDIR/nad-nncp-$vlan_id.yaml"
+        echo "$TMPDIR/nad-nncp-$vlan_id.yaml $description"
+    fi
+done
+```
+
+==== link:network/template-nad-physnet-localnet-vlan.yaml[template-nad-physnet-localnet-vlan.yaml]
+Creates a NetworkAttachmentDefinition and NodeNetworkConfigurationPolicy for OVS bridge with localnet topology using a standardized physical network naming convention.
+
+*Purpose*: Enables OVS bridge integration with OVN-Kubernetes using localnet topology for VLAN access. This template uses the `physnet-${BRIDGE}` physical network name convention, allowing a single bridge mapping to cover all localnets using the same bridge.
+
+*Key Difference*: Uses standardized physical network naming (`physnet-${BRIDGE}`) instead of bridge-specific mapping, enabling more efficient bridge mapping management.
+
+.*Parameters*:
+- `BRIDGE`: OVS bridge name (default: br-vmdata)
+- `DESCRIPTION`: Description for the NAD (default: Attachment to VLAN X through OVS bridge ${BRIDGE} and localnet topology)
+- `MTU`: Interface MTU (default: 1500)
+- `NAMESPACE`: Target namespace (default: default)
+- `NODE_SELECTOR_KEY`: Node selector key (default: node-role.kubernetes.io/worker)
+- `NODE_SELECTOR_VALUE`: Node selector value (default: empty string)
+- `VLAN`: VLAN ID (required)
+
+*Usage*:
+```bash
+oc process -f network/template-nad-physnet-localnet-vlan.yaml -p VLAN=200 -p BRIDGE=br-vmdata | oc apply -f -
+```
+
+*Creating Multiple VLAN Attachments*:
+
+```bash
+#!/bin/bash
+# process VLANs from file to create NAD and NNCP from OpenShift Template using physnet naming
+
+BRIDGE=br-vmdata
+TMPDIR=$(mktemp -d)
+
+# read VLAN IDs and optional names from file
+awk '/^[0-9]+/ {print $1 "|" substr($0, length($1)+2)}' network/vlans.txt \
+    | while IFS='|' read -r vlan_id vlan_name; do
+    if [[ -n "$vlan_id" ]]; then
+        description="${vlan_name:-VLAN-$vlan_id}"
+        oc process \
+            -f network/template-nad-physnet-localnet-vlan.yaml \
+            -p VLAN="$vlan_id" \
+            -p BRIDGE="br-vmdata" \
+            -p DESCRIPTION="Attachment to $description VLAN $vlan_id through OVS bridge $BRIDGE" \
+            -o yaml | yq '.items[0]'> "$TMPDIR/nad-$vlan_id.yaml"
+        echo "$TMPDIR/nad-$vlan_id.yaml $description"
+    fi
+done
+
+oc process \
+    -f network/template-nad-physnet-localnet-vlan.yaml \
+    -p VLAN="1" \
+    -p BRIDGE="br-vmdata" \
+    -o yaml | yq '.items[1]'> "$TMPDIR/nncp-physnet-mapping.yaml"
+```
+
+
+==== link:network/template-nad-linux-br-vlan.yaml[template-nad-linux-br-vlan.yaml]
+Creates a NetworkAttachmentDefinition for Linux bridge networking with VLAN support. This is analogous to a OVN-Kubernetes localnet topology, but does not use OVS so no OVS bridge mapping is required.
+
+Recommended to use OVS bridge instead, but Linux bridge is necessary for VGT.
+
+*Purpose*: Enables pods to connect to a specific VLAN through a Linux bridge interface using standard bridge CNI.
+
+.*Parameters*:
+- `BRIDGE`: Linux Bridge name (default: br-trunk)
+- `DESCRIPTION`: Description for the NAD (default: Attachment to linux bridge)
+- `NAME`: Network Attachment Definition name (default: nad-vlan-trunk)
+- `NAMESPACE`: Target namespace (default: default)
+- `VLAN`: VLAN ID - use '{}' to see all VLANs enabling VGT (default: {})
+
+*Usage*:
+```bash
+oc process -f network/template-nad-linux-br-vlan.yaml -p NAME=trunk-nad -p BRIDGE=br-trunk | oc apply -f -
+```
+
+=== Node Network Configuration Policies (NNCP)
+
+==== link:network/template-nncp-bond.yaml[template-nncp-bond.yaml]
+Creates a NodeNetworkConfigurationPolicy to bond two network interfaces.
+
+*Purpose*: Configures network bonding for high availability networking with configurable bonding modes.
+
+.*Parameters*:
+- `BOND`: Bond interface name (default: bond0)
+- `BOND_MODE`: Bond mode - 802.3ad for LACP, active-backup for failover (default: 802.3ad)
+- `DESCRIPTION`: Policy description
+- `MTU`: MTU of interfaces (default: 1500)
+- `NIC1`: First physical NIC (default: ens224)
+- `NIC2`: Second physical NIC (default: ens225)
+- `NODE_SELECTOR_KEY`: Node selector key (default: node-role.kubernetes.io/worker)
+- `NODE_SELECTOR_VALUE`: Node selector value
+
+*Usage*:
+```bash
+oc process -f network/template-nncp-bond.yaml -p NIC1=ens224 -p NIC2=ens225 -p BOND_MODE=802.3ad | oc apply -f -
+```
+
+==== link:network/template-nncp-nic-vlan-br.yaml[template-nncp-nic-vlan-br.yaml] (deprecated)
+Creates a NodeNetworkConfigurationPolicy to add VLAN interface and bridge to a network interface.
+
+*Purpose*: Configures a single NIC with VLAN tagging and bridge creation for pod networking.
+
+.*Parameters*:
+- `DESCRIPTION`: Policy description
+- `NIC_TYPE`: Interface type (default: ethernet)
+- `NIC`: Physical NIC or bond name (required)
+- `NODE_SELECTOR_KEY`: Node selector key (default: node-role.kubernetes.io/worker)
+- `NODE_SELECTOR_VALUE`: Node selector value
+- `VLAN`: VLAN ID (required)
+
+*Usage*:
+```bash
+oc process -f network/template-nncp-nic-vlan-br.yaml -p NIC=ens224 -p VLAN=100 | oc apply -f -
+```
+
+== Deployment
+
+=== Using Kustomize
+The templates can be deployed the the cluster for use in the console if desired.
+
+```bash
+oc apply -k .
+```
+
+== Common Use Cases
+
+=== Virtual Machine Networking
+1. Deploy NNCP templates to configure host networking
+2. Deploy NAD templates to provide network attachments
+3. Use NADs in VirtualMachine network specifications
+
+=== Multi-homed Pods
+1. Configure network attachments using NAD templates
+2. Reference NADs in pod specifications using annotations
+
+=== High Availability Networking
+1. Use bond templates for redundant network paths
+2. Configure VLANs for network segmentation
+3. Deploy bridges for pod connectivity
+
+== Prerequisites
+
+- OpenShift cluster with nmstate operator installed
+
+== Notes
+
+- Templates in the 'default' namespace are cluster-wide accessible
+- Node selectors can be customized for targeted deployments
+
+== Troubleshooting
+
+=== Verify NNCP Policies
+```bash
+oc get nncp
+oc describe nncp <policy-name>
+oc get nnce
+oc describe nnce <node-name>.<policy-name>
+```
+
+=== Check Network Attachments
+```bash
+oc get network-attachment-definitions
+oc describe network-attachment-definition <nad-name>
+```
+
+=== Node Network State
+```bash
+oc get nns
+oc describe nns <node-name>
+```
+
+== Cleanup
+
+NADs may be deleted with the `oc delete` command.
+
+Deleting a NNCP does not remove the configuration from the node.
+
+.**To properly remove a NNCP and any configuration applied by it:**
+1. Use `oc edit` command to edit the nncp
+2. Modify the state of any created resource to `absent` (as opposed to `up` for example)
+3. Save the changes and wait for the NNCP and NNCEs to reconcile
+4. Delete the NNCP

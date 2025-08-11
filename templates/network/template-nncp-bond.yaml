@@ -8,7 +8,7 @@ metadata:
       A NodeNetworkConfigurationPolicy to bond two NICs.
 
     iconClass: icon-load-balancer
-    openshift.io/provider-display-name: GUIFreeLife
+    openshift.io/provider-display-name: Tiger Team
     openshift.io/documentation-url: https://github.com/dlbewley/demo-virt
     openshift.io/support-url: https://github.com/dlbewley/demo-virt/issues
     tags: "networking,nmstate"
@@ -26,10 +26,10 @@ objects:
       desiredState:
         interfaces:
 
-          # i think you need to up them to work
           - name: ${NIC1}
             type: ethernet
             state: up
+            mtu: ${MTU}
             ipv4:
               enabled: false
             ipv6:
@@ -37,6 +37,7 @@ objects:
           - name: ${NIC2}
             type: ethernet
             state: up
+            mtu: ${MTU}
             ipv4:
               enabled: false
             ipv6:
@@ -45,40 +46,18 @@ objects:
           - name: ${BOND}
             type: bond
             state: up
+            mtu: ${MTU}
             ipv4:
               enabled: false
             ipv6:
               enabled: false
             link-aggregation:
-              mode: 802.3ad
+              mode: ${BOND_MODE}
               port:
                 - ${NIC1}
                 - ${NIC2}
 
-          - name: ${BOND}.${VLAN}
-            type: vlan
-            state: up
-            vlan:
-              base-iface: ${BOND}
-              id: ${VLAN}
-            ipv4:
-              enabled: false
-            ipv6:
-              enabled: false
-          - name: br-${VLAN}
-            type: linux-bridge
-            state: up
-            bridge:
-              options:
-                stp:
-                  enabled: false
-              port:
-                - name: ${BOND}.${VLAN}
-                  vlan: {}
-            ipv4:
-              enabled: false
-            ipv6:
-              enabled: false
+
 
 parameters:
   - description: Bond name
@@ -90,14 +69,19 @@ parameters:
   - description: Physical NIC 2 to bond
     name: NIC2
     value: ens225
-  - description: VLAN ID
-    name: VLAN
   - description: Node Selector Key
     name: NODE_SELECTOR_KEY
-    value: machine.openshift.io/cluster-api-machineset
+    value: node-role.kubernetes.io/worker
   - description: Node Selector Value
     name: NODE_SELECTOR_VALUE
-    value: hub-test-cnv
+    value: ''
+  - description: Bond mode. 802.3ad for LACP, active-backup for failover.
+    name: BOND_MODE
+    value: 802.3ad
+  - description: MTU of interfaces.
+    name: MTU
+    value: 1500
+    required: false
   - description: Policy description
     name: DESCRIPTION
     value: Network Config for adding bond and vlan ${VLAN} and bridge on ${NIC} 

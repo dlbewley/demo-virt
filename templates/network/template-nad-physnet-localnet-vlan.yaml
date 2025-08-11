@@ -1,0 +1,81 @@
+---
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: nad-ovs-br-localnet-vlan
+  annotations:
+    description: >-
+      NetworkAttachmentDefinition resource and NodeNetworkConfigurationPolicy to enable access to a OVS bridge via localnet topology and VLAN ID.
+
+      When defined in 'default' namespace the NAD is usable from all other namespaces.
+
+      This template uses the physnet-${BRIDGE} physical network name so only one mapping is needed to cover all localnets using this same bridge.
+
+    iconClass: icon-load-balancer
+    openshift.io/provider-display-name: Tiger Team
+    openshift.io/documentation-url: https://github.com/dlbewley/demo-virt
+    openshift.io/support-url: https://github.com/dlbewley/demo-virt/issues
+    tags: "networking,nmstate"
+
+objects:
+  - apiVersion: k8s.cni.cncf.io/v1
+    kind: NetworkAttachmentDefinition
+    metadata:
+      annotations:
+        description: ${DESCRIPTION}
+      labels:
+        template: nad-ovs-br-localnet-vlan
+      name: vlan-${VLAN}
+      namespace: ${NAMESPACE}
+    spec:
+      config: |
+        {
+          "name": "${NAMESPACE}-vlan-${VLAN}",
+          "cniVersion": "1.0.0",
+          "type": "ovn-k8s-cni-overlay", 
+          "topology": "localnet", 
+          "netAttachDefName": "${NAMESPACE}/vlan-${VLAN}",
+          "physicalNetworkName": "physnet-${BRIDGE}",
+          "vlanID": ${VLAN}, 
+          "mtu": ${MTU},
+          "ipam": {}
+        }
+
+  - apiVersion: nmstate.io/v1
+    kind: NodeNetworkConfigurationPolicy
+    metadata:
+      name: br-mapping-physnet-${BRIDGE}
+    spec:
+      nodeSelector:
+        ${NODE_SELECTOR_KEY}: ${NODE_SELECTOR_VALUE}
+      desiredState:
+        ovn:
+          bridge-mappings:
+            - localnet: physnet-${BRIDGE}
+              bridge: ${BRIDGE}
+              state: present 
+
+parameters:
+  - description: Existing OVS bridge carrying tagged traffic to peel the VLAN from
+    name: BRIDGE
+    value: br-vmdata
+    required: false
+  - description: ID of the VLAN
+    name: VLAN
+    required: true
+  - description: Namespace to hold the attachment. The 'default' namespace enables cluster-wide use of the attachment
+    name: NAMESPACE
+    value: default
+  - description: MTU of the VLAN. Match the MTU of the bridge.
+    name: MTU
+    value: "1500"
+    required: false
+  - description: Net-attach-def description
+    name: DESCRIPTION
+    value: Attachment to VLAN X through OVS bridge ${BRIDGE} and localnet topology
+  - description: Node Selector Key
+    name: NODE_SELECTOR_KEY
+    value: node-role.kubernetes.io/worker
+  - description: Node Selector Value
+    name: NODE_SELECTOR_VALUE
+    value: ''
