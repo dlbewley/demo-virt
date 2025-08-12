@@ -30,6 +30,13 @@ resources:
   - namespace.yaml
 
 patches:
+  # ensure each VM runs on a unique host
+  - path: patch-vm-affinity.yaml
+    target:
+      kind: VirtualMachine
+      group: kubevirt.io
+      version: v1
+
   - target:
       group: kubevirt.io
       kind: VirtualMachine

@@ -1,5 +1,8 @@
 # VLAN Guest Tagging
 
+> [!IMPORTANT]
+> See my [blog post](https://guifreelife.com/blog/2025/01/02/OpenShift-Virtualization-VLAN-Guest-Tagging/) on this topic.
+
 Test the passing of multiple VLANs to a single virtual machine guest interface on OpenShift Virtualization via 802.1q trunk.
 
 > [!NOTE]
@@ -7,22 +10,93 @@ Test the passing of multiple VLANs to a single virtual machine guest interface o
 
 # Setup
 
-Using linux-bridge and ovs-bridge on the same NIC is not supported. In my test the ovs-bridge stopped working.
+Using linux-bridge and ovs-bridge on the same NIC is not supported. Configure only one option at a time: [ovs-bridge](overlays/ovs-bridge) or [linux-bridge](overlays/linux-bridge).
 
-Configure only one option at a time: [ovs-bridge](overlays/ovs-bridge) or [linux-bridge](overlays/linux-bridge).
+## Prereqs
 
-> [!IMPORTANT]
-> Generally ovs-bridge is the preferred technology, but this testing has confirmed that at this time, linux-bridge is the only option that supports VGT functionality.
+**Node Selector**
+Identify a selector for the test nodes to test with. In my case that is:
+`"machine.openshift.io/cluster-api-machineset": "hub-v57jl-cnv"`
 
-## Cleanup
+**Trunked Network Interface**
+Identify a NIC to use as the uplink carrying the trunk. This NIC should not be in use already. In my case the NIC is `ens256`.
 
-> [!NOTE]
-> NNCP does not have a state controller, so it cleanup is not as straightforward as deleting the NNCP. A NNCP should be patched to reverse its affect and allowed to reconcile before deleting.
+**IP Forwarding**
+In OCP 4.18 and below IP forwarding was on by default for all interfaces.
+```bash
+# 4.18 has defaults:
+cat /proc/sys/net/ipv4/conf/default/forwarding
+1
+cat /proc/sys/net/ipv4/conf/all/forwarding
+1
+```
 
+In OCP 4.19 this has changed.
+```
+4.19 has defaults:
+sh-5.1# cat /proc/sys/net/ipv4/conf/default/forwarding
+0
+sh-5.1# cat /proc/sys/net/ipv4/conf/all/forwarding
+0
+```
+
+This means we need to enable IP forwarding on our linux bridge via [tuned.yaml](overlays/linux-bridge/tuned.yaml).
+
+## linux-bridge
+
+Update
+* linux-bridge [overlay kustomization.yaml](overlays/linux-bridge/kustomization.yaml) with the NIC name and selector identified in [Prereqs](#prereqs)
+* [tuned.yaml](overlays/linux-bridge/tuned.yaml) with the NIC name and selector identified in [Prereqs](#prereqs)
+
+```bash
+# sanity check the prereqs are in place
+oc kustomize overlays/linux-bridge | kfilt -k nodenetworkconfigurationpolicy
+
+# apply the settings
+oc apply -k overlays/linux-bridge
+```
+
+Test setup for cnv-bridge ove linux bridge.
+This does work. VLAN tags visible on VM.
+If packets are not flowing (i.e. dhcp fails) check IP forwarding like this.
+
+```bash
+for node in $(oc get nodes -l machine.openshift.io/cluster-api-machineset=hub-v57jl-cnv -o name); do
+  echo "# $node";
+  oc debug $node -- grep -H ^ /host/proc/sys/net/ipv4/conf/{ens192,ens224,ens256,all,default}/forwarding 2>/dev/null;
+done
+```
+
+* ["br-trunk" Linux Bridge NNCP](components/br-trunk/linux-bridge/)
+* [trunk Network Attachment Definition](components/trunk/linux-bridge/)
+
+**Cleanup**
+
+```bash
+oc patch -n demo-vgt nncp/br-trunk --type=json \
+  -p='[{"op":"replace", "path":"/spec/desiredState/interfaces/1/state", "value": "absent"}]'
+
+oc wait nncp/br-trunk --for=condition=Available=True
+
+oc delete -k overlays/linux-bridge
+```
 
 ## ovs-bridge
 
+> [!IMPORTANT]
+> Generally ovs-bridge is the preferred technology, but this testing has confirmed that at this time, linux-bridge is the only option that supports VGT functionality.
+>
+> Here are the related issues:
+> - https://issues.redhat.com/browse/RFE-6831
+> - https://issues.redhat.com/browse/CORENET-5642
+
+Update the ovs-bridge [overlay kustomization.yaml](overlays/ovs-bridge/kustomization.yaml) with the NIC name and selector identified in [Prereqs](#prereqs)
+
 ```bash
+# sanity check the prereqs are in place
+oc kustomize overlays/ovs-bridge | kfilt -k nodenetworkconfigurationpolicy
+
+# apply the settings
 oc apply -k overlays/ovs-bridge
 ```
 
@@ -48,27 +122,10 @@ oc wait nncp/ovs-bridge-mapping-trunk --for=condition=Available=True
 oc delete -k overlays/ovs-bridge
 ```
 
-## linux-bridge
+## Cleanup
 
-```bash
-oc apply -k overlays/linux-bridge
-```
-
-Test setup for cnv-bridge ove linux bridge.
-This does work. VLAN tags visible on VM.
-
-* [br-trunk Linux Bridge](components/br-trunk/linux-bridge/) (pass)
-* [trunk Network Attachment](components/trunk/linux-bridge/) (pass)
-
-```bash
-oc patch -n demo-vgt nncp/br-trunk --type=json \
-  -p='[{"op":"replace", "path":"/spec/desiredState/interfaces/1/state", "value": "absent"}]'
-
-oc wait nncp/br-trunk --for=condition=Available=True
-
-oc delete -k overlays/linux-bridge
-```
-
+> [!NOTE]
+> NNCP does not have a state controller, so cleanup is not as straightforward as deleting the NNCP. A NNCP should be patched to reverse its affect and then allowed to reconcile before finally deleting it.
 
 # Demo
 

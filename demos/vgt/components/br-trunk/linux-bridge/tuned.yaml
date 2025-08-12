@@ -1,0 +1,20 @@
+apiVersion: tuned.openshift.io/v1
+kind: Tuned
+metadata:
+  name: ip-forward-linux-bridge
+  namespace: openshift-cluster-node-tuning-operator
+spec:
+  profile:
+    - name: ip-forward-linux-bridge
+      data: |
+        [main]
+        summary=Add IP forwarding to interface hosting linux bridge
+
+        [sysctl]
+        net.ipv4.conf.ens256.forwarding=1
+  recommend:
+    - profile: ip-forward-linux-bridge
+      priority: 10
+      match:
+        - label: machine.openshift.io/cluster-api-machineset
+          value: hub-v57jl-cnv
