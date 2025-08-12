@@ -36,14 +36,14 @@ cat /proc/sys/net/ipv4/conf/all/forwarding
 
 In OCP 4.19 this has changed.
 ```
-4.19 has defaults:
-sh-5.1# cat /proc/sys/net/ipv4/conf/default/forwarding
+# 4.19 has defaults:
+cat /proc/sys/net/ipv4/conf/default/forwarding
 0
-sh-5.1# cat /proc/sys/net/ipv4/conf/all/forwarding
+cat /proc/sys/net/ipv4/conf/all/forwarding
 0
 ```
 
-This means we need to enable IP forwarding on our linux bridge via [tuned.yaml](overlays/linux-bridge/tuned.yaml).
+This means we need to enable IP forwarding on our linux bridge via [tuned.yaml](components/br-trunk/linux-bridge/tuned.yaml).
 
 ## linux-bridge
 
@@ -54,7 +54,7 @@ Here are the main components used:
 
 Update the:
 1) linux-bridge [overlay kustomization.yaml](overlays/linux-bridge/kustomization.yaml) with the NIC name and selector identified in [Prereqs](#prereqs)
-1) [tuned.yaml](overlays/linux-bridge/tuned.yaml) profile with the NIC name and selector identified in [Prereqs](#prereqs)
+1) [tuned.yaml](components/br-trunk/linux-bridge/tuned.yaml) profile with the NIC name and selector identified in [Prereqs](#prereqs)
 
 ```bash
 # sanity check the prereqs are in place (nic and selector)
