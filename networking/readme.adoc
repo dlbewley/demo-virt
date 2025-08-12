@@ -1,20 +1,23 @@
-= OpenShift Virtualization Networking Setup
+= OpenShift Virtualization Networking
 
-Configure networking to support OpenShift Virtualization.
+It may help to view this link:diagram.md[diagram] first and see this https://github.com/dlbewley/demo-cni[CNI overview].
 
-It may help to view this link:diagram.md[diagram] first.
+
+== Configuring networking to support OpenShift Virtualization
 
 The link:base/kustomization.yaml[base] will setup an OVS Bridge using link:components/br-vmdata/ovs-bridge/nncp.yaml[br-vmdata] and link:components/multinetworkpolicy[enable multinetwork policy] support.
 
+Look in the the components directory for examples of how to create VLAN definitions.
+
 .Instructions
-* Create VLAN definitions in link:components/[] dir.
+* Create VLAN definitions in link:components/[components] dir.
 * Create an overlay to enable the `br-vmdata` bridge and the appropriate network components. See example link:overlays/homelab/kustomization.yaml[overlays/homelab]
 * Apply the overlay.
 
 [source,bash]
 ----
-# tune output and place in vlan-1928/
-oc process -f templates/template-nad-ovs-br-localnet-vlan.yaml -p VLAN=1928 -o yaml
+# tune output of template and place it in vlan-1924/
+oc process -f templates/network/template-nad-ovs-br-localnet-vlan.yaml -p VLAN=1924 -o yaml
 
 # add components to overlay as relevant
 # view the rendered resources
