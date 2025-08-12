@@ -73,6 +73,14 @@ for node in $(oc get nodes -l machine.openshift.io/cluster-api-machineset=hub-v5
   echo "# $node";
   oc debug $node -- grep -H ^ /host/proc/sys/net/ipv4/conf/{ens192,ens224,ens256,all,default}/forwarding 2>/dev/null;
 done
+
+# node/hub-v57jl-cnv-25fpw
+/host/proc/sys/net/ipv4/conf/ens192/forwarding:1
+/host/proc/sys/net/ipv4/conf/ens224/forwarding:0
+/host/proc/sys/net/ipv4/conf/ens256/forwarding:1
+/host/proc/sys/net/ipv4/conf/all/forwarding:0
+/host/proc/sys/net/ipv4/conf/default/forwarding:0
+...
 ```
 
 **Cleanup**
