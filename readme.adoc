@@ -4,6 +4,10 @@
 
 == Demos
 
+* link:demos/affinity/[Affinity and Anti-Affinity]
+* link:demos/cloud-init/[Cloud-Init] application in different ways
+* link:demos/vgt/[VGT]
+* link:demos/vms-with-firewall/[VMs with Firewall] using overlay networks
 
 == Installing OpenShift Virtualization
 
@@ -16,11 +20,14 @@ oc apply -k virtualization/operator/base
 oc apply -k virtualization/instance/base
 ----
 
-== Configuration
+== Networking
 
-Virtual machines can use the default pod network and expose ports using Kubernetes resources like Services, Ingresses, Routes etc. However, it is likely you may have a need to deploy a virtual machine directly to existing enterprise networks outside the cluster.
+See link:networking/[Networking]
 
-This can be done by plumbing those networks to the Nodes and using the NMstate operator which can be programmed using NodeNetworkConfigurationPolicy (NNCP) resources.
+=== Multus General
+
+https://github.com/dlbewley/demo-cni[demo-cni]
+
 
 === Configure Hypervisor Node Networking
 
@@ -47,8 +54,8 @@ Associating a network to an ovs-bridge requires a mapping defined via an NNCP. T
 
 Take a peek at this link:networking/diagram.md[networking diagram] for a sense of how the NNCP and NAD will fit together.
 
-=== High Availability
-==== Node Maintenance Operator
+== High Availability
+=== Node Maintenance Operator
 
 https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/nodes/working-with-nodes#node-maintenance-operator[Node Maintenance Operator]
 
@@ -80,7 +87,7 @@ metadata:
 
 Create a maintenance and VM live migrated great
 
-==== Node Health Check Operator
+=== Node Health Check Operator
 
 https://docs.openshift.com/container-platform/4.11/nodes/nodes/eco-node-health-check-operator.html[Node Health Check Operator]
 
@@ -116,10 +123,6 @@ spec:
       status: Unknown
       type: Ready
 ----
-
-=== Multus General
-
-https://github.com/dlbewley/demo-cni[demo-cni]
 
 == Migration from VMware
 
