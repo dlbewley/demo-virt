@@ -2,7 +2,8 @@
 :source-highlighter: rouge
 :toc:
 
-This repo is a collection of configs to explore OpenShift Virtualization and Networking.
+== Demos
+
 
 == Installing OpenShift Virtualization
 
@@ -46,15 +47,10 @@ Associating a network to an ovs-bridge requires a mapping defined via an NNCP. T
 
 Take a peek at this link:networking/diagram.md[networking diagram] for a sense of how the NNCP and NAD will fit together.
 
-== Testing
-=== Migration from VMware
-
-link:migration/[Details] on migration from VMware to OpenShift Virtualization.
-
 === High Availability
 ==== Node Maintenance Operator
 
-https://docs.openshift.com/container-platform/4.11/nodes/nodes/eco-node-maintenance-operator.html[Node Maintenance Operator]
+https://docs.redhat.com/en/documentation/openshift_container_platform/4.19/html/nodes/working-with-nodes#node-maintenance-operator[Node Maintenance Operator]
 
 [source,yaml]
 ----
@@ -121,206 +117,14 @@ spec:
       type: Ready
 ----
 
-In VM Set runStrategy: Always
-
-[source,yaml]
-----
-apiVersion: self-node-remediation.medik8s.io/v1alpha1
-kind: SelfNodeRemediationConfig
-metadata:
-  name: self-node-remediation-config
-  namespace: openshift-operators
-spec:
-  safeTimeToAssumeNodeRebootedSeconds: 180 
-  watchdogFilePath: /dev/watchdog 
-  isSoftwareRebootEnabled: true 
-  apiServerTimeout: 15s 
-  apiCheckInterval: 5s 
-  maxApiErrorThreshold: 3 
-  peerApiServerTimeout: 5s 
-  peerDialTimeout: 5s 
-  peerRequestTimeout: 5s 
-  peerUpdateInterval: 15m 
-  selector: machine.openshift.io/cluster-api-machineset=hub-q4jtr-cnv
-----
-
-=== TBD
-
-.TBD
-* Create a new machineset[examples/machineset.yaml] with 1 VM capable of nested virt
-* Examine default network config on node ens224
-* Apply `link:networking/nncp[nncp]` and examine network config result via
-** `ip`
-** `nnce`
-** `ovs-vsctl`
-* Create a demo namespace
-* Apply `link:networking/nad[nad]` in demo namespace and examine network config result
-
 === Multus General
 
-https://access.redhat.com/documentation/en-us/openshift_container_platform/4.12/html/networking/multiple-networks[Multiple networks] can use these CNI plugins
+https://github.com/dlbewley/demo-cni[demo-cni]
 
-* https://access.redhat.com/documentation/en-us/openshift_container_platform/4.12/html-single/networking/#nw-multus-bridge-object_configuring-additional-network[bridge]: Configure a bridge-based additional network to allow pods on the same host to communicate with each other and the host.
-** CNV uses `cnv-bridge`. What is the big difference?
-* host-device: Configure a host-device additional network to allow pods access to a physical Ethernet network device on the host system.
-* ipvlan: Configure an ipvlan-based additional network to allow pods on a host to communicate with other hosts and pods on those hosts, similar to a macvlan-based additional network. Unlike a macvlan-based additional network, each pod shares the same MAC address as the parent physical network interface.
-* macvlan: Configure a macvlan-based additional network to allow pods on a host to communicate with other hosts and pods on those hosts by using a physical network interface. Each pod that is attached to a macvlan-based additional network is provided a unique MAC address.
-* SR-IOV: Configure an SR-IOV based additional network to allow pods to attach to a virtual function (VF) interface on SR-IOV capable hardware on the host system.
+== Migration from VMware
 
-https://docs.openshift.com/container-platform/4.12/networking/multiple_networks/attaching-pod.html
+link:migration/[Details] on migration from VMware to OpenShift Virtualization.
 
-
-=== IPVLAN
-
-Here is a test case that worked ipvlan
-
-.NNCP configuring br-1924
-[source,yaml]
-----
----
-# oc process -p VLAN=1924 -p NODE_SELECTOR_KEY=kubernetes.io/hostname -p NODE_SELECTOR_VALUE=hub-q4jtr-cnv-dn79n \
-#    -f templates/template-nncp.yaml -o yaml | yq e '.items[0]' - > nncp-hub-q4jtr-cnv-dn79n.yaml
-apiVersion: nmstate.io/v1
-kind: NodeNetworkConfigurationPolicy
-metadata:
-  annotations:
-    description: Network Config for adding vlan 1924 and bridge on ens224
-  name: ens224-v1924-dn79n
-spec:
-  nodeSelector:
-    kubernetes.io/hostname: hub-q4jtr-cnv-dn79n
-  desiredState:
-    interfaces:
-      - ipv4:
-          enabled: false
-        ipv6:
-          enabled: false
-        name: ens224
-        state: up
-        type: ethernet
-      - ipv4:
-          enabled: false
-        ipv6:
-          enabled: false
-        name: ens224.1924
-        state: up
-        type: vlan
-        vlan:
-          base-iface: ens224
-          id: 1924
-      - bridge:
-          options:
-            stp:
-              enabled: false
-          port:
-            - name: ens224.1924
-              vlan: {}
-        ipv4:
-          enabled: false
-        ipv6:
-          enabled: false
-        name: br-1924
-        state: up
-        type: linux-bridge
-----
-
-.Net-Attach-Def making ipvlan available on br-1924
-[source,yaml]
-----
----
-apiVersion: k8s.cni.cncf.io/v1
-kind: NetworkAttachmentDefinition
-metadata:
-  annotations:
-    description: IPVLAN will assign the MAC of the 'master' interface
-    k8s.v1.cni.cncf.io/resourceName: bridge.network.kubevirt.io/br-1924
-  name: ipvlan-1924
-spec:
-  config: |-
-    {
-      "cniVersion": "0.3.1",
-      "name": "ipvlan-1924", 
-      "plugins": [{ 
-        "type": "ipvlan",
-        "master": "br-1924", 
-        "mode": "l2",
-        "ipam": {
-          "type": "static",
-          "addresses": [
-            { "address": "192.168.4.213/24" }
-            ]
-            }
-          },
-          # without this next plugin get an address in use error
-          {
-        "type": "tuning",
-        "capabilities": { "mac": true }
-      }]
-    }
-----
-
-.Deployment using ipvlan-1924 net-attach-def
-[source,yaml]
-----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  annotations:
-    image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"static:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"static\")].image"}]'
-  labels:
-    app: static
-    app.kubernetes.io/component: static
-    app.kubernetes.io/instance: static
-  name: static-ipvlan
-  namespace: dale
-spec:
-  progressDeadlineSeconds: 600
-  replicas: 1
-  revisionHistoryLimit: 10
-  selector:
-    matchLabels:
-      deployment: static-ipvlan
-  strategy:
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-    type: RollingUpdate
-  template:
-    metadata:
-      annotations:
-        k8s.v1.cni.cncf.io/networks: '[{"interface":"net1","name":"ipvlan-1924","namespace":"dale"}]'
-        openshift.io/generated-by: OpenShiftNewApp
-      creationTimestamp: null
-      labels:
-        deployment: static-ipvlan
-    spec:
-      containers:
-      - command:
-        - /bin/bash
-        - -c
-        - sleep 2000000000000
-        image: registry.redhat.io/openshift4/ose-cli
-        imagePullPolicy: Always
-        name: ose-cli
-        ports:
-        - containerPort: 8080
-          protocol: TCP
-        - containerPort: 8443
-          protocol: TCP
-        resources: {}
-        terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
-      dnsPolicy: ClusterFirst
-      nodeSelector:
-        kubernetes.io/hostname: hub-q4jtr-cnv-dn79n
-      restartPolicy: Always
-      schedulerName: default-scheduler
-      securityContext: {}
-      terminationGracePeriodSeconds: 30       
-----
-
-=== MACVLAN
-=== DHCP
 
 == References
 
