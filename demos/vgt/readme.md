@@ -15,13 +15,16 @@ Using linux-bridge and ovs-bridge on the same NIC is not supported. Configure on
 ## Prereqs
 
 **Node Selector**
+
 Identify a selector for the test nodes to test with. In my case that is:
 `"machine.openshift.io/cluster-api-machineset": "hub-v57jl-cnv"`
 
 **Trunked Network Interface**
+
 Identify a NIC to use as the uplink carrying the trunk. This NIC should not be in use already. In my case the NIC is `ens256`.
 
 **IP Forwarding**
+
 In OCP 4.18 and below IP forwarding was on by default for all interfaces.
 ```bash
 # 4.18 has defaults:
@@ -44,21 +47,26 @@ This means we need to enable IP forwarding on our linux bridge via [tuned.yaml](
 
 ## linux-bridge
 
-Update
-* linux-bridge [overlay kustomization.yaml](overlays/linux-bridge/kustomization.yaml) with the NIC name and selector identified in [Prereqs](#prereqs)
-* [tuned.yaml](overlays/linux-bridge/tuned.yaml) with the NIC name and selector identified in [Prereqs](#prereqs)
+Here are the main components used:
+
+* ["br-trunk" Linux Bridge NNCP](components/br-trunk/linux-bridge/)
+* [trunk Network Attachment Definition](components/trunk/linux-bridge/)
+
+Update the:
+1) linux-bridge [overlay kustomization.yaml](overlays/linux-bridge/kustomization.yaml) with the NIC name and selector identified in [Prereqs](#prereqs)
+1) [tuned.yaml](overlays/linux-bridge/tuned.yaml) profile with the NIC name and selector identified in [Prereqs](#prereqs)
 
 ```bash
-# sanity check the prereqs are in place
+# sanity check the prereqs are in place (nic and selector)
 oc kustomize overlays/linux-bridge | kfilt -k nodenetworkconfigurationpolicy
 
 # apply the settings
 oc apply -k overlays/linux-bridge
 ```
 
-Test setup for cnv-bridge ove linux bridge.
-This does work. VLAN tags visible on VM.
-If packets are not flowing (i.e. dhcp fails) check IP forwarding like this.
+Login to the node and expect to see `eth1.1924` got an IP from DHCP. You can also [use tcpdump](https://gist.github.com/dlbewley/9acff618d854e679c7ac04888ec9abb0) to confirm a trunk is visible: `tcpdump -enni eth1 ether proto 0x8100`
+
+If packets are not flowing (i.e. DHCP fails) check IP forwarding on the nodes matching the selector like this. Adjust the list of interface names as appropriate. You want to see `1` on your int.
 
 ```bash
 for node in $(oc get nodes -l machine.openshift.io/cluster-api-machineset=hub-v57jl-cnv -o name); do
@@ -66,9 +74,6 @@ for node in $(oc get nodes -l machine.openshift.io/cluster-api-machineset=hub-v5
   oc debug $node -- grep -H ^ /host/proc/sys/net/ipv4/conf/{ens192,ens224,ens256,all,default}/forwarding 2>/dev/null;
 done
 ```
-
-* ["br-trunk" Linux Bridge NNCP](components/br-trunk/linux-bridge/)
-* [trunk Network Attachment Definition](components/trunk/linux-bridge/)
 
 **Cleanup**
 
