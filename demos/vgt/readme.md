@@ -58,7 +58,7 @@ Update the:
 
 ```bash
 # sanity check the prereqs are in place (nic and selector)
-oc kustomize overlays/linux-bridge | kfilt -k nodenetworkconfigurationpolicy
+oc kustomize overlays/linux-bridge | kfilt -k nodenetworkconfigurationpolicy,tuned
 
 # apply the settings
 oc apply -k overlays/linux-bridge

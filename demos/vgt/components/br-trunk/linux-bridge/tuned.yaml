@@ -11,10 +11,12 @@ spec:
         summary=Add IP forwarding to interface hosting linux bridge
 
         [sysctl]
+        # update NIC name as appropriate
         net.ipv4.conf.ens256.forwarding=1
   recommend:
     - profile: ip-forward-linux-bridge
       priority: 10
       match:
-        - label: machine.openshift.io/cluster-api-machineset
-          value: hub-v57jl-cnv
+        # adjust selector in the overlay kustomization.yaml
+        - label: node-role.kubernetes.io/worker
+          value: ''

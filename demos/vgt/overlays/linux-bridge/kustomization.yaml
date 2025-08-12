@@ -25,3 +25,15 @@ patches:
         value: {
               "machine.openshift.io/cluster-api-machineset": "hub-v57jl-cnv"
         }
+
+  - target:
+      group: tuned.openshift.io
+      kind: Tuned
+      name: ip-forward-linux-bridge
+      version: v1
+    patch: |-
+      - op: replace
+        path: /spec/recommend/0/match
+        value:
+          - label: "machine.openshift.io/cluster-api-machineset"
+            value: "hub-v57jl-cnv"
