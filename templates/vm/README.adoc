@@ -1,1 +1,153 @@
-include::../../../../inc/vm-templates.adoc[]
+= Virtual Machine Templates
+
+== Uploading a VM disk image
+
+https://docs.redhat.com/en/documentation/openshift_container_platform/4.18/html/virtualization/advanced-vm-creation#virt-uploading-image-virtctl_virt-creating-vms-uploading-images[Docs]
+
+[source,bash]
+----
+virtctl image-upload dv <datavolume_name> \
+  --size=<datavolume_size> \
+  --image-path=</path/to/image> \
+  --insecure
+----
+
+== Create a custom disk image for VM
+
+https://docs.redhat.com/en/documentation/openshift_container_platform/4.18/html/virtualization/advanced-vm-creation#virt-creating-vms-uploading-images[Docs]
+
+Generalizing a boot image
+```bash
+VM_NAME=rhel9-model
+virtctl stop $VM_NAME
+oc get vm $VM_NAME -o jsonpath="{.spec.template.spec.volumes}{'\n'}"
+oc get pvc
+virtctl guestfs <my-vm-volume> --uid 107
+```
+
+.Example
+```bash
+$ VM_NAME=rhel9-model
+$ NS=demo-pxe
+$ virtctl stop $VM_NAME -n $NS
+VM rhel9-model was scheduled to stop
+
+$ oc get vm $VM_NAME -n $NS -o jsonpath="{.spec.template.spec.volumes[?(@.name=='rootdisk')]}{'\n'}"
+{"dataVolume":{"name":"rhel9-model"},"name":"rootdisk"}
+
+$ oc get dv -n $NS
+NAME          PHASE       PROGRESS   RESTARTS   AGE
+rhel9-model   Succeeded   100.0%                12m
+
+# find PVC created for dataVolume volume named rootdisk (probably same as $VM_NAME)
+$ oc get pvc -n $NS
+NAME          STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS                                 VOLUMEATTRIBUTESCLASS   AGE
+rhel9-model   Bound    pvc-a8a26fcd-b776-4e99-a302-45852f89a6fd   30Gi       RWX            ocs-storagecluster-ceph-rbd-virtualization   <unset>                 13m
+
+$ PVC_NAME=$VM_NAME
+$ virtctl guestfs $PVC_NAME -n $NS --uid=107
+Use image: registry.redhat.io/container-native-virtualization/libguestfs-tools-rhel9@sha256:26d8835156c6a909903c343e411bd521f4d3b2194e2b350d4bb7f037fe4d21c5
+The PVC has been mounted at /dev/vda # <--------- this is the disk image
+Waiting for container libguestfs still in pending, reason: ContainerCreating, message:
+If you don't see a command prompt, try pressing enter.
+
+# how did i know /dev/vda? because I checked the volumeDevices[] in the libguestfs-toools pod.
+
+bash-5.1$ virt-df -a /dev/vda -h
+Filesystem                                Size       Used  Available  Use%
+vda:/dev/sda2                             200M       7.0M       193M    4%
+vda:/dev/sda3                             960M       134M       826M   14%
+vda:/dev/sda4                              29G       1.4G        27G    5%
+
+# make a note in the disk image
+bash-5.1$ echo "sysprepped on $(date)" > /tmp/prepped.txt
+bash-5.1$ virt-copy-in -a /dev/vda /tmp/prepped.txt /home/cloud-user/
+
+# on Trident with NFS the image is available at /disk/disk.img
+
+# optional example: set root password
+bash-5.1$ virt-customize -a /dev/vda --root-password 'password:r3dh4t!'
+[   0.0] Examining the guest ...
+[  12.6] Setting a random seed
+[  12.7] Setting passwords
+[  17.5] SELinux relabelling
+[  81.6] Finishing off
+
+bash-5.1$ virt-sysprep -a /dev/vda
+[   0.0] Examining the guest ...
+[  10.8] Performing "abrt-data" ...
+[  10.8] Performing "backup-files" ...
+[  13.9] Performing "bash-history" ...
+[  13.9] Performing "blkid-tab" ...
+[  14.1] Performing "crash-data" ...
+[  14.1] Performing "cron-spool" ...
+[  14.2] Performing "dhcp-client-state" ...
+[  14.2] Performing "dhcp-server-state" ...
+[  14.2] Performing "dovecot-data" ...
+[  14.2] Performing "ipa-client" ...
+[  14.2] Performing "kerberos-hostkeytab" ...
+[  14.3] Performing "logfiles" ...
+[  14.4] Performing "lvm-system-devices" ...
+[  14.4] Performing "machine-id" ...
+[  14.5] Performing "mail-spool" ...
+[  14.5] Performing "net-hostname" ...
+[  14.6] Performing "net-hwaddr" ...
+[  14.6] Performing "net-nmconn" ...
+[  14.7] Performing "pacct-log" ...
+[  14.7] Performing "package-manager-cache" ...
+[  14.7] Performing "pam-data" ...
+[  14.8] Performing "passwd-backups" ...
+[  14.8] Performing "puppet-data-log" ...
+[  14.8] Performing "rh-subscription-manager" ...
+[  14.9] Performing "rhn-systemid" ...
+[  14.9] Performing "rpm-db" ...
+[  14.9] Performing "samba-db-log" ...
+[  15.0] Performing "script" ...
+[  15.0] Performing "smolt-uuid" ...
+[  15.0] Performing "ssh-hostkeys" ...
+[  15.0] Performing "ssh-userdir" ...
+[  15.0] Performing "sssd-db-log" ...
+[  15.1] Performing "tmp-files" ...
+[  15.1] Performing "udev-persistent-net" ...
+[  15.2] Performing "utmp" ...
+[  15.2] Performing "yum-uuid" ...
+[  15.2] Performing "customize" ...
+[  15.2] Setting a random seed
+[  15.3] Setting the machine ID in /etc/machine-id
+[  15.3] SELinux relabelling
+[  56.5] Performing "lvm-uuids" ...
+```
+
+* Exit guestfish pod
+
+```
+bash-5.1$
+exit
+```
+
+==== Add volume to Catalog
+
+Navigate to  Virtualization -> Bootable Volumes -> Add Volume
+
+* Select _Use Existing Volume_
+
+image::img/virt-add-volume-to-catalog.png[width=50%]
+
+image::img/virt-add-volume-to-catalog-2.png[]
+
+* Optionally use this new image with existing template, or create a new template as described further below.
+
+image::img/vm-launch-gold-1.png[]
+image::img/vm-launch-gold-2.png[]
+
+== Customize Template to use Golden Image
+
+* Create a new template or clone an existing template.
+
+image::img/vm-custom-template-1.png[]
+image::img/vm-custom-template-2.png[]
+
+* Edit tempalate parameters to use the new bootable volume as the default root disk.
+
+image::img/vm-custom-template-2-2.png[]
+
